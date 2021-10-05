@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CED.Data
 {
-    class DataReaderHelper : IDataReader, IDisposable, IDataRecord
+    public class DataReaderHelper : IDataReader, IDisposable, IDataRecord
     {
         private Dictionary<string, int> m_Fields = new Dictionary<string, int>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
         private DbDataReader m_Reader;

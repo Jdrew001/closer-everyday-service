@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CED.Security
+namespace CED.Services.Interfaces
 {
-    public class HashWithSalt
+    public class IUserService
     {
-        public string Hash { get; set; }
-        public string Salt { get; set; }
     }
 }

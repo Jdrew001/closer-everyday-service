@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CED.Security
 {
-    class Hash
+    public class Hash
     {
         private const int _length = 15;
 

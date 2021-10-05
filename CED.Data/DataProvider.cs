@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CED.Data
 {
-    class DataProvider
+    public class DataProvider
     {
         protected string ConnectionStringName { get; set; }
 

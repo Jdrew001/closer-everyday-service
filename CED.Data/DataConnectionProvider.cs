@@ -1,9 +1,10 @@
 ﻿using MySql.Data.MySqlClient;
+using System;
 using System.Data;
 
 namespace CED.Data
 {
-    class DataConnectionProvider
+    public class DataConnectionProvider : IDisposable
     {
         private MySqlConnection _sqlConnection;
 

@@ -5,7 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CED.Data\CED.Data.csproj" />
+    <ProjectReference Include="..\CED.Models\CED.Models.csproj" />
+    <ProjectReference Include="..\CED.Security\CED.Security.csproj" />
+    <ProjectReference Include="..\CED.Services\CED.Services.csproj" />
   </ItemGroup>
 
 </Project>

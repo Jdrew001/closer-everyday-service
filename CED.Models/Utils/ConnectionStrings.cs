@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CED.Security
+namespace CED.Models
 {
-    public class HashWithSalt
+    public class ConnectionStrings
     {
-        public string Hash { get; set; }
-        public string Salt { get; set; }
+        public string CEDDB { get; set; }
     }
 }

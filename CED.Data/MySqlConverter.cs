@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CED.Data
 {
-    class MySqlConverter
+    public class MySqlConverter
     {
         public static readonly int MAX_LENGTH_VARCHAR = 4000;
         public static readonly int GUID_LENGTH = 38;
