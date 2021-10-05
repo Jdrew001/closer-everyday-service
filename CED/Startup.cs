@@ -41,17 +41,10 @@ namespace CED
 
             services.AddServices();
 
-            var allowedHosts = Configuration.GetSection("AllowedHosts").Get<string[]>();
+            var allowedHost = Configuration.GetSection("AllowedHosts").Get<string>();
 
-            services.AddCors(c =>
-                c.AddPolicy("AllowOrigin", options =>
-                {
-                    options
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials()
-                        .WithOrigins(allowedHosts);
-                }));
+
+            services.AddCors();
 
             services.AddAuthentication(option =>
             {
@@ -76,7 +69,7 @@ namespace CED
                     };
                 });
 
-            services.AddControllersWithViews();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,11 +86,22 @@ namespace CED
 
             app.UseRouting();
 
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
+
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller}/{action=Index}/{id?}");
             });
         }
     }

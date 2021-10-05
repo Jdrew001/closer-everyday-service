@@ -46,7 +46,7 @@ namespace CED.Services.Core
                 return UserNotFound(loginRequestDto);
             }
 
-            if (Hash.GetHash(loginRequestDto.Password, user.PasswordSalt).Hash == user.Password)
+            if (Hash.GetHash(loginRequestDto.Password, user.PasswordSalt).Hash != user.Password)
             {
                 return UserPasswordIncorrect(loginRequestDto);
             }
