@@ -25,7 +25,7 @@ namespace CED.Controllers
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var response = await _authenticationService.Register(request);
-            return Ok(response);
+            return response.IsAuthenticated ? Ok(response): Unauthorized(response);
         }
 
         [HttpPost("login")]
