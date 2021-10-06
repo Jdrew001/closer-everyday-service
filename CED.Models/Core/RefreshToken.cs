@@ -13,6 +13,7 @@ namespace CED.Models.Core
         public bool IsExpired => DateTime.UtcNow >= Expires;
         public DateTime Created { get; set; }
         public DateTime? Revoked { get; set; }
-        public bool IsActive => Revoked == null && !IsExpired;
+        public Boolean isRevoked { get; set; }
+        public bool IsActive => !isRevoked && !IsExpired;
     }
 }

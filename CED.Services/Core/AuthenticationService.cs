@@ -40,10 +40,11 @@ namespace CED.Services.Core
         public async Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto)
         {
             var user = await GetUserByEmail(loginRequestDto.Email);
+            var userRefreshTokens = await GetUserRefreshTokens(user.Id);
             var authenticationDTO = new AuthenticationDTO();
             if (user == null)
             {
-                return UserNotFound(loginRequestDto);
+                return UserNotFound(loginRequestDto.Email);
             }
 
             if (Hash.GetHash(loginRequestDto.Password, user.PasswordSalt).Hash != user.Password)
@@ -51,6 +52,10 @@ namespace CED.Services.Core
                 return UserPasswordIncorrect(loginRequestDto);
             }
 
+            if (userRefreshTokens != null)
+            {
+                user.RefreshTokens = userRefreshTokens;
+            }
 
             authenticationDTO.IsAuthenticated = true;
             authenticationDTO.Token = await CreateJwtToken(user);
@@ -75,9 +80,46 @@ namespace CED.Services.Core
             return authenticationDTO;
         }
 
-        public Task Logout(string token)
+        public async Task<AuthenticationDTO> Register(RegistrationDTO registrationDto)
         {
-            throw new NotImplementedException();
+            var user = await GetUserByEmail(registrationDto.email);
+
+            // user found in db, unable to register error thrown
+            if (user != null)
+            {
+                return RegistrationError();
+            }
+
+            var hashAndSalt = Hash.GetHash(registrationDto.password);
+            string spName = "RegisterAccount";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("Firstname", registrationDto.firstName);
+            command.Parameters.AddWithValue("Lastname", registrationDto.lastName);
+            command.Parameters.AddWithValue("Email", registrationDto.email);
+            command.Parameters.AddWithValue("UserHash", hashAndSalt.Hash);
+            command.Parameters.AddWithValue("Salt", hashAndSalt.Salt);
+
+            await command.ExecuteNonQueryAsync();
+
+            return await Login(new LoginRequestDTO()
+            {
+                Email = registrationDto.email,
+                Password = registrationDto.password,
+                IpAddress = registrationDto.IpAddress
+            });
+        }
+
+        public async Task Logout(string token)
+        {
+            string spName = "RevokeToken";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("token", token);
+            await command.ExecuteNonQueryAsync();
         }
 
         public Task<AuthenticationDTO> RefreshToken(string token)
@@ -129,11 +171,14 @@ namespace CED.Services.Core
                 {
                     Token = token,
                     Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_jwtToken.RefreshTokenExpiry)),
-                    Created = DateTime.UtcNow
+                    Created = DateTime.UtcNow,
+                    Revoked = null,
+                    isRevoked = false
                 };
                 return refreshToken;
             });
         }
+
         #region private util methods
         private async Task<User> GetUserByEmail(string email)
         {
@@ -150,7 +195,7 @@ namespace CED.Services.Core
 
             return result;
         }
-        private async Task SaveRefreshToken(RefreshToken token, Guid userId)
+        private async Task SaveRefreshToken(RefreshToken token, Int32 userId)
         {
             string spName = "SaveRefreshToken";
             using DataConnectionProvider dcp = CreateConnection();
@@ -158,15 +203,43 @@ namespace CED.Services.Core
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("UserId", userId);
             command.Parameters.AddWithValue("Token", token.Token);
+            command.Parameters.AddWithValue("IsExpired", token.IsExpired);
             command.Parameters.AddWithValue("Expires", token.Expires.ToUniversalTime());
             command.Parameters.AddWithValue("Created", token.Created.ToUniversalTime());
+            command.Parameters.AddWithValue("Revoked", token.Revoked?.ToUniversalTime());
+            command.Parameters.AddWithValue("IsRevoked", token.isRevoked);
             await command.ExecuteNonQueryAsync();
         }
-        private AuthenticationDTO UserNotFound(LoginRequestDTO loginRequestDTO)
+
+        private async Task<List<RefreshToken>> GetUserRefreshTokens(Int32 userId)
+        {
+            List<RefreshToken> result = new List<RefreshToken>();
+            string spName = "GetUserRefreshTokenById";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("UserId", userId);
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+            while (drh.Read())
+                result.Add(ReadRefreshToken(drh));
+
+            return result;
+        }
+
+        private AuthenticationDTO UserNotFound(string email)
         {
             var authenticationDTO = new AuthenticationDTO();
             authenticationDTO.IsAuthenticated = false;
-            authenticationDTO.Message = $"No Accounts Registered with {loginRequestDTO.Email}";
+            authenticationDTO.Message = $"No Accounts Registered with {email}";
+            return authenticationDTO;
+        }
+
+        private AuthenticationDTO RegistrationError()
+        {
+            var authenticationDTO = new AuthenticationDTO();
+            authenticationDTO.IsAuthenticated = false;
+            authenticationDTO.Message = $"Registration attempt failed";
             return authenticationDTO;
         }
 
@@ -181,14 +254,27 @@ namespace CED.Services.Core
         {
             return new User()
             {
-                Id = drh.Get<Guid>("UserId"),
-                Email = drh.Get<string>("Email"),
-                Username = drh.Get<string>("Username"),
-                FirstName = drh.Get<string>("FirstName"),
-                LastName = drh.Get<string>("LastName"),
-                LastLogin = drh.Get<DateTime?>("LastLogin"),
-                Locked = drh.Get<bool>("Locked"),
-                DateLocked = drh.Get<DateTime?>("DateLocked")
+                Id = drh.Get<Int32>("iduser"),
+                Email = drh.Get<string>("email"),
+                Username = drh.Get<string>("username"),
+                FirstName = drh.Get<string>("firstname"),
+                LastName = drh.Get<string>("lastname"),
+                LastLogin = drh.Get<DateTime?>("lastLogin"),
+                Locked = drh.Get<bool>("locked"),
+                DateLocked = drh.Get<DateTime?>("datelocked"),
+                PasswordSalt = drh.Get<string>("passwordSalt"),
+                Password = drh.Get<string>("password")
+            };
+        }
+
+        private RefreshToken ReadRefreshToken(DataReaderHelper drh)
+        {
+            return new RefreshToken()
+            {
+                Token = drh.Get<string>("token"),
+                Expires = drh.Get<DateTime>("expires"),
+                Created = drh.Get<DateTime>("created"),
+                Revoked = drh.Get<DateTime>("revoked")
             };
         }
         #endregion

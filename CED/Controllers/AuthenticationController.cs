@@ -20,20 +20,20 @@ namespace CED.Controllers
             _authenticationService = authenticationService;
         }
 
-        [HttpGet("Test")]
-        public async Task<IActionResult> Test()
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegistrationDTO request)
         {
-            //request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            //await _authenticationService.Login(request);
-            return Ok();
+            request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var response = await _authenticationService.Register(request);
+            return Ok(response);
         }
 
-        [HttpPost("Login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDTO request)
         {
             request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            await _authenticationService.Login(request);
-            return Ok();
+            var response = await _authenticationService.Login(request);
+            return Ok(response);
         }
     }
 }
