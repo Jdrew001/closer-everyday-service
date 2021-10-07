@@ -6,7 +6,7 @@ namespace CED.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto);
+        Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto, string deviceUUID);
         Task<AuthenticationDTO> Register(RegistrationDTO registrationDto);
         Task<AuthenticationDTO> RefreshToken(string token);
         Task Logout(string token);

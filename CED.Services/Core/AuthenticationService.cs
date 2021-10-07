@@ -24,23 +24,25 @@ namespace CED.Services.Core
     {
 
         private readonly IUserService _userService;
+        private readonly IDeviceService _deviceService;
         private readonly JwtToken _jwtToken;
         private readonly ILogger<AuthenticationService> _log;
 
         public AuthenticationService(
             ILogger<AuthenticationService> log,
             IOptions<JwtToken> jwtToken,
-            IOptions<ConnectionStrings> connectionStrings)
+            IOptions<ConnectionStrings> connectionStrings,
+            IDeviceService deviceService)
             : base(connectionStrings.Value.CEDDB)
         {
             _log = log;
             _jwtToken = jwtToken.Value;
+            _deviceService = deviceService;
         }
         
-        public async Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto)
+        public async Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto, string deviceUUID)
         {
             var user = await GetUserByEmail(loginRequestDto.Email);
-            var userRefreshTokens = await GetUserRefreshTokens(user.Id);
             var authenticationDTO = new AuthenticationDTO();
             if (user == null)
             {
@@ -52,24 +54,37 @@ namespace CED.Services.Core
                 return UserPasswordIncorrect(loginRequestDto);
             }
 
-            if (userRefreshTokens != null)
+            var devices = await _deviceService.GetUserDevices(user.Id);
+            var userDevice = devices.Find(d => (d.UUID.Equals(deviceUUID)));
+            if (userDevice == null)
             {
-                user.RefreshTokens = userRefreshTokens;
+                // TODO: Send an email to user asking if the phone logging in is correct
+                // if click on ALLOW, then call an end point updating the system
+                // eventually I want to use texting 
+                return DeviceNotRecognized();
+            }
+
+            user.RefreshTokens = await GetUserRefreshTokens(user.Id);
+            var activeRefreshToken = user.RefreshTokens.FirstOrDefault(a => a.IsActive);
+
+            // users request device uuid in use doesn't match the refresh token -- throw an error
+            if (activeRefreshToken != null && activeRefreshToken.DeviceId != userDevice.DeviceId)
+            {
+                return DeviceNotRecognized();
             }
 
             authenticationDTO.IsAuthenticated = true;
             authenticationDTO.Token = await CreateJwtToken(user);
             authenticationDTO.UserId = user.Id;
 
-            if (user.RefreshTokens != null && user.RefreshTokens.Any(a => a.IsActive))
+            if (activeRefreshToken != null)
             {
-                var activeRefreshToken = user.RefreshTokens.FirstOrDefault(a => a.IsActive);
                 authenticationDTO.RefreshToken = activeRefreshToken.Token;
                 authenticationDTO.RefreshTokenExpiration = activeRefreshToken.Expires;
             }
             else
             {
-                var refreshToken = await CreateRefreshToken();
+                var refreshToken = await CreateRefreshToken(userDevice);
                 authenticationDTO.RefreshToken = refreshToken.Token;
                 authenticationDTO.RefreshTokenExpiration = refreshToken.Expires;
                 user.RefreshTokens ??= new List<RefreshToken>();
@@ -90,26 +105,14 @@ namespace CED.Services.Core
                 return RegistrationError();
             }
 
-            var hashAndSalt = Hash.GetHash(registrationDto.password);
-            string spName = "RegisterAccount";
-            using DataConnectionProvider dcp = CreateConnection();
-            await using var command = dcp.CreateCommand(spName);
-
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("Firstname", registrationDto.firstName);
-            command.Parameters.AddWithValue("Lastname", registrationDto.lastName);
-            command.Parameters.AddWithValue("Email", registrationDto.email);
-            command.Parameters.AddWithValue("UserHash", hashAndSalt.Hash);
-            command.Parameters.AddWithValue("Salt", hashAndSalt.Salt);
-
-            await command.ExecuteNonQueryAsync();
+            await CreateNewUser(registrationDto);
 
             return await Login(new LoginRequestDTO()
             {
                 Email = registrationDto.email,
                 Password = registrationDto.password,
                 IpAddress = registrationDto.IpAddress
-            });
+            }, registrationDto.deviceGuid);
         }
 
         public async Task Logout(string token)
@@ -153,7 +156,7 @@ namespace CED.Services.Core
                 return new JwtSecurityTokenHandler().WriteToken(token);
             });
         }
-        public async Task<RefreshToken> CreateRefreshToken()
+        public async Task<RefreshToken> CreateRefreshToken(Device device)
         {
             return await Task.Run(() =>
             {
@@ -173,7 +176,8 @@ namespace CED.Services.Core
                     Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_jwtToken.RefreshTokenExpiry)),
                     Created = DateTime.UtcNow,
                     Revoked = null,
-                    isRevoked = false
+                    isRevoked = false,
+                    DeviceId = device.DeviceId
                 };
                 return refreshToken;
             });
@@ -195,7 +199,7 @@ namespace CED.Services.Core
 
             return result;
         }
-        private async Task SaveRefreshToken(RefreshToken token, Int32 userId)
+        private async Task SaveRefreshToken(RefreshToken token, int userId)
         {
             string spName = "SaveRefreshToken";
             using DataConnectionProvider dcp = CreateConnection();
@@ -208,10 +212,11 @@ namespace CED.Services.Core
             command.Parameters.AddWithValue("Created", token.Created.ToUniversalTime());
             command.Parameters.AddWithValue("Revoked", token.Revoked?.ToUniversalTime());
             command.Parameters.AddWithValue("IsRevoked", token.isRevoked);
+            command.Parameters.AddWithValue("DeviceId", token.DeviceId);
             await command.ExecuteNonQueryAsync();
         }
 
-        private async Task<List<RefreshToken>> GetUserRefreshTokens(Int32 userId)
+        private async Task<List<RefreshToken>> GetUserRefreshTokens(int userId)
         {
             List<RefreshToken> result = new List<RefreshToken>();
             string spName = "GetUserRefreshTokenById";
@@ -227,11 +232,39 @@ namespace CED.Services.Core
             return result;
         }
 
+        private async Task CreateNewUser(RegistrationDTO registrationDto)
+        {
+            var hashAndSalt = Hash.GetHash(registrationDto.password);
+            string spName = "RegisterAccount";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("Firstname", registrationDto.firstName);
+            command.Parameters.AddWithValue("Lastname", registrationDto.lastName);
+            command.Parameters.AddWithValue("Email", registrationDto.email);
+            command.Parameters.AddWithValue("UserHash", hashAndSalt.Hash);
+            command.Parameters.AddWithValue("Salt", hashAndSalt.Salt);
+            command.Parameters.AddWithValue("DeviceGUID", registrationDto.deviceGuid);
+            command.Parameters.AddWithValue("DeviceModel", registrationDto.deviceModel);
+            command.Parameters.AddWithValue("DevicePlatform", registrationDto.devicePlatform);
+            command.Parameters.AddWithValue("Manufacturer", registrationDto.deviceManufacture);
+            await command.ExecuteNonQueryAsync();
+        }
+
         private AuthenticationDTO UserNotFound(string email)
         {
             var authenticationDTO = new AuthenticationDTO();
             authenticationDTO.IsAuthenticated = false;
             authenticationDTO.Message = $"No Accounts Registered with {email}";
+            return authenticationDTO;
+        }
+
+        private AuthenticationDTO DeviceNotRecognized()
+        {
+            var authenticationDTO = new AuthenticationDTO();
+            authenticationDTO.IsAuthenticated = false;
+            authenticationDTO.Message = $"Device not Authorized";
             return authenticationDTO;
         }
 
@@ -254,7 +287,7 @@ namespace CED.Services.Core
         {
             return new User()
             {
-                Id = drh.Get<Int32>("iduser"),
+                Id = drh.Get<int>("iduser"),
                 Email = drh.Get<string>("email"),
                 Username = drh.Get<string>("username"),
                 FirstName = drh.Get<string>("firstname"),
@@ -274,7 +307,8 @@ namespace CED.Services.Core
                 Token = drh.Get<string>("token"),
                 Expires = drh.Get<DateTime>("expires"),
                 Created = drh.Get<DateTime>("created"),
-                Revoked = drh.Get<DateTime>("revoked")
+                Revoked = drh.Get<DateTime>("revoked"),
+                DeviceId = drh.Get<int>("deviceId")
             };
         }
         #endregion

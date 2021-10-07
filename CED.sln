@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CED", "CED\CED.csproj", "{3210309D-A4FD-444C-8A53-C470DA68C87A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CED", "CED\CED.csproj", "{3210309D-A4FD-444C-8A53-C470DA68C87A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CED.Data", "CED.Data\CED.Data.csproj", "{0882CE68-90E7-4CFE-8786-5CDCF151DD24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CED.Data", "CED.Data\CED.Data.csproj", "{0882CE68-90E7-4CFE-8786-5CDCF151DD24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CED.Models", "CED.Models\CED.Models.csproj", "{1F5080C7-4EFE-47C8-9F16-607C4F386B0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CED.Models", "CED.Models\CED.Models.csproj", "{1F5080C7-4EFE-47C8-9F16-607C4F386B0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CED.Security", "CED.Security\CED.Security.csproj", "{C40FBFD3-F47B-481A-8A63-FD295F3D7C78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CED.Security", "CED.Security\CED.Security.csproj", "{C40FBFD3-F47B-481A-8A63-FD295F3D7C78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CED.Services", "CED.Services\CED.Services.csproj", "{D8DAC476-B097-466D-9B08-8E346F61BA1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CED.Services", "CED.Services\CED.Services.csproj", "{D8DAC476-B097-466D-9B08-8E346F61BA1B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CED.Services.Tests", "CED.Services.Tests\CED.Services.Tests.csproj", "{D406FF79-D666-4F22-BC3E-F5C5BFC015C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{D8DAC476-B097-466D-9B08-8E346F61BA1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8DAC476-B097-466D-9B08-8E346F61BA1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8DAC476-B097-466D-9B08-8E346F61BA1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D406FF79-D666-4F22-BC3E-F5C5BFC015C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D406FF79-D666-4F22-BC3E-F5C5BFC015C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D406FF79-D666-4F22-BC3E-F5C5BFC015C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D406FF79-D666-4F22-BC3E-F5C5BFC015C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,6 +14,7 @@ namespace CED.Services.Infrastructure
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IDeviceService, DeviceService>();
             //services.AddScoped<IClientService, ClientService>();
             //services.AddScoped<IEmailService, EmailService>();
             //services.AddScoped<ICompanyService, CompanyService>();

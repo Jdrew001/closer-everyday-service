@@ -32,7 +32,14 @@ namespace CED.Controllers
         public async Task<IActionResult> Login(LoginRequestDTO request)
         {
             request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            var response = await _authenticationService.Login(request);
+            string deviceUUID = HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "DEVICE_UUID").Value.FirstOrDefault();
+
+            if (deviceUUID == null || deviceUUID.Equals(""))
+            {
+                return BadRequest();
+            }
+
+            var response = await _authenticationService.Login(request, deviceUUID);
             return Ok(response);
         }
     }

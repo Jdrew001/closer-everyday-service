@@ -27,6 +27,22 @@ namespace CED.Models.DTO
         [Required]
         public string password { get; set; }
 
+        [Required]
+        [MaxLength(100)]
+        public string deviceGuid { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string deviceModel { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string devicePlatform { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string deviceManufacture { get; set; }
+
         [JsonIgnore]
         public string IpAddress { get; set; }
     }
