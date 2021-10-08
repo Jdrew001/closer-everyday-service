@@ -1,11 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CED.Controllers
 {
-    public class AccountController
+    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AccountController : ControllerBase
     {
+        [HttpGet]
+        public IActionResult actionResult()
+        {
+            return Ok();
+        }
     }
 }

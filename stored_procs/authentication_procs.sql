@@ -101,3 +101,44 @@ END //
 
 DELIMITER ;
 -- End Get User By Email
+-- --------------------------------------
+
+
+-- Drop stored procedure if exists
+-- SaveRefreshToken
+DROP PROCEDURE IF EXISTS GetUserByRefreshToken;
+
+DELIMITER //
+
+CREATE PROCEDURE GetUserByRefreshToken(
+	IN Token VARCHAR(256)
+)
+BEGIN
+
+  SELECT * FROM `CEDDB`.`user` u 
+  WHERE u.iduser = (SELECT userId FROM `CEDDB`.`refresh_token` rt
+	WHERE rt.token = Token);
+    
+END //
+
+DELIMITER ;
+-- End Get User By Email
+
+-- Drop stored procedure if exists
+-- SaveRefreshToken
+DROP PROCEDURE IF EXISTS GetRefreshToken;
+
+DELIMITER //
+
+CREATE PROCEDURE GetRefreshToken(
+	IN Token VARCHAR(256)
+)
+BEGIN
+
+  SELECT * FROM `CEDDB`.`refresh_token` rt
+	WHERE rt.token = Token;
+    
+END //
+
+DELIMITER ;
+-- End Get User By Email

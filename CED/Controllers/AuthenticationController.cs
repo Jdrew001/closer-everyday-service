@@ -32,7 +32,7 @@ namespace CED.Controllers
         public async Task<IActionResult> Login(LoginRequestDTO request)
         {
             request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            string deviceUUID = HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "DEVICE_UUID").Value.FirstOrDefault();
+            string deviceUUID = RetrieveDeviceUUID();
 
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
@@ -41,6 +41,27 @@ namespace CED.Controllers
 
             var response = await _authenticationService.Login(request, deviceUUID);
             return Ok(response);
+        }
+
+        [HttpPost("refreshToken")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenDTO refreshTokenDTO)
+        {
+            refreshTokenDTO.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
+            string deviceUUID = RetrieveDeviceUUID();
+
+            if (deviceUUID == null || deviceUUID.Equals(""))
+            {
+                return BadRequest();
+            }
+
+            refreshTokenDTO.DeviceUUID = deviceUUID;
+            var response = await _authenticationService.RefreshToken(refreshTokenDTO);
+            return Ok(response);
+        }
+
+        private string RetrieveDeviceUUID()
+        {
+            return HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "DEVICE_UUID").Value.FirstOrDefault();
         }
     }
 }
