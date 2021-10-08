@@ -23,7 +23,6 @@ namespace CED.Services.Core
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly IUserService _userService;
         private readonly IDeviceService _deviceService;
         private readonly JwtToken _jwtToken;
         private readonly ILogger<AuthenticationService> _log;
