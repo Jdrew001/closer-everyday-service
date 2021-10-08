@@ -11,5 +11,6 @@ namespace CED.Models.Core
         public DateTime RefreshTokenExpiration { get; set; }
         public string Message { get; set; }
         public bool IsNewDevice { get; set; }
+        public bool ShouldRedirectoToLogin { get; set; }
     }
 }

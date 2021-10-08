@@ -103,6 +103,26 @@ DELIMITER ;
 -- End Get User By Email
 -- --------------------------------------
 
+-- Drop stored procedure if exists
+-- SaveRefreshToken
+DROP PROCEDURE IF EXISTS DeleteRefreshToken;
+
+DELIMITER //
+
+CREATE PROCEDURE DeleteRefreshToken(
+	IN Token VARCHAR(255)
+)
+BEGIN
+  
+  DELETE FROM `CEDDB`.`refresh_token` re
+  WHERE re.`token` = Token;
+  
+END //
+
+DELIMITER ;
+-- End Get User By Email
+-- --------------------------------------
+
 
 -- Drop stored procedure if exists
 -- SaveRefreshToken

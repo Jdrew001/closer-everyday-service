@@ -1,3 +1,4 @@
+using CED.Data.Infrastructure;
 using CED.Models;
 using CED.Models.Core;
 using CED.Services.Infrastructure;
@@ -40,6 +41,7 @@ namespace CED
             });
 
             services.AddServices();
+            services.AddRepositories();
 
             var allowedHost = Configuration.GetSection("AllowedHosts").Get<string>();
 

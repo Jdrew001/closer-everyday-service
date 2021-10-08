@@ -17,32 +17,38 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Data;
+using CED.Data.Interfaces;
 
 namespace CED.Services.Core
 {
-    public class AuthenticationService : DataProvider, IAuthenticationService
+    public class AuthenticationService : IAuthenticationService
     {
-
         private readonly IUserService _userService;
         private readonly IDeviceService _deviceService;
         private readonly JwtToken _jwtToken;
         private readonly ILogger<AuthenticationService> _log;
+        private readonly IUserRepository _userRepository;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
 
         public AuthenticationService(
             ILogger<AuthenticationService> log,
             IOptions<JwtToken> jwtToken,
             IOptions<ConnectionStrings> connectionStrings,
-            IDeviceService deviceService)
-            : base(connectionStrings.Value.CEDDB)
+            IDeviceService deviceService,
+            IUserRepository userRepository,
+            IRefreshTokenRepository refreshTokenRepository)
         {
             _log = log;
             _jwtToken = jwtToken.Value;
             _deviceService = deviceService;
+            _userRepository = userRepository;
+            _refreshTokenRepository = refreshTokenRepository;
         }
-        
+
+        #region authentication methods
         public async Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto, string deviceUUID)
         {
-            var user = await GetUserByEmail(loginRequestDto.Email);
+            var user = await _userRepository.GetUserByEmail(loginRequestDto.Email);
             var authenticationDTO = new AuthenticationDTO();
             if (user == null)
             {
@@ -64,7 +70,7 @@ namespace CED.Services.Core
                 return AddNewDevice();
             }
 
-            user.RefreshTokens = await GetUserRefreshTokens(user.Id);
+            user.RefreshTokens = await _refreshTokenRepository.GetUserRefreshTokens(user.Id);
             var activeRefreshToken = user.RefreshTokens.FirstOrDefault(a => a.IsActive);
 
             // users request device uuid in use doesn't match the refresh token -- throw an error
@@ -89,7 +95,7 @@ namespace CED.Services.Core
                 authenticationDTO.RefreshTokenExpiration = refreshToken.Expires;
                 user.RefreshTokens ??= new List<RefreshToken>();
                 user.RefreshTokens.Add(refreshToken);
-                await SaveRefreshToken(refreshToken, user.Id);
+                await _refreshTokenRepository.SaveRefreshToken(refreshToken, user.Id);
             }
 
             return authenticationDTO;
@@ -97,7 +103,7 @@ namespace CED.Services.Core
 
         public async Task<AuthenticationDTO> Register(RegistrationDTO registrationDto)
         {
-            var user = await GetUserByEmail(registrationDto.email);
+            var user = await _userRepository.GetUserByEmail(registrationDto.email);
 
             // user found in db, unable to register error thrown
             if (user != null)
@@ -105,7 +111,7 @@ namespace CED.Services.Core
                 return RegistrationError();
             }
 
-            await CreateNewUser(registrationDto);
+            await _userRepository.CreateNewUser(registrationDto);
 
             return await Login(new LoginRequestDTO()
             {
@@ -117,12 +123,7 @@ namespace CED.Services.Core
 
         public async Task Logout(string token)
         {
-            string spName = "RevokeToken";
-            using DataConnectionProvider dcp = CreateConnection();
-            await using var command = dcp.CreateCommand(spName);
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("token", token);
-            await command.ExecuteNonQueryAsync();
+            await _userRepository.Logout(token);
         }
 
         public async Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDTO)
@@ -131,44 +132,50 @@ namespace CED.Services.Core
             if (string.IsNullOrEmpty(refreshTokenDTO.Token))
             {
                 authenticationDTO.IsAuthenticated = false;
+                authenticationDTO.ShouldRedirectoToLogin = true;
                 authenticationDTO.Message = "Token invalid.";
                 return authenticationDTO;
             }
 
-            var user = await GetUserByRefreshToken(refreshTokenDTO);
+            var user = await _userRepository.GetUserByRefreshToken(refreshTokenDTO);
             if (user == null)
             {
                 authenticationDTO.IsAuthenticated = false;
+                authenticationDTO.ShouldRedirectoToLogin = true;
                 authenticationDTO.Message = "Token did not match any users.";
                 return authenticationDTO;
             }
 
-            var refreshToken = await GetRefreshToken(refreshTokenDTO.Token);
+            var refreshToken = await _refreshTokenRepository.GetRefreshToken(refreshTokenDTO.Token);
             var devices = await _deviceService.GetUserDevices(user.Id);
             var userDevice = devices.Find(d => (d.UUID.Equals(refreshTokenDTO.DeviceUUID)));
-            if (!refreshToken.IsActive)
-            {
-                authenticationDTO.IsAuthenticated = false;
-                authenticationDTO.Message = "Token not active.";
-                return authenticationDTO;
-            }
 
             if (userDevice == null)
             {
                 authenticationDTO.IsAuthenticated = false;
-                authenticationDTO.Message = "Device did not match.";
+                authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Message = "Device not matching.";
+
                 return authenticationDTO;
             }
 
-            refreshToken.Revoked = DateTime.UtcNow;
-            refreshToken.isRevoked = true;
+            var delRefreshToken = await _refreshTokenRepository.DeleteRefreshToken(refreshToken.Token);
+            if (delRefreshToken != null)
+            {
+                authenticationDTO.IsAuthenticated = false;
+                authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Message = "Unable to process request";
 
+                return authenticationDTO;
+            }
+
+            //create a new refresh token
             var newRefreshToken = await CreateRefreshToken(userDevice);
             user.RefreshTokens ??= new List<RefreshToken>();
 
             user.RefreshTokens.Add(newRefreshToken);
 
-            await SaveRefreshToken(newRefreshToken, user.Id);
+            await _refreshTokenRepository.SaveRefreshToken(refreshToken, user.Id);
 
             //Generates new jwt
             authenticationDTO.IsAuthenticated = true;
@@ -231,128 +238,9 @@ namespace CED.Services.Core
                 return refreshToken;
             });
         }
+        #endregion
 
         #region private util methods
-        private async Task<User> GetUserByEmail(string email)
-        {
-            User result = null;
-            using DataConnectionProvider dcp = CreateConnection();
-            await using var command = dcp.CreateCommand("GetUserByEmail");
-
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("Email", email);
-            using DataReaderHelper drh = await command.ExecuteReaderAsync();
-
-            while (drh.Read())
-                result = ReadUser(drh);
-
-            return result;
-        }
-        private async Task SaveRefreshToken(RefreshToken token, int userId)
-        {
-            string spName = "SaveRefreshToken";
-            using DataConnectionProvider dcp = CreateConnection();
-            await using var command = dcp.CreateCommand(spName);
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
-            command.Parameters.AddWithValue("Token", token.Token);
-            command.Parameters.AddWithValue("IsExpired", token.IsExpired);
-            command.Parameters.AddWithValue("Expires", token.Expires.ToUniversalTime());
-            command.Parameters.AddWithValue("Created", token.Created.ToUniversalTime());
-            command.Parameters.AddWithValue("Revoked", token.Revoked?.ToUniversalTime());
-            command.Parameters.AddWithValue("IsRevoked", token.isRevoked);
-            command.Parameters.AddWithValue("DeviceId", token.DeviceId);
-            await command.ExecuteNonQueryAsync();
-        }
-
-        private async Task<List<RefreshToken>> GetUserRefreshTokens(int userId)
-        {
-            List<RefreshToken> result = new List<RefreshToken>();
-            string spName = "GetUserRefreshTokenById";
-            using DataConnectionProvider dcp = CreateConnection();
-            await using var command = dcp.CreateCommand(spName);
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
-            using DataReaderHelper drh = await command.ExecuteReaderAsync();
-
-            while (drh.Read())
-                result.Add(ReadRefreshToken(drh));
-
-            return result;
-        }
-
-        private async Task CreateNewUser(RegistrationDTO registrationDto)
-        {
-            var hashAndSalt = Hash.GetHash(registrationDto.password);
-            string spName = "RegisterAccount";
-            using DataConnectionProvider dcp = CreateConnection();
-            await using var command = dcp.CreateCommand(spName);
-
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("Firstname", registrationDto.firstName);
-            command.Parameters.AddWithValue("Lastname", registrationDto.lastName);
-            command.Parameters.AddWithValue("Email", registrationDto.email);
-            command.Parameters.AddWithValue("UserHash", hashAndSalt.Hash);
-            command.Parameters.AddWithValue("Salt", hashAndSalt.Salt);
-            command.Parameters.AddWithValue("DeviceGUID", registrationDto.deviceGuid);
-            command.Parameters.AddWithValue("DeviceModel", registrationDto.deviceModel);
-            command.Parameters.AddWithValue("DevicePlatform", registrationDto.devicePlatform);
-            command.Parameters.AddWithValue("Manufacturer", registrationDto.deviceManufacture);
-            await command.ExecuteNonQueryAsync();
-        }
-
-        private async Task<User> GetUserByRefreshToken(RefreshTokenDTO dto)
-        {
-            User result = null;
-            using DataConnectionProvider dcp = CreateConnection();
-            await using var command = dcp.CreateCommand("GetUserByRefreshToken");
-
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("Token", dto.Token);
-            using DataReaderHelper drh = await command.ExecuteReaderAsync();
-
-            while (drh.Read())
-                result = ReadUser(drh);
-
-            return result;
-        }
-
-        private async Task<RefreshToken> GetRefreshToken(string token)
-        {
-            RefreshToken result = null;
-            string spName = "GetRefreshToken";
-
-            using DataConnectionProvider dcp = CreateConnection();
-            await using var command = dcp.CreateCommand(spName);
-
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("Token", token);
-            using DataReaderHelper drh = await command.ExecuteReaderAsync();
-
-            while (drh.Read())
-            {
-                result = new RefreshToken
-                {
-                    Token = drh.Get<string>("Token"),
-                    Expires = drh.Get<DateTime>("Expires"),
-                    Created = drh.Get<DateTime>("Created"),
-                    Revoked = drh.Get<DateTime?>("Revoked"),
-                    isRevoked = drh.Get<bool>("is_revoked"),
-                    DeviceId = drh.Get<int>("deviceId")
-                };
-            }
-
-            return result;
-        }
-
-        private AuthenticationDTO UserNotFound(string email)
-        {
-            var authenticationDTO = new AuthenticationDTO();
-            authenticationDTO.IsAuthenticated = false;
-            authenticationDTO.Message = $"No Accounts Registered with {email}";
-            authenticationDTO.IsNewDevice = false;
-            return authenticationDTO;
-        }
 
         private AuthenticationDTO DeviceNotRecognized()
         {
@@ -379,34 +267,6 @@ namespace CED.Services.Core
             authenticationDTO.Message = $"Email or password incorrect";
             authenticationDTO.IsNewDevice = false;
             return authenticationDTO;
-        }
-        private User ReadUser(DataReaderHelper drh)
-        {
-            return new User()
-            {
-                Id = drh.Get<int>("iduser"),
-                Email = drh.Get<string>("email"),
-                Username = drh.Get<string>("username"),
-                FirstName = drh.Get<string>("firstname"),
-                LastName = drh.Get<string>("lastname"),
-                LastLogin = drh.Get<DateTime?>("lastLogin"),
-                Locked = drh.Get<bool>("locked"),
-                DateLocked = drh.Get<DateTime?>("datelocked"),
-                PasswordSalt = drh.Get<string>("passwordSalt"),
-                Password = drh.Get<string>("password")
-            };
-        }
-
-        private RefreshToken ReadRefreshToken(DataReaderHelper drh)
-        {
-            return new RefreshToken()
-            {
-                Token = drh.Get<string>("token"),
-                Expires = drh.Get<DateTime>("expires"),
-                Created = drh.Get<DateTime>("created"),
-                Revoked = drh.Get<DateTime>("revoked"),
-                DeviceId = drh.Get<int>("deviceId")
-            };
         }
         #endregion
     }
