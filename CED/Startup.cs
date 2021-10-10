@@ -1,4 +1,5 @@
 using CED.Data.Infrastructure;
+using CED.Middleware;
 using CED.Models;
 using CED.Models.Core;
 using CED.Services.Infrastructure;
@@ -82,7 +83,12 @@ namespace CED
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CED v1"));
+            } else
+            {
+                app.UseHsts();
             }
+
+            app.UseExceptionHandlerMiddleware();
 
             app.UseHttpsRedirection();
 

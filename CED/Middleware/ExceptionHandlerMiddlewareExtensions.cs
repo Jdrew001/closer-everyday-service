@@ -48,8 +48,9 @@ namespace CED.Middleware
             int statusCode = (int)HttpStatusCode.InternalServerError;
             var result = JsonConvert.SerializeObject(new
             {
-                StatusCode = statusCode,
-                ErrorMessage = exception.Message
+                code = statusCode,
+                message = "An Error has Occurred",
+                status = "FAILURE"
             });
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = statusCode;

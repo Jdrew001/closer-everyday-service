@@ -117,6 +117,9 @@ BEGIN
   DELETE FROM `CEDDB`.`refresh_token` re
   WHERE re.`token` = Token;
   
+  SELECT * FROM `CEDDB`.`refresh_token` re
+  WHERE re.`token` = Token;
+  
 END //
 
 DELIMITER ;

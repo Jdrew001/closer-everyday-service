@@ -15,6 +15,8 @@ namespace CED.Services.Infrastructure
         {
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IDeviceService, DeviceService>();
+            services.AddScoped<IHabitService, HabitService>();
+            services.AddScoped<ITokenService, TokenService>();
             //services.AddScoped<IClientService, ClientService>();
             //services.AddScoped<IEmailService, EmailService>();
             //services.AddScoped<ICompanyService, CompanyService>();

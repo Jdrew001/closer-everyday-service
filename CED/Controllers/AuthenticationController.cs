@@ -40,7 +40,7 @@ namespace CED.Controllers
             }
 
             var response = await _authenticationService.Login(request, deviceUUID);
-            return Ok(response);
+            return response.IsAuthenticated ? Ok(response): BadRequest(response);
         }
 
         [HttpPost("refreshToken")]
@@ -56,7 +56,7 @@ namespace CED.Controllers
 
             refreshTokenDTO.DeviceUUID = deviceUUID;
             var response = await _authenticationService.RefreshToken(refreshTokenDTO);
-            return Ok(response);
+            return response.IsAuthenticated ? Ok(response): BadRequest(response);
         }
 
         private string RetrieveDeviceUUID()

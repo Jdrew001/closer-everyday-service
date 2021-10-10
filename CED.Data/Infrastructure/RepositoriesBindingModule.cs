@@ -1,11 +1,6 @@
 ﻿using CED.Data.Interfaces;
 using CED.Data.Repositories;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CED.Data.Infrastructure
 {
@@ -16,6 +11,8 @@ namespace CED.Data.Infrastructure
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddTransient<IDeviceRepository, DeviceRepository>();
+            services.AddTransient<IHabitRepository, HabitRepository>();
+            services.AddTransient<IFrequencyRepository, FrequencyRepository>();
             return services;
         }
     }

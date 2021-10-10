@@ -207,7 +207,7 @@ namespace CED.Services.Core
                     expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtToken.TokenExpiry)),
                     notBefore: DateTime.Now.Subtract(TimeSpan.FromMinutes(30)),
                     signingCredentials: credentials);
-
+                
                 return new JwtSecurityTokenHandler().WriteToken(token);
             });
         }
