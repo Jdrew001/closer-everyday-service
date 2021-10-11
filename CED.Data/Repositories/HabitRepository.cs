@@ -45,7 +45,7 @@ namespace CED.Data.Repositories
         {
             //GetAllUserHabits
             List<Habit> habits = new List<Habit>();
-            string spName = "GetAlluserHabits";
+            string spName = "GetAllUserHabits";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
@@ -56,6 +56,7 @@ namespace CED.Data.Repositories
             {
                 var habit = ReadHabit(drh);
                 habit.Frequencies = await _frequencyRepository.GetHabitFrequencies(habit.Id);
+                habit.friendHabits = await GetFriendHabits(habit.Id);
                 habits.Add(habit);
             }
 
@@ -97,7 +98,21 @@ namespace CED.Data.Repositories
         {
             throw new System.NotImplementedException();
         }
+        public async Task<List<FriendHabit>> GetFriendHabits(int habitId)
+        {
+            List<FriendHabit> friendHabits = new List<FriendHabit>();
+            string spName = "GetHabitFriends";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habitId);
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
+            while (drh.Read())
+                friendHabits.Add(ReadFriendHabit(drh));
+                
+            return friendHabits;
+        }
         private Habit ReadHabit(DataReaderHelper drh)
         {
             return new Habit()
@@ -127,6 +142,16 @@ namespace CED.Data.Repositories
                     }
                 },
                 UserId = drh.Get<int>("userId")
+            };
+        }
+        private FriendHabit ReadFriendHabit(DataReaderHelper drh)
+        {
+            return new FriendHabit()
+            {
+                Id = drh.Get<int>("id"),
+                Firstname = drh.Get<string>("firstname"),
+                LastName = drh.Get<string>("lastname"),
+                OwnerId = drh.Get<int>("ownerId")
             };
         }
     }

@@ -20,5 +20,6 @@ namespace CED.Models.Core
         public Schedule Schedule { get; set; }
         public int UserId { get; set; }
         public List<Frequency> Frequencies { get; set; }
+        public List<FriendHabit> friendHabits { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace CED.Data.Interfaces
         Task<List<Habit>> GetAllHabits();
         Task<List<Habit>> GetAllUserHabits(int userId);
         Task<Habit> GetHabitById(int id);
+        Task<List<FriendHabit>> GetFriendHabits(int habitId);
         Task<Habit> SaveHabit(Habit habit);
         Task<Habit> UpdateHabit(Habit habit);
         bool DeleteHabitById(int id);
