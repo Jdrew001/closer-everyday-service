@@ -13,6 +13,7 @@ namespace CED.Data.Infrastructure
             services.AddTransient<IDeviceRepository, DeviceRepository>();
             services.AddTransient<IHabitRepository, HabitRepository>();
             services.AddTransient<IFrequencyRepository, FrequencyRepository>();
+            services.AddTransient<IReferenceRepository, ReferenceRepository>();
             return services;
         }
     }

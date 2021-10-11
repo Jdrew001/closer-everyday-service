@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CED.Models.DTO;
+using CED.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CED.Controllers
@@ -12,16 +11,24 @@ namespace CED.Controllers
     [ApiController]
     public class ReferenceController : CEDBaseController
     {
-        public ReferenceController()
+        private readonly IReferenceService _referenceService;
+        public ReferenceController(
+            IReferenceService referenceService)
         {
-
+            _referenceService = referenceService;
         }
 
         [HttpGet("getHabitReferenceData")]
         public async Task<IActionResult> GetAllHabitReferenceData()
         {
-            // TODO: Call service
-            return Ok();
+            var habitTypes = await _referenceService.GetHabitTypes();
+            var scheduleTypes = await _referenceService.GetScheduleTypes();
+            var referenceData = new ReferenceDTO()
+            {
+                habitTypes = habitTypes,
+                scheduleTypes = scheduleTypes
+            };
+            return Ok(GenerateSuccessResponse(null, referenceData));
         }
     }
 }

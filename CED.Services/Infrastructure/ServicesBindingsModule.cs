@@ -17,13 +17,7 @@ namespace CED.Services.Infrastructure
             services.AddScoped<IDeviceService, DeviceService>();
             services.AddScoped<IHabitService, HabitService>();
             services.AddScoped<ITokenService, TokenService>();
-            //services.AddScoped<IClientService, ClientService>();
-            //services.AddScoped<IEmailService, EmailService>();
-            //services.AddScoped<ICompanyService, CompanyService>();
-            //services.AddScoped<IMaintenanceService, MaintenanceService>();
-            //services.AddScoped<IRoleService, RoleService>();
-            //services.AddScoped<IUserService, UserService>();
-            //services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+            services.AddScoped<IReferenceService, ReferenceService>();
             return services;
         }
     }
