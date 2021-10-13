@@ -174,7 +174,7 @@ namespace CED.Services.Core
 
             user.RefreshTokens.Add(newRefreshToken);
 
-            await _refreshTokenRepository.SaveRefreshToken(refreshToken, user.Id);
+            await _refreshTokenRepository.SaveRefreshToken(newRefreshToken, user.Id);
 
             //Generates new jwt
             authenticationDTO.IsAuthenticated = true;
