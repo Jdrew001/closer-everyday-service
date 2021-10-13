@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CED.Data.Interfaces;
 using CED.Models.Core;
 using CED.Services.Interfaces;
@@ -33,9 +33,9 @@ namespace CED.Services.Core
             return _habitRepository.GetHabitById(id);
         }
 
-        public Task<HabitLog> GetHabitLogByIdCurrentDate(int id)
+        public Task<HabitLog> GetHabitLogByIdDate(int id, string date)
         {
-            return _habitRepository.GetHabitLogByIdAndCurrentDate(id);
+            return _habitRepository.GetHabitLogByIdAndDate(id, date);
         }
 
         public Task<HabitLog> GetHabitLog(int id)
@@ -58,22 +58,22 @@ namespace CED.Services.Core
             return _habitRepository.UpdateHabit(habit);
         }
 
-        public async Task<HabitLog> SaveHabitLog(char status, int userId, int habitId)
+        public async Task<HabitLog> SaveHabitLog(char status, int userId, int habitId, string date)
         {
+
             if (!status.Equals('C') && !status.Equals('F') && !status.Equals('P'))
                 return null;
-
             // Habit log not null, then update otherwise create a new one
             var habit = await GetHabitById(habitId);
 
             if (habit == null)
                 return null;
 
-            var habitLog = await GetHabitLogByIdCurrentDate(habitId);
+            var habitLog = await GetHabitLogByIdDate(habitId, date); // need to get by date passed in
             if (habitLog == null)
                 return await _habitRepository.SaveHabitLog(status, userId, habitId);
             else
-                return await _habitRepository.UpdateHabitLog(status, habitId);
+                return await _habitRepository.UpdateHabitLog(status, habitId, date); //save by created date
         }
     }
 }

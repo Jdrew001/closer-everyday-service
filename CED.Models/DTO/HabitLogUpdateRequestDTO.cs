@@ -10,5 +10,6 @@ namespace CED.Models.DTO
     {
         public char status { get; set; }
         public int habitId { get; set; }
+        public DateTime date { get; set; }
     }
 }

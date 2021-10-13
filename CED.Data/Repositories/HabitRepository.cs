@@ -1,4 +1,4 @@
-﻿using CED.Data.Interfaces;
+using CED.Data.Interfaces;
 using CED.Models;
 using CED.Models.Core;
 using Microsoft.Extensions.Options;
@@ -58,6 +58,7 @@ namespace CED.Data.Repositories
                 var habit = ReadHabit(drh);
                 habit.Frequencies = await _frequencyRepository.GetHabitFrequencies(habit.Id);
                 habit.friendHabits = await GetFriendHabits(habit.Id);
+                
                 habits.Add(habit);
             }
 
@@ -136,7 +137,7 @@ namespace CED.Data.Repositories
             return log;
         }
 
-        public async Task<HabitLog> UpdateHabitLog(char status, int habitId)
+        public async Task<HabitLog> UpdateHabitLog(char status, int habitId, string date)
         {
             HabitLog log = null;
             string spName = "UpdateHabitLog";
@@ -145,6 +146,7 @@ namespace CED.Data.Repositories
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("Value", status);
             command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("DateValue", date);
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
@@ -153,14 +155,15 @@ namespace CED.Data.Repositories
             return log;
         }
 
-        public async Task<HabitLog> GetHabitLogByIdAndCurrentDate(int id)
+        public async Task<HabitLog> GetHabitLogByIdAndDate(int id, string date)
         {
             HabitLog log = null;
-            string spName = "GetHabitLogByIdAndCurrentDate";
+            string spName = "GetHabitLogByIdAndDate";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("HabitId", id);
+            command.Parameters.AddWithValue("DateValue", date);
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())

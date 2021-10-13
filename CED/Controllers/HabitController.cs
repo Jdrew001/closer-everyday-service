@@ -60,10 +60,14 @@ namespace CED.Controllers
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }
 
+            // if the date past in from dto is greater than today, throw error
+            if (logUpdateDTO.date.Date > DateTime.UtcNow.Date)
+                return BadRequest(GenerateErrorResponse("Date must be past or present", null));
+
             var token = await tokenService.ReadJwtToken(RetrieveToken());
             var userId = Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
             var status = char.ToUpper(logUpdateDTO.status);
-            var result = await habitService.SaveHabitLog(status, userId, logUpdateDTO.habitId);
+            var result = await habitService.SaveHabitLog(status, userId, logUpdateDTO.habitId, logUpdateDTO.date.ToString("yyyy-MM-dd H:mm:ss"));
 
             return result == null ? BadRequest(GenerateErrorResponse("Unable to update Habit Log", null)) :
                 Ok(GenerateSuccessResponse(null, mapHabitLogDto(result)));

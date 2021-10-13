@@ -12,11 +12,11 @@ namespace CED.Services.Interfaces
         Task<List<Habit>> GetAllHabits();
         Task<List<Habit>> GetAllUserHabits(int userId);
         Task<Habit> GetHabitById(int id);
-        Task<HabitLog> GetHabitLogByIdCurrentDate(int id);
+        Task<HabitLog> GetHabitLogByIdDate(int id, string date);
         Task<HabitLog> GetHabitLog(int id);
         Task<Habit> SaveHabit(Habit habit);
         Task<Habit> UpdateHabit(Habit habit);
-        Task<HabitLog> SaveHabitLog(char status, int userId, int habitId);
+        Task<HabitLog> SaveHabitLog(char status, int userId, int habitId, string date);
         bool MarkHabitInactive(int id);
     }
 }
