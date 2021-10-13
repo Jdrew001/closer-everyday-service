@@ -49,7 +49,7 @@ namespace CED.Middleware
             var result = JsonConvert.SerializeObject(new
             {
                 code = statusCode,
-                message = "An Error has Occurred",
+                message = exception.Message,
                 status = "FAILURE"
             });
             context.Response.ContentType = "application/json";

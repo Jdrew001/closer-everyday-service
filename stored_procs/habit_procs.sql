@@ -201,3 +201,125 @@ END //
 
 DELIMITER ;
 -- --------------------------------------
+
+DROP PROCEDURE IF EXISTS GetHabitLogById;
+
+DELIMITER //
+
+CREATE PROCEDURE GetHabitLogById(
+	IN
+    HabitId INT
+)
+BEGIN
+	SET @id = (SELECT hl.idhabit_log FROM `ceddb`.`habit_log` hl
+		WHERE hl.habit_id = HabitId);
+
+    SELECT hl.`idhabit_log` as `id`,
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+	FROM `ceddb`.`habit_log` hl
+    WHERE hl.`idhabit_log` = @id;
+
+END //
+
+DELIMITER ;
+-- --------------------------------------
+
+DROP PROCEDURE IF EXISTS GetHabitLogByIdAndCurrentDate;
+
+DELIMITER //
+
+CREATE PROCEDURE GetHabitLogByIdAndCurrentDate(
+	IN
+    HabitId INT
+)
+BEGIN
+
+    SELECT hl.`idhabit_log` as `id`,
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+	FROM `ceddb`.`habit_log` hl
+    WHERE Date(hl.`created_at`)=curdate();
+
+END //
+
+DELIMITER ;
+-- --------------------------------------
+
+DROP PROCEDURE IF EXISTS GetAllLogsForHabit;
+
+DELIMITER //
+
+CREATE PROCEDURE GetAllLogsForHabit(
+	IN
+    HabitId INT
+)
+BEGIN
+    SELECT hl.`idhabit_log` as `id`,
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+	FROM `ceddb`.`habit_log` hl
+    WHERE hl.`habit_id` = HabitId;
+
+END //
+
+DELIMITER ;
+-- --------------------------------------
+
+DROP PROCEDURE IF EXISTS AddHabitLog;
+
+DELIMITER //
+
+CREATE PROCEDURE AddHabitLog(
+	IN
+    HabitId INT,
+    UserId INT,
+    `Value` CHAR(1),
+    `CreatedAt` DateTime
+)
+BEGIN
+    INSERT INTO `ceddb`.`habit_log`
+		(`log_value`,
+		`user_id`,
+		`habit_id`,
+		`created_at`)
+	VALUES
+		(`Value`,
+		UserId,
+		HabitId,
+		CreatedAt);
+        
+	SELECT * FROM `ceddb`.`habit_log` h WHERE h.`idhabit_log`=(SELECT last_insert_id());
+END //
+
+DELIMITER ;
+-- --------------------------------------
+
+DROP PROCEDURE IF EXISTS UpdateHabitLog;
+
+DELIMITER //
+
+CREATE PROCEDURE UpdateHabitLog(
+	IN
+    `Value` CHAR(1),
+    HabitId INT
+)
+BEGIN
+	SET @id = (SELECT hl.idhabit_log FROM `ceddb`.`habit_log` hl
+		WHERE hl.habit_id = HabitId);
+
+	UPDATE `ceddb`.`habit_log` SET
+		`log_value` = `Value`
+		WHERE `idhabit_log` = @id;
+        
+	select * from `ceddb`.`habit_log` h where h.idhabit_log = @id; 
+END //
+
+DELIMITER ;
+-- --------------------------------------

@@ -1,8 +1,6 @@
-﻿using CED.Models.Core;
-using System;
+﻿using System;
+using CED.Models.Core;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CED.Data.Interfaces
@@ -13,7 +11,12 @@ namespace CED.Data.Interfaces
         Task<List<Habit>> GetAllUserHabits(int userId);
         Task<Habit> GetHabitById(int id);
         Task<List<FriendHabit>> GetFriendHabits(int habitId);
+        Task<HabitLog> GetHabitLogById(int id);
+        Task<HabitLog> GetHabitLogByIdAndCurrentDate(int id);
+        Task<List<HabitLog>> GetLogsForHabit(int habitId);
         Task<Habit> SaveHabit(Habit habit);
+        Task<HabitLog> SaveHabitLog(char status, int userId, int habitId);
+        Task<HabitLog> UpdateHabitLog(char status, int habitId);
         Task<Habit> UpdateHabit(Habit habit);
         bool DeleteHabitById(int id);
     }
