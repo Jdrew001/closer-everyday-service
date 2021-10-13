@@ -23,9 +23,9 @@ namespace CED.Services.Core
             return _habitRepository.GetAllHabits();
         }
 
-        public Task<List<Habit>> GetAllUserHabits(int userId)
+        public Task<List<Habit>> GetAllUserHabits(int userId, string date)
         {
-            return _habitRepository.GetAllUserHabits(userId);
+            return _habitRepository.GetAllUserHabits(userId, date);
         }
 
         public Task<Habit> GetHabitById(int id)

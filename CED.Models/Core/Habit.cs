@@ -21,5 +21,6 @@ namespace CED.Models.Core
         public int UserId { get; set; }
         public List<Frequency> Frequencies { get; set; }
         public List<FriendHabit> friendHabits { get; set; }
+        public HabitLog habitLog { get; set; }
     }
 }

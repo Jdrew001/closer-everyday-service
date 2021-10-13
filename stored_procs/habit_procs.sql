@@ -227,23 +227,24 @@ END //
 DELIMITER ;
 -- --------------------------------------
 
-DROP PROCEDURE IF EXISTS GetHabitLogByIdAndCurrentDate;
+DROP PROCEDURE IF EXISTS GetHabitLogByIdAndDate;
 
 DELIMITER //
 
-CREATE PROCEDURE GetHabitLogByIdAndCurrentDate(
+CREATE PROCEDURE GetHabitLogByIdAndDate(
 	IN
-    HabitId INT
+    HabitId INT,
+    DateValue DATETIME
 )
 BEGIN
-
+	
     SELECT hl.`idhabit_log` as `id`,
 		hl.`log_value` as `value`,
 		hl.`user_id` as `userId`,
 		hl.`habit_id` as `habitId`,
 		hl.`created_at` as `createdAt`
 	FROM `ceddb`.`habit_log` hl
-    WHERE Date(hl.`created_at`)=curdate();
+    WHERE Date(hl.`created_at`)=Date(DateValue) AND hl.`habit_id` = HabitId;
 
 END //
 
@@ -292,7 +293,12 @@ BEGIN
 		UserId,
 		HabitId);
         
-	SELECT * FROM `ceddb`.`habit_log` h WHERE h.`idhabit_log`=(SELECT last_insert_id());
+	SELECT 
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+    FROM `ceddb`.`habit_log` hl WHERE hl.`idhabit_log`=(SELECT last_insert_id());
 END //
 
 DELIMITER ;
@@ -305,17 +311,23 @@ DELIMITER //
 CREATE PROCEDURE UpdateHabitLog(
 	IN
     `Value` CHAR(1),
-    HabitId INT
+    HabitId INT,
+    DateValue DATETIME
 )
 BEGIN
 	SET @id = (SELECT hl.idhabit_log FROM `ceddb`.`habit_log` hl
-		WHERE Date(hl.`created_at`)=curdate());
+		WHERE Date(hl.`created_at`)=Date(DateValue));
 
 	UPDATE `ceddb`.`habit_log` SET
 		`log_value` = `Value`
 		WHERE `idhabit_log` = @id;
         
-	select * from `ceddb`.`habit_log` h WHERE Date(h.`created_at`)=curdate();
+	select 
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+    from `ceddb`.`habit_log` hl WHERE Date(hl.`created_at`)=Date(DateValue);
 END //
 
 DELIMITER ;

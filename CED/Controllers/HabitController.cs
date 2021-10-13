@@ -25,8 +25,8 @@ namespace CED.Controllers
             this.tokenService = tokenService;
         }
 
-        [HttpGet("getAllUserHabits")]
-        public async Task<IActionResult> GetAllUserHabits()
+        [HttpGet("getAllUserHabits/{date}")]
+        public async Task<IActionResult> GetAllUserHabits(DateTime date)
         {
             var reqToken = RetrieveToken();
             if (string.IsNullOrEmpty(reqToken))
@@ -36,7 +36,7 @@ namespace CED.Controllers
 
             var token = await tokenService.ReadJwtToken(RetrieveToken());
             var userId = Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
-            return Ok(GenerateSuccessResponse("Success", await habitService.GetAllUserHabits(userId)));
+            return Ok(GenerateSuccessResponse("Success", await habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"))));
         }
 
         [HttpGet("{id}")]

@@ -42,7 +42,7 @@ namespace CED.Data.Repositories
 
             return habits;
         }
-        public async Task<List<Habit>> GetAllUserHabits(int userId)
+        public async Task<List<Habit>> GetAllUserHabits(int userId, string date)
         {
             //GetAllUserHabits
             List<Habit> habits = new List<Habit>();
@@ -51,6 +51,7 @@ namespace CED.Data.Repositories
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("DateValue", date);
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -58,7 +59,7 @@ namespace CED.Data.Repositories
                 var habit = ReadHabit(drh);
                 habit.Frequencies = await _frequencyRepository.GetHabitFrequencies(habit.Id);
                 habit.friendHabits = await GetFriendHabits(habit.Id);
-                
+                habit.habitLog = await GetHabitLogByIdAndDate(habit.Id, date);
                 habits.Add(habit);
             }
 
@@ -251,10 +252,10 @@ namespace CED.Data.Repositories
             return new HabitLog()
             {
                 Id = drh.Get<int>("idhabit_log"),
-                Value = drh.Get<char>("log_value"),
-                UserId = drh.Get<int>("user_id"),
-                HabitId = drh.Get<int>("habit_id"),
-                CreatedAt = drh.Get<DateTime>("created_at")
+                Value = drh.Get<char>("value"),
+                UserId = drh.Get<int>("userId"),
+                HabitId = drh.Get<int>("habitId"),
+                CreatedAt = drh.Get<DateTime>("createdAt")
             };
         }
         #endregion
