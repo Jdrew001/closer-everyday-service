@@ -280,20 +280,17 @@ CREATE PROCEDURE AddHabitLog(
 	IN
     HabitId INT,
     UserId INT,
-    `Value` CHAR(1),
-    `CreatedAt` DateTime
+    `Value` CHAR(1)
 )
 BEGIN
     INSERT INTO `ceddb`.`habit_log`
 		(`log_value`,
 		`user_id`,
-		`habit_id`,
-		`created_at`)
+		`habit_id`)
 	VALUES
 		(`Value`,
 		UserId,
-		HabitId,
-		CreatedAt);
+		HabitId);
         
 	SELECT * FROM `ceddb`.`habit_log` h WHERE h.`idhabit_log`=(SELECT last_insert_id());
 END //
@@ -312,13 +309,13 @@ CREATE PROCEDURE UpdateHabitLog(
 )
 BEGIN
 	SET @id = (SELECT hl.idhabit_log FROM `ceddb`.`habit_log` hl
-		WHERE hl.habit_id = HabitId);
+		WHERE Date(hl.`created_at`)=curdate());
 
 	UPDATE `ceddb`.`habit_log` SET
 		`log_value` = `Value`
 		WHERE `idhabit_log` = @id;
         
-	select * from `ceddb`.`habit_log` h where h.idhabit_log = @id; 
+	select * from `ceddb`.`habit_log` h WHERE Date(h.`created_at`)=curdate();
 END //
 
 DELIMITER ;

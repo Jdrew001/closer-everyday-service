@@ -128,7 +128,6 @@ namespace CED.Data.Repositories
             command.Parameters.AddWithValue("Value", status);
             command.Parameters.AddWithValue("UserId", userId);
             command.Parameters.AddWithValue("HabitId", habitId);
-            command.Parameters.AddWithValue("CreatedAt", new DateTime());
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
