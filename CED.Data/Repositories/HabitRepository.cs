@@ -251,7 +251,7 @@ namespace CED.Data.Repositories
         {
             return new HabitLog()
             {
-                Id = drh.Get<int>("idhabit_log"),
+                Id = drh.Get<int>("id"),
                 Value = drh.Get<char>("value"),
                 UserId = drh.Get<int>("userId"),
                 HabitId = drh.Get<int>("habitId"),

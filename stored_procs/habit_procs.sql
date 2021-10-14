@@ -316,7 +316,7 @@ CREATE PROCEDURE UpdateHabitLog(
 )
 BEGIN
 	SET @id = (SELECT hl.idhabit_log FROM `ceddb`.`habit_log` hl
-		WHERE Date(hl.`created_at`)=Date(DateValue));
+		WHERE Date(hl.`created_at`)=Date(DateValue) AND hl.habit_id=HabitId);
 
 	UPDATE `ceddb`.`habit_log` SET
 		`log_value` = `Value`
@@ -327,7 +327,7 @@ BEGIN
 		hl.`user_id` as `userId`,
 		hl.`habit_id` as `habitId`,
 		hl.`created_at` as `createdAt`
-    from `ceddb`.`habit_log` hl WHERE Date(hl.`created_at`)=Date(DateValue);
+    from `ceddb`.`habit_log` hl WHERE Date(hl.`created_at`)=Date(DateValue) AND hl.habit_id=HabitId;
 END //
 
 DELIMITER ;

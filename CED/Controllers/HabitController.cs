@@ -73,6 +73,32 @@ namespace CED.Controllers
                 Ok(GenerateSuccessResponse(null, mapHabitLogDto(result)));
         }
 
+        [HttpGet("updateHabitLogsForDate/{date}")]
+        public async Task<IActionResult> UpdateHabitLogsForDate(DateTime date)
+        {
+            var reqToken = RetrieveToken();
+            if (string.IsNullOrEmpty(reqToken))
+            {
+                return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+            }
+
+            var token = await tokenService.ReadJwtToken(RetrieveToken());
+            var userId = Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
+            var habits = await habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
+            if (habits != null)
+            {
+                // Get all ids for habits where habit log is null
+                var habitIds = habits.FindAll(o => o.habitLog == null).Select(o => o.Id).ToArray();
+                foreach (var id in habitIds)
+                {
+                    var result = await habitService.SaveHabitLog(char.Parse("P"), userId, id, date.ToString("yyyy-MM-dd H:mm:ss"));
+                    if (result == null)
+                        return BadRequest(GenerateErrorResponse("Error: Unable to process request", null));
+                }
+            }
+
+            return Ok(GenerateSuccessResponse("Successfully update logs", null));
+        }
         private UpdateHabitLogDTO mapHabitLogDto(HabitLog log)
         {
             return new UpdateHabitLogDTO()

@@ -60,7 +60,6 @@ namespace CED.Services.Core
 
         public async Task<HabitLog> SaveHabitLog(char status, int userId, int habitId, string date)
         {
-
             if (!status.Equals('C') && !status.Equals('F') && !status.Equals('P'))
                 return null;
             // Habit log not null, then update otherwise create a new one
