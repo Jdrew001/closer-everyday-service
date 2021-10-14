@@ -15,34 +15,33 @@ namespace CED.Controllers
     [ApiController]
     public class HabitController : CEDBaseController
     {
-        private readonly IHabitService habitService;
-        private readonly ITokenService tokenService;
+        private readonly IHabitService _habitService;
+        private readonly ITokenService _tokenService;
         public HabitController(
             IHabitService habitService,
             ITokenService tokenService)
+            :base(tokenService)
         {
-            this.habitService = habitService;
-            this.tokenService = tokenService;
+            this._habitService = habitService;
+            this._tokenService = tokenService;
         }
 
         [HttpGet("getAllUserHabits/{date}")]
         public async Task<IActionResult> GetAllUserHabits(DateTime date)
         {
-            var reqToken = RetrieveToken();
-            if (string.IsNullOrEmpty(reqToken))
+
+            var userId = await GetUserId();
+            if (userId == -1)
             {
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }
-
-            var token = await tokenService.ReadJwtToken(RetrieveToken());
-            var userId = Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
-            return Ok(GenerateSuccessResponse("Success", await habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"))));
+            return Ok(GenerateSuccessResponse("Success", await _habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"))));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetHabit(int id)
         {
-            var habit = await habitService.GetHabitById(id);
+            var habit = await _habitService.GetHabitById(id);
             if (habit == null)
             {
                 return BadRequest(GenerateErrorResponse("ERROR: The habit selected doesn't exist", null));
@@ -52,46 +51,42 @@ namespace CED.Controllers
         }
 
         [HttpPost("updateHabitLog")]
-        public async Task<IActionResult> UpdateHabitLog(HabitLogUpdateRequestDTO logUpdateDTO)
+        public async Task<IActionResult> UpdateHabitLog(HabitLogUpdateRequestDTO logUpdateDto)
         {
-            var reqToken = RetrieveToken();
-            if (string.IsNullOrEmpty(reqToken))
+            var userId = await GetUserId();
+            if (userId == -1)
             {
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }
 
             // if the date past in from dto is greater than today, throw error
-            if (logUpdateDTO.date.Date > DateTime.UtcNow.Date)
+            if (logUpdateDto.date.Date > DateTime.UtcNow.Date)
                 return BadRequest(GenerateErrorResponse("Date must be past or present", null));
 
-            var token = await tokenService.ReadJwtToken(RetrieveToken());
-            var userId = Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
-            var status = char.ToUpper(logUpdateDTO.status);
-            var result = await habitService.SaveHabitLog(status, userId, logUpdateDTO.habitId, logUpdateDTO.date.ToString("yyyy-MM-dd H:mm:ss"));
+            var status = char.ToUpper(logUpdateDto.status);
+            var result = await _habitService.SaveHabitLog(status, userId, logUpdateDto.habitId, logUpdateDto.date.ToString("yyyy-MM-dd H:mm:ss"));
 
             return result == null ? BadRequest(GenerateErrorResponse("Unable to update Habit Log", null)) :
-                Ok(GenerateSuccessResponse(null, mapHabitLogDto(result)));
+                Ok(GenerateSuccessResponse(null, MapHabitLogDto(result)));
         }
 
         [HttpGet("updateHabitLogsForDate/{date}")]
         public async Task<IActionResult> UpdateHabitLogsForDate(DateTime date)
         {
-            var reqToken = RetrieveToken();
-            if (string.IsNullOrEmpty(reqToken))
+            var userId = await GetUserId();
+            if (userId == -1)
             {
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }
 
-            var token = await tokenService.ReadJwtToken(RetrieveToken());
-            var userId = Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
-            var habits = await habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
+            var habits = await _habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
             if (habits != null)
             {
                 // Get all ids for habits where habit log is null
                 var habitIds = habits.FindAll(o => o.habitLog == null).Select(o => o.Id).ToArray();
                 foreach (var id in habitIds)
                 {
-                    var result = await habitService.SaveHabitLog(char.Parse("P"), userId, id, date.ToString("yyyy-MM-dd H:mm:ss"));
+                    var result = await _habitService.SaveHabitLog(char.Parse("P"), userId, id, date.ToString("yyyy-MM-dd H:mm:ss"));
                     if (result == null)
                         return BadRequest(GenerateErrorResponse("Error: Unable to process request", null));
                 }
@@ -99,7 +94,7 @@ namespace CED.Controllers
 
             return Ok(GenerateSuccessResponse("Successfully update logs", null));
         }
-        private UpdateHabitLogDTO mapHabitLogDto(HabitLog log)
+        private UpdateHabitLogDTO MapHabitLogDto(HabitLog log)
         {
             return new UpdateHabitLogDTO()
             {

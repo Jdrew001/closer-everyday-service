@@ -12,10 +12,14 @@ namespace CED.Controllers
     public class ReferenceController : CEDBaseController
     {
         private readonly IReferenceService _referenceService;
+        private readonly ITokenService _tokenService;
         public ReferenceController(
-            IReferenceService referenceService)
+            IReferenceService referenceService,
+            ITokenService tokenService)
+        : base(tokenService)
         {
             _referenceService = referenceService;
+            _tokenService = tokenService;
         }
 
         [HttpGet("getHabitReferenceData")]

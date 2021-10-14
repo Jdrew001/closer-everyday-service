@@ -1,15 +1,37 @@
-﻿using CED.Models.DTO;
+﻿using System;
+using CED.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Threading.Tasks;
+using CED.Services.Interfaces;
 
 namespace CED.Controllers
 {
     public class CEDBaseController : ControllerBase
     {
+        protected ITokenService _tokenService;
+        public CEDBaseController(ITokenService tokenService)
+        {
+            _tokenService = tokenService;
+        }
+
         protected string RetrieveToken()
         {
             return HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Authorization")
                 .Value.FirstOrDefault().Remove(0, 7);
+        }
+
+        protected async Task<int> GetUserId()
+        {
+            var reqToken = RetrieveToken();
+            if (string.IsNullOrEmpty(reqToken))
+                return -1;
+
+            var token = await _tokenService.ReadJwtToken(RetrieveToken());
+            if (token == null)
+                return -1;
+
+            return Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
         }
 
         protected GenericResponseDTO GenerateErrorResponse(string message, object data)
