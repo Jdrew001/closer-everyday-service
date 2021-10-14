@@ -64,6 +64,7 @@ namespace CED.Services.Core
                 return null;
             // Habit log not null, then update otherwise create a new one
             var habit = await GetHabitById(habitId);
+            checkHabitStatusUpdate(status, habit);
 
             if (habit == null)
                 return null;
@@ -73,6 +74,29 @@ namespace CED.Services.Core
                 return await _habitRepository.SaveHabitLog(status, userId, habitId);
             else
                 return await _habitRepository.UpdateHabitLog(status, habitId, date); //save by created date
+        }
+
+        /// <summary>
+        /// Check for different status updates and send notification to user if habit is visible to friends
+        /// </summary>
+        private void checkHabitStatusUpdate(char status, Habit habit)
+        {
+            if (habit.VisibleToFriends)
+            {
+                // we need to retrieve the habit friends
+
+                // send notification if completed
+                if (status.Equals('C'))
+                {
+
+                }
+
+                // send notification in case of failure
+                if (status.Equals('F'))
+                {
+
+                }
+            }
         }
     }
 }
