@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build_and_test:
 
     runs-on: ubuntu-latest
 
@@ -26,3 +26,4 @@ jobs:
     - name: Codecov
       uses: codecov/codecov-action@v2.1.0
 
+  
