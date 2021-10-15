@@ -16,14 +16,12 @@ namespace CED.Controllers
     public class HabitController : CEDBaseController
     {
         private readonly IHabitService _habitService;
-        private readonly ITokenService _tokenService;
         public HabitController(
             IHabitService habitService,
             ITokenService tokenService)
             :base(tokenService)
         {
             this._habitService = habitService;
-            this._tokenService = tokenService;
         }
 
         [HttpGet("getAllUserHabits/{date}")]

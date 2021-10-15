@@ -18,6 +18,8 @@ namespace CED.Services.Infrastructure
             services.AddScoped<IHabitService, HabitService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IReferenceService, ReferenceService>();
+            services.AddScoped<IHabitStatService, HabitStatService>();
+
             return services;
         }
     }

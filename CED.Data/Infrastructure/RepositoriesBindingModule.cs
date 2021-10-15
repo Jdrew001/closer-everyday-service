@@ -14,6 +14,7 @@ namespace CED.Data.Infrastructure
             services.AddTransient<IHabitRepository, HabitRepository>();
             services.AddTransient<IFrequencyRepository, FrequencyRepository>();
             services.AddTransient<IReferenceRepository, ReferenceRepository>();
+            services.AddTransient<IHabitStatRepository, HabitStatRepository>();
             return services;
         }
     }
