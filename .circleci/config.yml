@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   windows: circleci/windows@2.2.0
+  codecov: codecov/codecov@3.2.0
 
 jobs:
   test:
@@ -22,7 +23,7 @@ jobs:
             key: dotnet-packages-v1-{{ checksum "CED/CED.csproj" }}
         - run:
             name: "Run Application Tests"
-            command: dotnet.exe test -v n --results-directory:test_coverage --collect:"Code Coverage"
+            command: dotnet.exe test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
         - run:
             name: "Print Working Directory"
             command: pwd
