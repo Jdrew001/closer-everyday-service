@@ -21,7 +21,7 @@ namespace CED.Services.Core
 
         public async Task<int> GetMaxStreak(int userId)
         {
-            // This will be the max streak, the value returned
+            // This will be the max streak, the value returnedd
             var maxStreak = 0;
 
             // Get all habit logs for a given user all habits
