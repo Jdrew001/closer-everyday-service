@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   windows: circleci/windows@2.2.0
-  codecov: codecov/codecov@3.2.0
 
 jobs:
   test:
