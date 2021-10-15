@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CED.Security", "CED.Securit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CED.Services", "CED.Services\CED.Services.csproj", "{D8DAC476-B097-466D-9B08-8E346F61BA1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CED.Services.Tests", "CED.Services.Tests\CED.Services.Tests.csproj", "{D406FF79-D666-4F22-BC3E-F5C5BFC015C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CED.Services.Tests", "CED.Services.Tests\CED.Services.Tests.csproj", "{D406FF79-D666-4F22-BC3E-F5C5BFC015C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
