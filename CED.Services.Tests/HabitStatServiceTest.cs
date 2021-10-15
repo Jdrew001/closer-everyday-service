@@ -135,6 +135,46 @@ namespace CED.Services.Tests
         }
 
         [Fact]
+        public async void GetMaxStreakHabitDates0Streak()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-09T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 2,
+                    CreatedAt = DateTime.Parse("2021-10-11T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-13T23:13:44"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+
+            HabitStatService service = new HabitStatService(habitService.Object);
+            var result = await service.GetMaxStreak(20);
+            var expectedResult = 0;
+
+            Assert.Equal(result, expectedResult);
+        }
+
+        [Fact]
         public async void GetMaxStreakHabitDatesMultipleHabitsStreak1()
         {
             var habitService = new Mock<IHabitService>();
