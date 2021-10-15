@@ -84,6 +84,7 @@ namespace CED.Data.Repositories
 
             return habit;
         }
+
         public Task<Habit> SaveHabit(Habit habit)
         {
             //CreateHabit
@@ -203,8 +204,22 @@ namespace CED.Data.Repositories
 
             return log;
         }
+        public async Task<List<HabitLog>> GetAllCompletedLogsForUser(int userId)
+        {
+            List<HabitLog> logs = new List<HabitLog>();
+            string spName = "GetCompletedLogsForUser";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("UserId", userId);
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                logs.Add(ReadHabitLog(drh));
+
+            return logs;
+        }
         #endregion
-        
+
         #region Private Methods
         private Habit ReadHabit(DataReaderHelper drh)
         {

@@ -1,4 +1,3 @@
-using System;
 using CED.Data.Interfaces;
 using CED.Models.Core;
 using CED.Services.Interfaces;
@@ -41,6 +40,11 @@ namespace CED.Services.Core
         public Task<HabitLog> GetHabitLog(int id)
         {
             return _habitRepository.GetHabitLogById(id);
+        }
+
+        public Task<List<HabitLog>> GetAllHabitLogsForUser(int userId)
+        {
+            return _habitRepository.GetAllCompletedLogsForUser(userId);
         }
 
         public bool MarkHabitInactive(int id)
