@@ -24,4 +24,5 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal --collect:"CED Code Coverage"
     - name: Codecov
-      uses: codecov/codecov-action@v1.5.2
+      uses: codecov/codecov-action@v2.1.0
+
