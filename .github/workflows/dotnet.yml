@@ -30,8 +30,8 @@ jobs:
     - name: Copy via ssh
       uses: garygrossgarten/github-action-scp@v0.5.3
       with:
-        local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/CED.dll
-        remote: /var/www/ced-service/CED.dll
+        local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/
+        remote: /var/www/ced-service/
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
