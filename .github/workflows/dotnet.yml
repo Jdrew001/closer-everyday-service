@@ -35,7 +35,6 @@ jobs:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
-        port: 25
 
 #
     
