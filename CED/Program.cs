@@ -15,7 +15,7 @@ namespace CED
         {
             var baseDir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile($"{baseDir}\\appsettings.json")
+                .AddJsonFile($@"{baseDir}/appsettings.json")
                 .Build();
 
             var levelSwitch = new LoggingLevelSwitch();
