@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build_and_test:
+  build_test_deploy:
 
     runs-on: ubuntu-latest
 
@@ -25,5 +25,14 @@ jobs:
       run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
     - name: Codecov
       uses: codecov/codecov-action@v2.1.0
+    - name: Copy via ssh
+      uses: garygrossgarten/github-action-scp@v0.5.3
+      with:
+        local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Debug/net5.0/CED.dll
+        remote: ${{ secrets.REMOTE_TARGET }}
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        privateKey: ${{ secrets.REMOTE_SSH_KEY }}
+    
 
   
