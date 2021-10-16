@@ -31,8 +31,8 @@ jobs:
         local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Debug/net5.0/CED.dll
         remote: ${{ secrets.REMOTE_TARGET }}
         host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USER }}
-        privateKey: ${{ secrets.REMOTE_SSH_KEY }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
     
 
   
