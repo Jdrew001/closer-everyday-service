@@ -26,11 +26,11 @@ jobs:
     - name: Codecov
       uses: codecov/codecov-action@v2.1.0
     - name: Publish Application
-      run: dotnet publish -c Release -p:PublishReadyToRun=true
+      run: dotnet publish -c Release
     - name: Copy via ssh
       uses: garygrossgarten/github-action-scp@v0.5.3
       with:
-        local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Debug/net5.0/CED.dll
+        local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/CED.dll
         remote: /var/www/ced-service/CED.dll
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.USERNAME }}
