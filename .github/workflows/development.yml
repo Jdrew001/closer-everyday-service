@@ -27,10 +27,10 @@ jobs:
 
       # This is just an example use case, not tested.
       - name: Push DB Backup
-        uses: garygrossgarten/github-action-scp@release
+        uses: appleboy/scp-action@master
         with:
-          local: /github/workspace/backups
-          remote: /github/backups
+          source: /github/workspace/backups
+          target: /github/backups
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
