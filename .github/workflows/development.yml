@@ -34,30 +34,30 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-####   build_test_deploy:
-      # - uses: actions/checkout@v2
-###     runs-on: ubuntu-latest
-
-#     steps:
-#     - name: Setup .NET
-#       uses: actions/setup-dotnet@v1
-#       with:
-#         dotnet-version: 5.0.x
-#     - name: Restore dependencies
-#       run: dotnet restore
-#     - name: Build
-#       run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
-#     - name: Test
-#       run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-#     - name: Codecov
-#       uses: codecov/codecov-action@v2.1.0
-#     - name: Publish Application
-#       run: dotnet publish -c Release
-#     # - name: Copy via ssh
-#     #   uses: garygrossgarten/github-action-scp@v0.5.3
-#     #   with:
-#     #     local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/
-#     #     remote: /var/www/ced-service/
-#     #     host: ${{ secrets.REMOTE_HOST }}
-#     #     username: ${{ secrets.USERNAME }}
-#     #     password: ${{ secrets.PASSWORD }}
+  build:
+    name: Build, Test, Publish CED Application
+    runs-on: ubuntu-latest
+    - uses: actions/checkout@v2
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
+      - name: Test
+        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+      - name: Codecov
+        uses: codecov/codecov-action@v2.1.0
+      - name: Publish Application
+        run: dotnet publish -c Release
+    # - name: Copy via ssh
+    #   uses: garygrossgarten/github-action-scp@v0.5.3
+    #   with:
+    #     local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/
+    #     remote: /var/www/ced-service/
+    #     host: ${{ secrets.REMOTE_HOST }}
+    #     username: ${{ secrets.USERNAME }}
+    #     password: ${{ secrets.PASSWORD }}
