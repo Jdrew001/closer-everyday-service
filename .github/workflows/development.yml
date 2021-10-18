@@ -17,7 +17,6 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
           key: ${{ secrets.DEPLOY_KEY }}
           type: db
           db_type: mysql
@@ -25,7 +24,7 @@ jobs:
           db_pass: ${{ secrets.MYSQL_PASS }}
           db_port: 3306
           db_name: ${{ secrets.DB_NAME }}
-###   build_test_deploy:
+####   build_test_deploy:
       # - uses: actions/checkout@v2
 ###     runs-on: ubuntu-latest
 
