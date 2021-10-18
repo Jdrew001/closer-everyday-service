@@ -21,6 +21,7 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           type: db
           db_type: mysql
+          db_host: ${{ secrets.DB_HOST }}
           db_user: ${{ secrets.MYSQL_USER }}
           db_pass: ${{ secrets.MYSQL_PASS }}
           db_port: 3306
