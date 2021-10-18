@@ -27,7 +27,7 @@ jobs:
           db_name: ${{ secrets.DB_NAME }}
 ###   build_test_deploy:
       # - uses: actions/checkout@v2
-#     runs-on: ubuntu-latest
+##     runs-on: ubuntu-latest
 
 #     steps:
 #     - name: Setup .NET
