@@ -30,7 +30,7 @@ jobs:
         uses: appleboy/scp-action@master
         with:
           source: /github/workspace/backups
-          target: /github/backups
+          target: /
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
