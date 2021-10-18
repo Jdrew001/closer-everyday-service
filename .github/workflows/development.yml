@@ -11,8 +11,6 @@ jobs:
     name: Backup MySQL DB
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: shogo82148/actions-setup-mysql@v1
       - name: Backup Step
         uses: valerianpereira/backup-action@master
         with:
@@ -23,7 +21,6 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           type: db
           db_type: mysql
-          db_host: ${{ secrets.DB_HOST }}
           db_user: ${{ secrets.MYSQL_USER }}
           db_pass: ${{ secrets.MYSQL_PASS }}
           db_port: 3306
