@@ -59,7 +59,7 @@ jobs:
         with:
           dotnet-version: 5.0.x
       - name: Test
-        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Threshold=80
+        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ThresholdType=Method /p:Threshold=80
       - name: Codecov
         uses: codecov/codecov-action@v2.1.0
   publish_deploy:
