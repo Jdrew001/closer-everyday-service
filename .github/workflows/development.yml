@@ -81,7 +81,7 @@ jobs:
         run: ls -al
   db_deploy:
     name: Deploy DB Scripts
-    needs: publish_deploy
+    needs: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
