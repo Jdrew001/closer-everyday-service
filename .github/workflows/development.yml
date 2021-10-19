@@ -97,6 +97,7 @@ jobs:
   notification:
     name: Notify Success
     needs: db_deploy
+    runs-on: ubuntu-latest
     steps:
       - name: Send Email Notification
         uses: dawidd6/action-send-mail@v3
