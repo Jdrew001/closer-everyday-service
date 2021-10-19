@@ -61,14 +61,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Update Database
-      uses: gtadam/mysql-deploy-action@v1
-      with:
-        DATABASE_HOST: ${{ secrets.REMOTE_HOST }}
-        DATABASE_PORT: '3306'
-        DATABASE_NAME: 'CEDDB'
-        DATABASE_USERNAME: ${{ secrets.MYSQL_USER }}
-        DATABASE_PASSWORD: ${{ secrets.PASSWORD }}
-        DATABASE_SCRIPT: 'script.sql'
+        uses: gtadam/mysql-deploy-action@v1
+        with:
+          DATABASE_HOST: ${{ secrets.REMOTE_HOST }}
+          DATABASE_PORT: '3306'
+          DATABASE_NAME: 'CEDDB'
+          DATABASE_USERNAME: ${{ secrets.MYSQL_USER }}
+          DATABASE_PASSWORD: ${{ secrets.PASSWORD }}
+          DATABASE_SCRIPT: 'script.sql'
     # - name: Copy via ssh
     #   uses: garygrossgarten/github-action-scp@v0.5.3
     #   with:
