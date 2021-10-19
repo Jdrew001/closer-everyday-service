@@ -51,8 +51,8 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v2.1.0
         #/p:ThresholdType=Method /p:Threshold=80
-  publish_deploy:
-    name: Publish and Deploy CED application
+  publish_upload:
+    name: Publish and Upload CED application
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -68,6 +68,17 @@ jobs:
         with:
           name: code-artifact-archive
           path: CED/bin/Release/net5.0/*
+  deploy:
+    name: Deploy CED Application
+    needs: publish_upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: code-artifact-archive
+      - shell: bash
+        run: ls -al
   db_deploy:
     name: Deploy DB Scripts
     needs: publish_deploy
