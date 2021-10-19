@@ -97,6 +97,8 @@ jobs:
   notification:
     name: Notification Email
     runs-on: ubuntu-latest
+    if: always()
+    needs: [backup_db,build,publish_upload,deploy,db_deploy]
     steps:
       - name: Send Email Notification
         uses: dawidd6/action-send-mail@v3
