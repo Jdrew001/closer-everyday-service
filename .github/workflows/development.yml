@@ -24,8 +24,6 @@ jobs:
           db_pass: ${{ secrets.MYSQL_PASS }}
           db_port: 3306
           db_name: ${{ secrets.DB_NAME }}
-
-      # This is just an example use case, not tested.
       - name: Push DB Backup
         uses: appleboy/scp-action@master
         with:
@@ -64,6 +62,11 @@ jobs:
           dotnet-version: 5.0.x
       - name: Publish Application
         run: dotnet publish -c Release
+      - name: Archive Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-artifact-archive
+          path: CED/bin/Release/net5.0/*
   db_deploy:
     name: Deploy DB Scripts
     needs: publish_deploy
