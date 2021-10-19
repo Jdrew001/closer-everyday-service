@@ -58,7 +58,7 @@ jobs:
     name: Deploy DB Scripts
     needs: build
     steps:
-      uses: gtadam/mysql-deploy-action@v1
+      - uses: gtadam/mysql-deploy-action@v1
       with:
         DATABASE_HOST: ${{ secrets.REMOTE_HOST }}
         DATABASE_PORT: '3306'
