@@ -94,6 +94,22 @@ jobs:
           DATABASE_USERNAME: ${{ secrets.MYSQL_USER }}
           DATABASE_PASSWORD: ${{ secrets.MYSQL_PASS }}
           DATABASE_SCRIPT: 'script.sql'
+    notification:
+      name: Notify Success
+      needs: db_deploy
+      steps:
+        - name: Send Email Notification
+          uses: dawidd6/action-send-mail@v3
+          with: 
+            server_address: smtp.gmail.com
+            server_port: 465
+            username: ${{secrets.MAIL_USERNAME}}
+            password: ${{secrets.MAIL_PASSWORD}}
+            subject: Develop Pipeline Successful
+            to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+            from: CED Pipeline
+            body: Build job of ${{github.repository}} completed successfully!
+            priority: low
     # - name: Copy via ssh
     #   uses: garygrossgarten/github-action-scp@v0.5.3
     #   with:
