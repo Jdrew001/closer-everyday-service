@@ -109,7 +109,7 @@ jobs:
           subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.status }}
           to: dtatkison@gmail.com, izzybeth.harris@gmail.com
           from: CED Pipeline
-          body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+          body: ${{ github.workflow }} of ${{ github.repository }} has ${{ github.workflow.status }}
           priority: high
     # - name: Copy via ssh
     #   uses: garygrossgarten/github-action-scp@v0.5.3
