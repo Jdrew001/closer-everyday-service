@@ -47,9 +47,10 @@ jobs:
       - name: Build
         run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
       - name: Test
-        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ThresholdType=Method /p:Threshold=80
+        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover 
       - name: Codecov
         uses: codecov/codecov-action@v2.1.0
+        #/p:ThresholdType=Method /p:Threshold=80
   publish_deploy:
     name: Publish and Deploy CED application
     needs: build
