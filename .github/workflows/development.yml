@@ -36,6 +36,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
   build:
     name: Build, Test, Publish CED Application
+    needs: backup_db
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
