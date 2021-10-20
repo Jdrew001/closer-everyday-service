@@ -332,3 +332,21 @@ END //
 
 DELIMITER ;
 -- --------------------------------------
+
+DROP PROCEDURE IF EXISTS GetCompletedLogsForUser;
+
+DELIMITER //
+
+CREATE PROCEDURE GetCompletedLogsForUser(
+	IN
+    UserId INT
+)
+BEGIN
+	select * 
+    from habit_log hl 
+    where hl.user_id= UserId AND hl.log_value = "C"
+    ORDER BY hl.created_at ASC, hl.habit_id ASC; 
+END //
+
+DELIMITER ;
+-- --------------------------------------
