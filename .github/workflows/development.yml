@@ -93,23 +93,41 @@ jobs:
           DATABASE_USERNAME: ${{ secrets.MYSQL_USER }}
           DATABASE_PASSWORD: ${{ secrets.MYSQL_PASS }}
           DATABASE_SCRIPT: 'script.sql'
-  notification:
+  notification_failure:
     name: Notification Email
     runs-on: ubuntu-latest
-    if: always()
+    if: failure()
     needs: [backup_db,build,publish_upload,deploy,db_deploy]
     steps:
-      - name: Send Email Notification
+      - name: Send Email Failure Notification
         uses: dawidd6/action-send-mail@v3
         with: 
           server_address: smtp.gmail.com
           server_port: 465
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
-          subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.status }}
+          subject: ${{ github.repository }} develop build failure
           to: dtatkison@gmail.com, izzybeth.harris@gmail.com
-          from: CED Pipeline
-          body: ${{ github.workflow }} of ${{ github.repository }} has ${{ github.workflow.status }}
+          from: CED Pipeline Failure
+          body: Github pipeline has failed to run
+          priority: high
+  notification_success:
+    name: Notification Email
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [backup_db,build,publish_upload,deploy,db_deploy]
+    steps:
+      - name: Send Email Success Notification
+        uses: dawidd6/action-send-mail@v3
+        with: 
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          subject: ${{ github.repository }} develop build succeeded
+          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+          from: CED Pipeline Success
+          body: Github pipeline has succeeded
           priority: high
     # - name: Copy via ssh
     #   uses: garygrossgarten/github-action-scp@v0.5.3
