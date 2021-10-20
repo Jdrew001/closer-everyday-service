@@ -47,7 +47,7 @@ jobs:
       - name: Build
         run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
       - name: Test
-        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ThresholdType=Method /p:Threshold=2
+        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ThresholdType=Method
       - name: Codecov
         uses: codecov/codecov-action@v2.1.0
   publish_upload:
