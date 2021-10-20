@@ -66,6 +66,8 @@ namespace CED.Services.Core
                 // TODO: Send an email to user asking if the phone logging in is correct
                 // if click on ALLOW, then call an end point updating the system
                 // eventually I want to use texting 
+                //_log.LogError(e, "test: {devices}", devices);
+
                 return AddNewDevice();
             }
 

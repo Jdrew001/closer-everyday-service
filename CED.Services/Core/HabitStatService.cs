@@ -24,7 +24,7 @@ namespace CED.Services.Core
             // This will be the max streak, the value returnedd
             var maxStreak = 0;
 
-            // Get all habit logs for a given user all habits
+            // Get all habit logs for a given user all habits ---- can call once
             var logs = await _habitService.GetAllHabitLogsForUser(userId);
 
             // Grab all the habit ids and remove duplicates

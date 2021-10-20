@@ -1,3 +1,5 @@
+USE `ceddb`;
+
 DROP PROCEDURE IF EXISTS UpdateHabit;
 
 DELIMITER //
