@@ -94,9 +94,9 @@ jobs:
           DATABASE_PASSWORD: ${{ secrets.MYSQL_PASS }}
           DATABASE_SCRIPT: 'script.sql'
   notification_failure:
-    name: Notification Email
+    name: Failure Notification Email
     runs-on: ubuntu-latest
-    if: failure()
+    if: ${{ success() }}
     needs: [backup_db,build,publish_upload,deploy,db_deploy]
     steps:
       - name: Send Email Failure Notification
@@ -112,9 +112,9 @@ jobs:
           body: Github pipeline has failed to run
           priority: high
   notification_success:
-    name: Notification Email
+    name: Success Notification Email
     runs-on: ubuntu-latest
-    if: failure()
+    if: ${{ failure() }}
     needs: [backup_db,build,publish_upload,deploy,db_deploy]
     steps:
       - name: Send Email Success Notification
