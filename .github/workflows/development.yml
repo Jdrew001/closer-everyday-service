@@ -96,7 +96,7 @@ jobs:
   notification_failure:
     name: Failure Notification Email
     runs-on: ubuntu-latest
-    if: ${{ success() }}
+    if: ${{ failure() }}
     needs: [backup_db,build,publish_upload,deploy,db_deploy]
     steps:
       - name: Send Email Failure Notification
@@ -114,7 +114,7 @@ jobs:
   notification_success:
     name: Success Notification Email
     runs-on: ubuntu-latest
-    if: ${{ failure() }}
+    if: ${{ success() }}
     needs: [backup_db,build,publish_upload,deploy,db_deploy]
     steps:
       - name: Send Email Success Notification
