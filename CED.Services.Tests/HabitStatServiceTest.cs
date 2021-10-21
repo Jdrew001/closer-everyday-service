@@ -47,7 +47,7 @@ namespace CED.Services.Tests
                     Value = 'C'
                 }
             };
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
 
 
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
@@ -89,7 +89,7 @@ namespace CED.Services.Tests
                     Value = 'C'
                 }
             };
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
 
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
             var result = await service.GetMaxStreak(20);
@@ -130,7 +130,7 @@ namespace CED.Services.Tests
                     Value = 'C'
                 }
             };
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
 
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
             var result = await service.GetMaxStreak(20);
@@ -171,7 +171,7 @@ namespace CED.Services.Tests
                     Value = 'C'
                 }
             };
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
 
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
             var result = await service.GetMaxStreak(20);
@@ -236,7 +236,7 @@ namespace CED.Services.Tests
                     Value = 'C'
                 }
             };
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
 
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
             var result = await service.GetMaxStreak(20);
@@ -301,7 +301,7 @@ namespace CED.Services.Tests
                     Value = 'C'
                 }
             };
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
 
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
             var result = await service.GetMaxStreak(20);
@@ -345,7 +345,7 @@ namespace CED.Services.Tests
                 },
             };
 
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
 
             var result = await service.GetCurrentStreak(20);
@@ -387,7 +387,7 @@ namespace CED.Services.Tests
                 },
             };
 
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
 
             var result = await service.GetCurrentStreak(20);
@@ -453,7 +453,7 @@ namespace CED.Services.Tests
                 }
             };
 
-            habitService.Setup(o => o.GetAllHabitLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
 
             var result = await service.GetCurrentStreak(20);
@@ -477,6 +477,172 @@ namespace CED.Services.Tests
             double result = await statService.GetAverageSuccessRate(20);
 
             Assert.Equal(expectedResult, result);
+        }
+        #endregion
+
+        #region Global habit perfect days tests
+        [Fact]
+        public async void GetHabitPerfectDays2()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 9,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 2,
+                    CreatedAt = DateTime.Parse("2021-10-11T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 2,
+                    CreatedAt = DateTime.Parse("2021-10-11T22:59:28"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-12T23:13:44"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-12T23:13:44"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'F'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-13T23:13:44"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-13T23:13:44"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'F'
+                }
+            };
+            habitService.Setup(o => o.GetUserHabitLogs(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetPerfectDays(20);
+            var expectedResult = 2;
+
+            Assert.Equal(expectedResult, result);
+
+        }
+
+        [Fact]
+        public async void GetHabitPerfectDays4()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 9,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 2,
+                    CreatedAt = DateTime.Parse("2021-10-11T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 2,
+                    CreatedAt = DateTime.Parse("2021-10-11T22:59:28"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-12T23:13:44"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-12T23:13:44"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-13T23:13:44"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-10-13T23:13:44"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+            habitService.Setup(o => o.GetUserHabitLogs(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetPerfectDays(20);
+            var expectedResult = 4;
+
+            Assert.Equal(expectedResult, result);
+
         }
         #endregion
     }

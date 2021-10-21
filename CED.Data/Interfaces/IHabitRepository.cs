@@ -15,6 +15,7 @@ namespace CED.Data.Interfaces
         Task<HabitLog> GetHabitLogByIdAndDate(int id, string date);
         Task<List<HabitLog>> GetLogsForHabit(int habitId);
         Task<List<HabitLog>> GetAllCompletedLogsForUser(int userId);
+        Task<List<HabitLog>> GetAllLogsForUser(int userId);
         Task<Habit> SaveHabit(Habit habit);
         Task<HabitLog> SaveHabitLog(char status, int userId, int habitId);
         Task<HabitLog> UpdateHabitLog(char status, int habitId, string date);

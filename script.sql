@@ -15,3 +15,20 @@ END //
 
 DELIMITER ;
 -- --------------------------------------
+
+
+DROP PROCEDURE IF EXISTS GetLogsForUser;
+
+DELIMITER //
+
+CREATE PROCEDURE GetLogsForUser(
+	IN
+    UserId INT
+)
+BEGIN
+	SELECT * FROM `ceddb`.`habit_log` hl
+    WHERE hl.user_id = UserId ORDER BY hl.created_at ASC;
+END //
+
+DELIMITER ;
+-- --------------------------------------

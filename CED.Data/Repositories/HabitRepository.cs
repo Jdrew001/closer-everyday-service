@@ -218,6 +218,21 @@ namespace CED.Data.Repositories
 
             return logs;
         }
+
+        public async Task<List<HabitLog>> GetAllLogsForUser(int userId)
+        {
+            List<HabitLog> logs = new List<HabitLog>();
+            string spName = "GetLogsForUser";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("UserId", userId);
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                logs.Add(ReadHabitLog(drh));
+
+            return logs;
+        }
         #endregion
 
         #region Private Methods

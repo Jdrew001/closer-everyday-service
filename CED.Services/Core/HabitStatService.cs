@@ -22,7 +22,7 @@ namespace CED.Services.Core
             var currentStreak = 0;
 
             // I want to get all completed user habits logs
-            var logs = await _habitService.GetAllHabitLogsForUser(userId);
+            var logs = await _habitService.GetAllCompletedLogsForUser(userId);
             var habitIds = logs.Select(o => o.HabitId).Distinct().ToList();
 
             habitIds.ForEach(habitId => {
@@ -57,7 +57,7 @@ namespace CED.Services.Core
             var maxStreak = 0;
 
             // Get all habit logs for a given user all habits ---- can call once
-            var logs = await _habitService.GetAllHabitLogsForUser(userId);
+            var logs = await _habitService.GetAllCompletedLogsForUser(userId);
 
             // Grab all the habit ids and remove duplicates
             var habitIds = logs.Select(o => o.HabitId).Distinct().ToList();
@@ -105,7 +105,21 @@ namespace CED.Services.Core
 
         public async Task<int> GetPerfectDays(int userId)
         {
-            throw new NotImplementedException();
+            //Get all users habit logs
+            var logs = await _habitService.GetUserHabitLogs(userId);
+            var habitLogDates = logs.Select(o => o.CreatedAt).Distinct().ToList();
+            var perfectDays = 0;
+
+            habitLogDates.ForEach(date =>
+            {
+                var count = logs.FindAll(o => o.CreatedAt.Date == date.Date);
+                var completedLogs = logs.FindAll(o => o.CreatedAt.Date == date.Date && o.Value == 'C');
+
+                if (count.Count == completedLogs.Count)
+                    perfectDays++;
+            });
+
+            return perfectDays;
         }
 
         public async Task<int> GetTotalFriendsSupporting(int userId)
