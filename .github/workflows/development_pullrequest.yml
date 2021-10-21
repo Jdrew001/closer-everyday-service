@@ -26,6 +26,7 @@ jobs:
     name: Failure Notification Email
     runs-on: ubuntu-latest
     if: ${{ failure() }}
+    needs: build
     steps:
       - name: Send Email Failure Notification
         uses: dawidd6/action-send-mail@v3
@@ -43,6 +44,7 @@ jobs:
     name: Success Notification Email
     runs-on: ubuntu-latest
     if: ${{ success() }}
+    needs: build
     steps:
       - name: Send Email Success Notification
         uses: dawidd6/action-send-mail@v3
