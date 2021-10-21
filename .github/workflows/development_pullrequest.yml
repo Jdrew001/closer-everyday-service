@@ -1,0 +1,94 @@
+name: Development
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  backup_db:
+    name: Backup MySQL DB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Backup Step
+        uses: valerianpereira/backup-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          type: db
+          db_type: mysql
+          db_user: ${{ secrets.MYSQL_USER }}
+          db_pass: ${{ secrets.MYSQL_PASS }}
+          db_port: 3306
+          db_name: ${{ secrets.DB_NAME }}
+      - name: Push DB Backup
+        uses: appleboy/scp-action@master
+        with:
+          source: /github/workspace/backups
+          target: /CED
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+  build:
+    name: Build and Test CED Application
+    needs: backup_db
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
+      - name: Test
+        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ThresholdType=Method
+      - name: Codecov
+        uses: codecov/codecov-action@v2.1.0
+  notification_failure:
+    name: Failure Notification Email
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    needs: [backup_db,build,publish_upload,deploy,db_deploy]
+    steps:
+      - name: Send Email Failure Notification
+        uses: dawidd6/action-send-mail@v3
+        with: 
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          subject: ${{ github.repository }} develop build failure -- Pull Request
+          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+          from: CED Pipeline Failure
+          body: Github pipeline has failed to run -- Pull Request
+          priority: high
+  notification_success:
+    name: Success Notification Email
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    needs: [backup_db,build,publish_upload,deploy,db_deploy]
+    steps:
+      - name: Send Email Success Notification
+        uses: dawidd6/action-send-mail@v3
+        with: 
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          subject: ${{ github.repository }} develop build succeeded -- Pull Request
+          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+          from: CED Pipeline Success
+          body: Github pipeline has succeeded -- Pull Request
+          priority: high
+    # - name: Copy via ssh
+    #   uses: garygrossgarten/github-action-scp@v0.5.3
+    #   with:
+    #     local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/
+    #     remote: /var/www/ced-service/
+    #     host: ${{ secrets.REMOTE_HOST }}
+    #     username: ${{ secrets.USERNAME }}
+    #     password: ${{ secrets.PASSWORD }}
