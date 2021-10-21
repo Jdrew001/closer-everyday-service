@@ -12,7 +12,7 @@ namespace CED.Services.Interfaces
 
         public Task<int> GetCurrentStreak(int userId);
         public Task<int> GetMaxStreak(int userId);
-        public Task<int> GetAverageSuccessRate(int userId);
+        public Task<double> GetAverageSuccessRate(int userId);
         public Task<int[]> GetMonthlySuccessRate(int userId);
         public Task<int> GetPerfectDays(int userId);
         public Task<int> GetTotalFriendsSupporting(int userId);

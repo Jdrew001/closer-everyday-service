@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CED.Data.Interfaces;
 using CED.Services.Interfaces;
 
 namespace CED.Services.Core
@@ -8,9 +9,11 @@ namespace CED.Services.Core
     public class HabitStatService : IHabitStatService
     {
         private readonly IHabitService _habitService;
-        public HabitStatService(IHabitService habitService)
+        private readonly IHabitStatRepository _habitStatRepository;
+        public HabitStatService(IHabitService habitService, IHabitStatRepository habitStatRepository)
         {
             _habitService = habitService;
+            _habitStatRepository = habitStatRepository;
         }
 
         #region global stats for user
@@ -90,9 +93,9 @@ namespace CED.Services.Core
             return maxStreak;
         }
 
-        public async Task<int> GetAverageSuccessRate(int userId)
-        {//
-            throw new NotImplementedException();
+        public async Task<double> GetAverageSuccessRate(int userId)
+        {
+            return await this._habitStatRepository.GetGlobalSuccessRate(userId);
         }
 
         public async Task<int[]> GetMonthlySuccessRate(int userId)
