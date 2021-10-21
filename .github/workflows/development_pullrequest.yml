@@ -5,34 +5,8 @@ on:
     branches: [ develop ]
 
 jobs:
-  backup_db:
-    name: Backup MySQL DB
-    runs-on: ubuntu-latest
-    steps:
-      - name: Backup Step
-        uses: valerianpereira/backup-action@master
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          type: db
-          db_type: mysql
-          db_user: ${{ secrets.MYSQL_USER }}
-          db_pass: ${{ secrets.MYSQL_PASS }}
-          db_port: 3306
-          db_name: ${{ secrets.DB_NAME }}
-      - name: Push DB Backup
-        uses: appleboy/scp-action@master
-        with:
-          source: /github/workspace/backups
-          target: /CED
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
   build:
     name: Build and Test CED Application
-    needs: backup_db
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -52,7 +26,6 @@ jobs:
     name: Failure Notification Email
     runs-on: ubuntu-latest
     if: ${{ failure() }}
-    needs: [backup_db,build,publish_upload,deploy,db_deploy]
     steps:
       - name: Send Email Failure Notification
         uses: dawidd6/action-send-mail@v3
@@ -70,7 +43,6 @@ jobs:
     name: Success Notification Email
     runs-on: ubuntu-latest
     if: ${{ success() }}
-    needs: [backup_db,build,publish_upload,deploy,db_deploy]
     steps:
       - name: Send Email Success Notification
         uses: dawidd6/action-send-mail@v3
