@@ -91,7 +91,7 @@ namespace CED.Services.Core
         }
 
         public async Task<int> GetAverageSuccessRate(int userId)
-        {
+        {//
             throw new NotImplementedException();
         }
 
