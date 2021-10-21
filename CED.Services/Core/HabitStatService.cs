@@ -16,7 +16,36 @@ namespace CED.Services.Core
         #region global stats for user
         public async Task<int> GetCurrentStreak(int userId)
         {
-            throw new NotImplementedException();
+            var currentStreak = 0;
+
+            // I want to get all completed user habits logs
+            var logs = await _habitService.GetAllHabitLogsForUser(userId);
+            var habitIds = logs.Select(o => o.HabitId).Distinct().ToList();
+
+            habitIds.ForEach(habitId => {
+                var habitLogs = logs.FindAll(o => o.HabitId == habitId);
+                var streak = 0;
+
+                for (int i = habitLogs.Count - 1; i >= 0; i--)
+                {
+                    if (i > 0)
+                    {
+                        // subtract latest day from previous
+                        if ((habitLogs[i].CreatedAt - habitLogs[i - 1].CreatedAt).Days == 1)
+                            streak++;
+                    }
+                    else
+                    {
+                        if (Math.Abs((habitLogs[i].CreatedAt - habitLogs[i + 1].CreatedAt).Days) == 1)
+                            streak++;
+                    }
+                }
+
+                if (streak > currentStreak)
+                    currentStreak = streak;
+            });
+
+            return currentStreak;
         }
 
         public async Task<int> GetMaxStreak(int userId)
