@@ -384,3 +384,19 @@ END //
 
 DELIMITER ;
 -- --------------------------------------
+
+DROP PROCEDURE IF EXISTS GetFriendHabits;
+
+DELIMITER //
+
+CREATE PROCEDURE GetFriendHabits(
+	IN
+    UserId INT
+)
+BEGIN
+	SELECT * FROM `ceddb`.`friend_habit` fh
+    WHERE fh.friendId = UserId;
+END //
+
+DELIMITER ;
+-- --------------------------------------
