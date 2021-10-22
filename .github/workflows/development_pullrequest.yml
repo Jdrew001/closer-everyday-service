@@ -1,0 +1,74 @@
+name: Development Pull Request
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    name: Build and Test CED Application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
+      - name: Test
+        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ThresholdType=Method
+      - name: Codecov
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+        run: | 
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          find . -iregex "codecov.*"
+          chmod +x codecov 
+          ./codecov -t ${CODECOV_TOKEN}
+  notification_failure:
+    name: Failure Notification Email
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    needs: build
+    steps:
+      - name: Send Email Failure Notification
+        uses: dawidd6/action-send-mail@v3
+        with: 
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          subject: ${{ github.repository }} develop build failure -- Pull Request
+          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+          from: CED Pipeline Failure
+          body: Github pipeline has failed to run -- Pull Request
+          priority: high
+  notification_success:
+    name: Success Notification Email
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    needs: build
+    steps:
+      - name: Send Email Success Notification
+        uses: dawidd6/action-send-mail@v3
+        with: 
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          subject: ${{ github.repository }} develop build succeeded -- Pull Request
+          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+          from: CED Pipeline Success
+          body: Github pipeline has succeeded -- Pull Request
+          priority: high
+    # - name: Copy via ssh
+    #   uses: garygrossgarten/github-action-scp@v0.5.3
+    #   with:
+    #     local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/
+    #     remote: /var/www/ced-service/
+    #     host: ${{ secrets.REMOTE_HOST }}
+    #     username: ${{ secrets.USERNAME }}
+    #     password: ${{ secrets.PASSWORD }}
