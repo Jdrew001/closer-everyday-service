@@ -645,5 +645,21 @@ namespace CED.Services.Tests
 
         }
         #endregion
+
+        #region Friends user supports tests
+        public async void GetFriendsSupporing2()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            habitRepo.Setup(o => o.GetFriendStat(20)).Returns(Task.FromResult(2));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetTotalFriendsSupporting(20);
+            var expectedResult = 2;
+
+            Assert.Equal(expectedResult, result);
+
+        }
+        #endregion
     }
 }

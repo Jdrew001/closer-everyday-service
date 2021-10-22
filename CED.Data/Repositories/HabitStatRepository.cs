@@ -29,5 +29,21 @@ namespace CED.Data.Repositories
 
             return rate;
         }
+
+        public async Task<int> GetFriendStat(int userId)
+        {
+            int count = 0;
+            string spName = "GetAvgSuccessLogsForUser";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("UserId", userId);
+
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                count = drh.Get<int>("FRIEND_STAT");
+
+            return count;
+        }
     }
 }

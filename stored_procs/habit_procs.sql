@@ -385,17 +385,18 @@ END //
 DELIMITER ;
 -- --------------------------------------
 
-DROP PROCEDURE IF EXISTS GetFriendHabits;
+DROP PROCEDURE IF EXISTS GetUserFriendHabitStats;
 
 DELIMITER //
 
-CREATE PROCEDURE GetFriendHabits(
+CREATE PROCEDURE GetUserFriendHabitStats(
 	IN
     UserId INT
 )
 BEGIN
-	SELECT * FROM `ceddb`.`friend_habit` fh
-    WHERE fh.friendId = UserId;
+	SELECT (
+		(SELECT COUNT(*) FROM `ceddb`.friend_habit WHERE user_id = UserId))
+	AS 'FRIEND_STAT';
 END //
 
 DELIMITER ;

@@ -124,7 +124,7 @@ namespace CED.Services.Core
 
         public async Task<int> GetTotalFriendsSupporting(int userId)
         {
-            throw new NotImplementedException();
+            return await _habitStatRepository.GetFriendStat(userId);
         }
 
         public async Task<int> GetTotalCompletions(int userId)
