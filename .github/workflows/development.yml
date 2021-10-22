@@ -47,7 +47,13 @@ jobs:
       - name: Test
         run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ThresholdType=Method
       - name: Codecov
-        uses: codecov/codecov-action@v2.1.0
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+        run: | 
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          find . -iregex "codecov.*"
+          chmod +x codecov 
+          ./codecov -t ${CODECOV_TOKEN}
   publish_upload:
     name: Publish and Upload CED application
     needs: build
