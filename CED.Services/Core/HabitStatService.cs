@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CED.Data.Interfaces;
 using CED.Services.Interfaces;
+using CED.Services.utils;
+using Org.BouncyCastle.Crypto.Engines;
 
 namespace CED.Services.Core
 {
@@ -98,9 +101,29 @@ namespace CED.Services.Core
             return await this._habitStatRepository.GetGlobalSuccessRate(userId);
         }
 
-        public async Task<int[]> GetMonthlySuccessRate(int userId)
+        public async Task<Dictionary<string, double>> GetMonthlySuccessRate(int userId, int year)
         {
-            throw new NotImplementedException();
+            var habitLogs = await _habitService.GetUserHabitLogs(userId);
+            var habitLogsForGivenYear = habitLogs.FindAll(o => o.CreatedAt.Year == year);
+            Dictionary<string, double> monthlyRates = new Dictionary<string, double>();
+
+            //loop through the months
+            foreach (var month in ServiceConstants.MONTHS_OF_YEAR)
+            {
+                var habitsForMonth = habitLogsForGivenYear.FindAll(o => o.CreatedAt.Month == month.Key);
+
+                // rate: (total complete / total) * 100 percentage
+                double totalComplete = Convert.ToDouble(habitsForMonth.FindAll(o => o.Value == 'C').Count);
+                double total = Convert.ToDouble(habitsForMonth.Count);
+                double rate = 0;
+
+                if (totalComplete != 0 && total != 0)
+                    rate = (totalComplete / total) * 100;
+
+                monthlyRates.Add(month.Value, rate);
+            }
+
+            return monthlyRates;
         }
 
         public async Task<int> GetPerfectDays(int userId)

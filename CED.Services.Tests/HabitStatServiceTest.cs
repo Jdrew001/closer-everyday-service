@@ -7,6 +7,7 @@ using CED.Data.Interfaces;
 using CED.Models.Core;
 using CED.Services.Core;
 using CED.Services.Interfaces;
+using CED.Services.utils;
 using Moq;
 using Xunit;
 
@@ -647,6 +648,7 @@ namespace CED.Services.Tests
         #endregion
 
         #region Friends user supports tests
+        [Fact]
         public async void GetFriendsSupporing2()
         {
             var habitService = new Mock<IHabitService>();
@@ -659,6 +661,95 @@ namespace CED.Services.Tests
 
             Assert.Equal(expectedResult, result);
 
+        }
+        #endregion
+
+        #region Monthly success reate tests
+
+        [Fact]
+        public async void GetMonthlySuccessRate()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-01-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 9,
+                    CreatedAt = DateTime.Parse("2021-01-10T22:59:28"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 2,
+                    CreatedAt = DateTime.Parse("2021-02-11T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 2,
+                    CreatedAt = DateTime.Parse("2021-02-11T22:59:28"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-03-12T23:13:44"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-03-12T23:13:44"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'F'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-04-13T23:13:44"),
+                    HabitId = 2,
+                    UserId = 20,
+                    Value = 'C'
+                },
+                new HabitLog()
+                {
+                    Id = 12,
+                    CreatedAt = DateTime.Parse("2021-04-13T23:13:44"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'F'
+                }
+            };
+            habitService.Setup(o => o.GetUserHabitLogs(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetMonthlySuccessRate(20, 2021);
+            var janExpectedResultRate = 100;
+            var decExpectedResultRate = 0;
+            var marchExpectedResultRate = 50;
+
+            Assert.Equal(janExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[1]]);
+            Assert.Equal(marchExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[3]]);
+            Assert.Equal(decExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[12]]);
         }
         #endregion
     }
