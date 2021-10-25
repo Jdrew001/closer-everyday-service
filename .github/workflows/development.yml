@@ -80,10 +80,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: code-artifact-archive
+          path: project/ced
       - name: Copy Via ssh
         uses: garygrossgarten/github-action-scp@v0.5.3
         with: 
-          local: /
+          local: project/ced
           remote: /var/www/closer-every-day/
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
