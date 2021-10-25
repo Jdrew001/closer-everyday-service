@@ -80,8 +80,22 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: code-artifact-archive
-      - shell: bash
-        run: ls -al
+      - name: Copy Via ssh
+        uses: garygrossgarten/github-action-scp@v0.5.3
+        with: 
+          local: /
+          remote: /var/www/closer-every-day/
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+      - name: start application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }} 
+          script: |
+            ls -al
   db_deploy:
     name: Deploy DB Scripts
     needs: deploy
@@ -133,11 +147,3 @@ jobs:
           from: CED Pipeline Success
           body: Github pipeline has succeeded
           priority: high
-    # - name: Copy via ssh
-    #   uses: garygrossgarten/github-action-scp@v0.5.3
-    #   with:
-    #     local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/
-    #     remote: /var/www/ced-service/
-    #     host: ${{ secrets.REMOTE_HOST }}
-    #     username: ${{ secrets.USERNAME }}
-    #     password: ${{ secrets.PASSWORD }}
