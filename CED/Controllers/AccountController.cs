@@ -23,7 +23,7 @@ namespace CED.Controllers
         public IActionResult actionResult()
         {
             _log.LogError("Environment Variable TEST!", _hostingEnv.EnvironmentName);
-            return Ok(_hostingEnv.EnvironmentName);
+            return Ok("Hello World");
         }
     }
 }
