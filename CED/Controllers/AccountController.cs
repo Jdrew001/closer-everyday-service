@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace CED.Controllers
 {
@@ -10,15 +11,18 @@ namespace CED.Controllers
     {
 
         private IHostingEnvironment _hostingEnv;
+        private readonly ILogger<AccountController> _log;
 
-        public AccountController(IHostingEnvironment hostingEnv)
+        public AccountController(IHostingEnvironment hostingEnv, ILogger<AccountController> log)
         {
             _hostingEnv = hostingEnv;
+            _log = log;
         }
 
         [HttpGet("environment")]
         public IActionResult actionResult()
         {
+            _log.LogDebug("Environment Variable", _hostingEnv.EnvironmentName);
             return Ok(_hostingEnv.EnvironmentName);
         }
     }
