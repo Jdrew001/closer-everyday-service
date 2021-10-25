@@ -1,17 +1,29 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace CED.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
-        [HttpGet]
+
+        private IHostingEnvironment _hostingEnv;
+        private readonly ILogger<AccountController> _log;
+
+        public AccountController(IHostingEnvironment hostingEnv, ILogger<AccountController> log)
+        {
+            _hostingEnv = hostingEnv;
+            _log = log;
+        }
+
+        [HttpGet("environment")]
         public IActionResult actionResult()
         {
-            return Ok();
+            _log.LogDebug("Environment Variable", _hostingEnv.EnvironmentName);
+            return Ok(_hostingEnv.EnvironmentName);
         }
     }
 }
