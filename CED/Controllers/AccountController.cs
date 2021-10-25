@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CED.Controllers
@@ -7,10 +8,18 @@ namespace CED.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        [HttpGet]
+
+        private IHostingEnvironment _hostingEnv;
+
+        public AccountController(IHostingEnvironment hostingEnv)
+        {
+            _hostingEnv = hostingEnv;
+        }
+
+        [HttpGet("environment")]
         public IActionResult actionResult()
         {
-            return Ok();
+            return Ok(_hostingEnv.EnvironmentName);
         }
     }
 }
