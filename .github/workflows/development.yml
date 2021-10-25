@@ -81,7 +81,7 @@ jobs:
         with:
           name: code-artifact-archive
           path: project/ced
-      - name: Copy Via ssh
+      - name: Copy Artifact to Server
         uses: garygrossgarten/github-action-scp@v0.5.3
         with: 
           local: project/ced
@@ -89,14 +89,15 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-      - name: start application
+          rmRemote: true
+      - name: Restart Application
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }} 
           script: |
-            ls -al
+            sudo systemctl restart ced.service
   db_deploy:
     name: Deploy DB Scripts
     needs: deploy
