@@ -88,7 +88,7 @@ namespace CED.Services.Core
                     }
                 }
 
-                // if the local variable streak is higher than maxStreak, then update maxStreak
+                // if the local variable streak is higher than maxStreak, then update maxStreak!
                 if (streak > maxStreak)
                     maxStreak = streak;
             });
