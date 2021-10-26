@@ -127,7 +127,7 @@ jobs:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
           subject: ${{ github.repository }} develop build failure
-          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+          to: dtatkison@gmail.com
           from: CED Pipeline Failure
           body: Github pipeline has failed to run
           priority: high

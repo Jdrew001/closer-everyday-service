@@ -1,22 +1,57 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CED.Data.Interfaces;
 using CED.Services.Interfaces;
+using CED.Services.utils;
+using Org.BouncyCastle.Crypto.Engines;
 
 namespace CED.Services.Core
 {
     public class HabitStatService : IHabitStatService
     {
         private readonly IHabitService _habitService;
-        public HabitStatService(IHabitService habitService)
+        private readonly IHabitStatRepository _habitStatRepository;
+        public HabitStatService(IHabitService habitService, IHabitStatRepository habitStatRepository)
         {
             _habitService = habitService;
+            _habitStatRepository = habitStatRepository;
         }
 
         #region global stats for user
         public async Task<int> GetCurrentStreak(int userId)
         {
-            throw new NotImplementedException();
+            var currentStreak = 0;
+
+            // I want to get all completed user habits logs
+            var logs = await _habitService.GetAllCompletedLogsForUser(userId);
+            var habitIds = logs.Select(o => o.HabitId).Distinct().ToList();
+
+            habitIds.ForEach(habitId => {
+                var habitLogs = logs.FindAll(o => o.HabitId == habitId);
+                var streak = 0;
+
+                for (int i = habitLogs.Count - 1; i >= 0; i--)
+                {
+                    if (i > 0)
+                    {
+                        // subtract latest day from previous
+                        if ((habitLogs[i].CreatedAt - habitLogs[i - 1].CreatedAt).Days == 1)
+                            streak++;
+                    }
+                    else
+                    {
+                        if (Math.Abs((habitLogs[i].CreatedAt - habitLogs[i + 1].CreatedAt).Days) == 1)
+                            streak++;
+                    }
+                }
+
+                if (streak > currentStreak)
+                    currentStreak = streak;
+            });
+
+            return currentStreak;
         }
 
         public async Task<int> GetMaxStreak(int userId)
@@ -25,7 +60,7 @@ namespace CED.Services.Core
             var maxStreak = 0;
 
             // Get all habit logs for a given user all habits ---- can call once
-            var logs = await _habitService.GetAllHabitLogsForUser(userId);
+            var logs = await _habitService.GetAllCompletedLogsForUser(userId);
 
             // Grab all the habit ids and remove duplicates
             var habitIds = logs.Select(o => o.HabitId).Distinct().ToList();
@@ -53,7 +88,7 @@ namespace CED.Services.Core
                     }
                 }
 
-                // if the local variable streak is higher than maxStreak, then update maxStreak
+                // if the local variable streak is higher than maxStreak, then update maxStreak!
                 if (streak > maxStreak)
                     maxStreak = streak;
             });
@@ -61,29 +96,64 @@ namespace CED.Services.Core
             return maxStreak;
         }
 
-        public async Task<int> GetAverageSuccessRate(int userId)
+        public async Task<double> GetAverageSuccessRate(int userId)
         {
-            throw new NotImplementedException();
+            return await this._habitStatRepository.GetGlobalSuccessRate(userId);
         }
 
-        public async Task<int[]> GetMonthlySuccessRate(int userId)
+        public async Task<Dictionary<string, double>> GetMonthlySuccessRate(int userId, int year)
         {
-            throw new NotImplementedException();
+            var habitLogs = await _habitService.GetUserHabitLogs(userId);
+            var habitLogsForGivenYear = habitLogs.FindAll(o => o.CreatedAt.Year == year);
+            Dictionary<string, double> monthlyRates = new Dictionary<string, double>();
+
+            //loop through the months
+            foreach (var month in ServiceConstants.MONTHS_OF_YEAR)
+            {
+                var habitsForMonth = habitLogsForGivenYear.FindAll(o => o.CreatedAt.Month == month.Key);
+
+                // rate: (total complete / total) * 100 percentage
+                double totalComplete = Convert.ToDouble(habitsForMonth.FindAll(o => o.Value == 'C').Count);
+                double total = Convert.ToDouble(habitsForMonth.Count);
+                double rate = 0;
+
+                if (totalComplete != 0 && total != 0)
+                    rate = (totalComplete / total) * 100;
+
+                monthlyRates.Add(month.Value, rate);
+            }
+
+            return monthlyRates;
         }
 
         public async Task<int> GetPerfectDays(int userId)
         {
-            throw new NotImplementedException();
+            //Get all users habit logs
+            var logs = await _habitService.GetUserHabitLogs(userId);
+            var habitLogDates = logs.Select(o => o.CreatedAt).Distinct().ToList();
+            var perfectDays = 0;
+
+            habitLogDates.ForEach(date =>
+            {
+                var count = logs.FindAll(o => o.CreatedAt.Date == date.Date);
+                var completedLogs = logs.FindAll(o => o.CreatedAt.Date == date.Date && o.Value == 'C');
+
+                if (count.Count == completedLogs.Count)
+                    perfectDays++;
+            });
+
+            return perfectDays;
         }
 
         public async Task<int> GetTotalFriendsSupporting(int userId)
         {
-            throw new NotImplementedException();
+            return await _habitStatRepository.GetFriendStat(userId);
         }
 
         public async Task<int> GetTotalCompletions(int userId)
         {
-            throw new NotImplementedException();
+            var habitLogs = await _habitService.GetAllCompletedLogsForUser(userId);
+            return habitLogs.Count;
         }
         #endregion
 

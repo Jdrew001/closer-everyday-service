@@ -14,10 +14,11 @@ namespace CED.Services.Interfaces
         Task<Habit> GetHabitById(int id);
         Task<HabitLog> GetHabitLogByIdDate(int id, string date);
         Task<HabitLog> GetHabitLog(int id);
+        Task<List<HabitLog>> GetUserHabitLogs(int userId);
         Task<Habit> SaveHabit(Habit habit);
         Task<Habit> UpdateHabit(Habit habit);
         Task<HabitLog> SaveHabitLog(char status, int userId, int habitId, string date);
-        Task<List<HabitLog>> GetAllHabitLogsForUser(int userId);
+        Task<List<HabitLog>> GetAllCompletedLogsForUser(int userId);
         bool MarkHabitInactive(int id);
     }
 }
