@@ -112,7 +112,7 @@ namespace CED
 
             app.UseAuthorization();
 
-            
+            app.UseSerilogRequestLogging();
 
             app.UseEndpoints(endpoints =>
             {

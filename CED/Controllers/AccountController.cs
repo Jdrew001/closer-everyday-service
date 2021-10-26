@@ -22,7 +22,6 @@ namespace CED.Controllers
         [HttpGet("environment")]
         public IActionResult actionResult()
         {
-            _log.LogError("Environment Variable TEST!", _hostingEnv.EnvironmentName);
             return Ok("Hello World");
         }
     }
