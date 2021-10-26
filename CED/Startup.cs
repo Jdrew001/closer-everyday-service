@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
 using Microsoft.AspNetCore.HttpOverrides;
+using Serilog;
 
 namespace CED
 {
@@ -110,6 +111,8 @@ namespace CED
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            
 
             app.UseEndpoints(endpoints =>
             {
