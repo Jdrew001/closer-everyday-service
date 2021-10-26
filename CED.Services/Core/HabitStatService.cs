@@ -152,7 +152,8 @@ namespace CED.Services.Core
 
         public async Task<int> GetTotalCompletions(int userId)
         {
-            throw new NotImplementedException();
+            var habitLogs = await _habitService.GetAllCompletedLogsForUser(userId);
+            return habitLogs.Count;
         }
         #endregion
 
