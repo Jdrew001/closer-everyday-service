@@ -57,6 +57,11 @@ namespace CED.Services.Core
             throw new System.NotImplementedException();
         }
 
+        public async Task<List<HabitLog>> GetLogsForHabit(int habitId)
+        {
+            return await _habitRepository.GetLogsForHabit(habitId);
+        }
+
         public Task<Habit> SaveHabit(Habit habit)
         {
             return _habitRepository.SaveHabit(habit);

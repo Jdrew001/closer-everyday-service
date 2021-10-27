@@ -20,5 +20,7 @@ namespace CED.Services.Interfaces
         Task<HabitLog> SaveHabitLog(char status, int userId, int habitId, string date);
         Task<List<HabitLog>> GetAllCompletedLogsForUser(int userId);
         bool MarkHabitInactive(int id);
+
+        Task<List<HabitLog>> GetLogsForHabit(int habitId);
     }
 }

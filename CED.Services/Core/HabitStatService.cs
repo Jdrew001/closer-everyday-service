@@ -37,12 +37,12 @@ namespace CED.Services.Core
                     if (i > 0)
                     {
                         // subtract latest day from previous
-                        if ((habitLogs[i].CreatedAt - habitLogs[i - 1].CreatedAt).Days == 1)
+                        if ((habitLogs[i].CreatedAt.Date - habitLogs[i - 1].CreatedAt.Date).Days == 1)
                             streak++;
                     }
                     else
                     {
-                        if (Math.Abs((habitLogs[i].CreatedAt - habitLogs[i + 1].CreatedAt).Days) == 1)
+                        if (Math.Abs((habitLogs[i].CreatedAt.Date - habitLogs[i + 1].CreatedAt.Date).Days) == 1)
                             streak++;
                     }
                 }
@@ -78,12 +78,12 @@ namespace CED.Services.Core
                     if (i == habitLogs.Count - 1)
                     {
                         // check the previous streak
-                        if ((habitLogs[i].CreatedAt - habitLogs[i - 1].CreatedAt).Days == 1)
+                        if ((habitLogs[i].CreatedAt.Date - habitLogs[i - 1].CreatedAt.Date).Days == 1)
                             streak++;
                     }
                     else
                     {
-                        if (i == habitLogs.Count - 1 || (habitLogs[i + 1].CreatedAt - habitLogs[i].CreatedAt).Days == 1)
+                        if (i == habitLogs.Count - 1 || (habitLogs[i + 1].CreatedAt.Date - habitLogs[i].CreatedAt.Date).Days == 1)
                             streak++;
                     }
                 }
@@ -160,7 +160,29 @@ namespace CED.Services.Core
         #region Habit Stats
         public async Task<int> GetCurrentStreakForHabit(int habitId)
         {
-            throw new NotImplementedException();
+            var currentStreak = 0;
+            var logs = await _habitService.GetLogsForHabit(habitId);
+            var streak = 0;
+
+            for (int i = logs.Count - 1; i >= 0; i--)
+            {
+                if (i > 0)
+                {
+                    // subtract latest day from previous
+                    if ((logs[i].CreatedAt.Date - logs[i - 1].CreatedAt.Date).Days == 1)
+                        streak++;
+                }
+                else
+                {
+                    if (Math.Abs((logs[i].CreatedAt.Date - logs[i + 1].CreatedAt.Date).Days) == 1)
+                        streak++;
+                }
+            }
+
+            if (streak > currentStreak)
+                currentStreak = streak;
+
+            return currentStreak;
         }
 
         public async Task<int> GetMaxStreakForHabit(int habitId)
