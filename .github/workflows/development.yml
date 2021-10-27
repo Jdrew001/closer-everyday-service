@@ -30,7 +30,7 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          port: ${{ SCP_PORT }}
+          port: ${{ secrets.SCP_PORT }}
   build:
     name: Build and Test CED Application
     needs: backup_db
