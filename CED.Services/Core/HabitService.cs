@@ -8,7 +8,6 @@ namespace CED.Services.Core
 {
     public class HabitService : IHabitService
     {
-
         private readonly IHabitRepository _habitRepository;
 
         public HabitService(
@@ -102,18 +101,14 @@ namespace CED.Services.Core
         {
             if (habit.VisibleToFriends)
             {
-                // we need to retrieve the habit friends
-
                 // send notification if completed
                 if (status.Equals('C'))
                 {
-
                 }
 
                 // send notification in case of failure
                 if (status.Equals('F'))
                 {
-
                 }
             }
         }

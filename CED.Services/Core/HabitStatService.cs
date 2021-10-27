@@ -146,7 +146,6 @@ namespace CED.Services.Core
             if (logs != null)
             {
                 var habitLogDates = logs.Select(o => o.CreatedAt).Distinct().ToList();
-                
 
                 habitLogDates.ForEach(date =>
                 {
@@ -234,7 +233,6 @@ namespace CED.Services.Core
                 if (streak > maxStreak)
                     maxStreak = streak;
             }
-            
 
             return maxStreak;
         }
