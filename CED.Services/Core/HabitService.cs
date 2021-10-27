@@ -8,7 +8,6 @@ namespace CED.Services.Core
 {
     public class HabitService : IHabitService
     {
-
         private readonly IHabitRepository _habitRepository;
 
         public HabitService(
@@ -47,6 +46,11 @@ namespace CED.Services.Core
             return _habitRepository.GetAllCompletedLogsForUser(userId);
         }
 
+        public async Task<List<HabitLog>> GetAllCompletedLogsForHabit(int habitId)
+        {
+            return await _habitRepository.GetAllCompletedLogsForHabit(habitId);
+        }
+
         public async Task<List<HabitLog>> GetUserHabitLogs(int userId)
         {
             return await _habitRepository.GetAllLogsForUser(userId);
@@ -55,6 +59,11 @@ namespace CED.Services.Core
         public bool MarkHabitInactive(int id)
         {
             throw new System.NotImplementedException();
+        }
+
+        public async Task<List<HabitLog>> GetLogsForHabit(int habitId)
+        {
+            return await _habitRepository.GetLogsForHabit(habitId);
         }
 
         public Task<Habit> SaveHabit(Habit habit)
@@ -92,18 +101,14 @@ namespace CED.Services.Core
         {
             if (habit.VisibleToFriends)
             {
-                // we need to retrieve the habit friends
-
                 // send notification if completed
                 if (status.Equals('C'))
                 {
-
                 }
 
                 // send notification in case of failure
                 if (status.Equals('F'))
                 {
-
                 }
             }
         }

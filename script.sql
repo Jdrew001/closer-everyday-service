@@ -1,50 +1,39 @@
-DROP PROCEDURE IF EXISTS GetAvgSuccessLogsForUser;
+DROP PROCEDURE IF EXISTS GetAllLogsForHabit;
 
 DELIMITER //
 
-CREATE PROCEDURE GetAvgSuccessLogsForUser(
+CREATE PROCEDURE GetAllLogsForHabit(
 	IN
-    UserId INT
+    HabitId INT
 )
 BEGIN
-	SELECT (
-		(SELECT COUNT(*) FROM HABIT_LOG WHERE user_id = UserId and log_value = 'C') /
-		(SELECT COUNT(*) FROM HABIT_LOG WHERE user_id = UserId) * 100) 
-	AS 'COMPLETED_PERCENTAGE';
+    SELECT hl.`idhabit_log` as `id`,
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+	FROM `ceddb`.`habit_log` hl
+    WHERE hl.`habit_id` = HabitId
+    ORDER BY hl.created_at ASC;
+
 END //
 
 DELIMITER ;
 -- --------------------------------------
 
-
-DROP PROCEDURE IF EXISTS GetLogsForUser;
-
-DELIMITER //
-
-CREATE PROCEDURE GetLogsForUser(
-	IN
-    UserId INT
-)
-BEGIN
-	SELECT * FROM `ceddb`.`habit_log` hl
-    WHERE hl.user_id = UserId ORDER BY hl.created_at ASC;
-END //
-
-DELIMITER ;
--- --------------------------------------
-
-DROP PROCEDURE IF EXISTS GetUserFriendHabitStats;
+DROP PROCEDURE IF EXISTS GetCompletedLogsForHabit;
 
 DELIMITER //
 
-CREATE PROCEDURE GetUserFriendHabitStats(
+CREATE PROCEDURE GetCompletedLogsForHabit(
 	IN
-    UserId INT
+    HabitId INT
 )
 BEGIN
-	SELECT (
-		(SELECT COUNT(*) FROM `ceddb`.friend_habit WHERE user_id = UserId))
-	AS 'FRIEND_STAT';
+	select * 
+    from habit_log hl 
+    where hl.habit_id = HabitId AND hl.log_value = "C"
+    ORDER BY hl.created_at ASC, hl.habit_id ASC; 
 END //
 
 DELIMITER ;
