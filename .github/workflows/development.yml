@@ -5,31 +5,31 @@ on:
     branches: [ develop ]
 
 jobs:
-  backup_db:
-    name: Backup MySQL DB
-    runs-on: ubuntu-latest
-    steps:
-      - name: Backup Step
-        uses: valerianpereira/backup-action@master
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          type: db
-          db_type: mysql
-          db_user: ${{ secrets.MYSQL_USER }}
-          db_pass: ${{ secrets.MYSQL_PASS }}
-          db_port: 3306
-          db_name: ${{ secrets.DB_NAME }}
-      - name: Push DB Backup
-        uses: appleboy/scp-action@master
-        with:
-          source: /github/workspace/backups
-          target: ~/CED
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+  # backup_db:
+  #   name: Backup MySQL DB
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Backup Step
+  #       uses: valerianpereira/backup-action@master
+  #       with:
+  #         host: ${{ secrets.REMOTE_HOST }}
+  #         username: ${{ secrets.USERNAME }}
+  #         password: ${{ secrets.PASSWORD }}
+  #         key: ${{ secrets.DEPLOY_KEY }}
+  #         type: db
+  #         db_type: mysql
+  #         db_user: ${{ secrets.MYSQL_USER }}
+  #         db_pass: ${{ secrets.MYSQL_PASS }}
+  #         db_port: 3306
+  #         db_name: ${{ secrets.DB_NAME }}
+  #     - name: Push DB Backup
+  #       uses: appleboy/scp-action@master
+  #       with:
+  #         source: /github/workspace/backups
+  #         target: ~/CED
+  #         host: ${{ secrets.REMOTE_HOST }}
+  #         username: ${{ secrets.USERNAME }}
+  #         password: ${{ secrets.PASSWORD }}
   build:
     name: Build and Test CED Application
     needs: backup_db
@@ -85,7 +85,7 @@ jobs:
         uses: garygrossgarten/github-action-scp@v0.5.3
         with: 
           local: project/ced
-          remote: /var/www/closer-every-day/
+          remote: ~/var/www/closer-every-day/
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
