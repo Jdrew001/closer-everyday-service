@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CED.Models.DTO;
 
 namespace CED.Services.Interfaces
 {
@@ -10,6 +11,7 @@ namespace CED.Services.Interfaces
     {
         #region Global Stats for a given user
 
+        public Task<HabitStatDTO> GetGlobalHabitStats(int userId, int year);
         public Task<int> GetCurrentStreak(int userId);
         public Task<int> GetMaxStreak(int userId);
         public Task<double> GetAverageSuccessRate(int userId);

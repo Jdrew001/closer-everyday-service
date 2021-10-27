@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CED.Data.Interfaces;
+using CED.Models.DTO;
 using CED.Services.Interfaces;
 using CED.Services.utils;
 using Org.BouncyCastle.Crypto.Engines;
@@ -20,6 +21,29 @@ namespace CED.Services.Core
         }
 
         #region global stats for user
+
+        public async Task<HabitStatDTO> GetGlobalHabitStats(int userId, int year)
+        {
+            var currentStreak = await GetCurrentStreak(userId);
+            var maxStreak = await GetMaxStreak(userId);
+            var avgSuccessRate = await GetAverageSuccessRate(userId);
+            var monthlySuccessRate = await GetMonthlySuccessRate(userId, year);
+            var perfectDays = await GetPerfectDays(userId);
+            var totalFriendsHelping = await GetTotalFriendsSupporting(userId);
+            var totalCompletions = await GetTotalCompletions(userId);
+
+            return new HabitStatDTO()
+            {
+                currentStreak = currentStreak,
+                maxStreak = maxStreak,
+                averageSuccessReate = avgSuccessRate,
+                monthlySuccessRate = monthlySuccessRate,
+                perfectDays = perfectDays,
+                totalFriendsHelping = totalFriendsHelping,
+                totalCompletions = totalCompletions
+            };
+        }
+
         public async Task<int> GetCurrentStreak(int userId)
         {
             var currentStreak = 0;

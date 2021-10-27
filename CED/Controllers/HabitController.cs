@@ -16,12 +16,15 @@ namespace CED.Controllers
     public class HabitController : CEDBaseController
     {
         private readonly IHabitService _habitService;
+        private readonly IHabitStatService _habitStatService;
         public HabitController(
             IHabitService habitService,
+            IHabitStatService habitStatService,
             ITokenService tokenService)
             :base(tokenService)
         {
             this._habitService = habitService;
+            this._habitStatService = habitStatService;
         }
 
         [HttpGet("getAllUserHabits/{date}")]
@@ -92,6 +95,21 @@ namespace CED.Controllers
 
             return Ok(GenerateSuccessResponse("Successfully update logs", null));
         }
+
+        [HttpGet("getGlobalStats/{year}")]
+        public async Task<IActionResult> GetGlobalHabitStats(int year)
+        {
+            var userId = await GetUserId();
+            if (userId == -1)
+            {
+                return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+            }
+
+            var habitStats = _habitStatService.GetGlobalHabitStats(userId, year);
+
+            return Ok(GenerateSuccessResponse("Success", habitStats));
+        }
+
         private UpdateHabitLogDTO MapHabitLogDto(HabitLog log)
         {
             return new UpdateHabitLogDTO()
