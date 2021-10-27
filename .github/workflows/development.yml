@@ -84,7 +84,7 @@ jobs:
         uses: garygrossgarten/github-action-scp@v0.5.3
         with: 
           local: project/ced
-          remote: projects/closer-every-day/
+          remote: /www/projects/closer-every-day/
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
