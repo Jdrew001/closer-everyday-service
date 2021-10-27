@@ -50,7 +50,6 @@ namespace CED.Services.Tests
             };
             habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
 
-
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
             var result = await service.GetMaxStreak(20);
             var expectedResult = 3;
@@ -65,7 +64,6 @@ namespace CED.Services.Tests
             var habitRepo = new Mock<IHabitStatRepository>();
             List<HabitLog> habitLogs = null;
             habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
-
 
             HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
             var result = await service.GetMaxStreak(20);
@@ -593,7 +591,6 @@ namespace CED.Services.Tests
             var expectedResult = 2;
 
             Assert.Equal(expectedResult, result);
-
         }
 
         [Fact]
@@ -675,7 +672,6 @@ namespace CED.Services.Tests
             var expectedResult = 4;
 
             Assert.Equal(expectedResult, result);
-
         }
 
         [Fact]
@@ -691,7 +687,6 @@ namespace CED.Services.Tests
             var expectedResult = 0;
 
             Assert.Equal(expectedResult, result);
-
         }
         #endregion
 
@@ -708,7 +703,6 @@ namespace CED.Services.Tests
             var expectedResult = 2;
 
             Assert.Equal(expectedResult, result);
-
         }
         #endregion
 
@@ -1201,7 +1195,6 @@ namespace CED.Services.Tests
             var expectedResult = 2;
 
             Assert.Equal(expectedResult, result);
-
         }
 
         [Fact]
@@ -1217,7 +1210,6 @@ namespace CED.Services.Tests
             var expectedResult = 0;
 
             Assert.Equal(expectedResult, result);
-
         }
         #endregion
 
