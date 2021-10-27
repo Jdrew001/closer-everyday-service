@@ -233,6 +233,20 @@ namespace CED.Data.Repositories
 
             return logs;
         }
+        public async Task<List<HabitLog>> GetAllCompletedLogsForHabit(int habitId)
+        {
+            List<HabitLog> logs = new List<HabitLog>();
+            string spName = "GetCompletedLogsForHabit";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habitId);
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                logs.Add(ReadHabitLog(drh));
+
+            return logs;
+        }
         #endregion
 
         #region Private Methods

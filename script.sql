@@ -20,3 +20,21 @@ END //
 
 DELIMITER ;
 -- --------------------------------------
+
+DROP PROCEDURE IF EXISTS GetCompletedLogsForHabit;
+
+DELIMITER //
+
+CREATE PROCEDURE GetCompletedLogsForHabit(
+	IN
+    HabitId INT
+)
+BEGIN
+	select * 
+    from habit_log hl 
+    where hl.habit_id = HabitId AND hl.log_value = "C"
+    ORDER BY hl.created_at ASC, hl.habit_id ASC; 
+END //
+
+DELIMITER ;
+-- --------------------------------------

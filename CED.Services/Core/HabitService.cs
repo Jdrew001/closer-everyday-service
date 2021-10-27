@@ -47,6 +47,11 @@ namespace CED.Services.Core
             return _habitRepository.GetAllCompletedLogsForUser(userId);
         }
 
+        public async Task<List<HabitLog>> GetAllCompletedLogsForHabit(int habitId)
+        {
+            return await _habitRepository.GetAllCompletedLogsForHabit(habitId);
+        }
+
         public async Task<List<HabitLog>> GetUserHabitLogs(int userId)
         {
             return await _habitRepository.GetAllLogsForUser(userId);

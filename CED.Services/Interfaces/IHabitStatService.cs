@@ -24,7 +24,7 @@ namespace CED.Services.Interfaces
 
         public Task<int> GetCurrentStreakForHabit(int habitId);
         public Task<int> GetMaxStreakForHabit(int habitId);
-        public Task<int[]> GetMonthlySuccessRateForHabit(int habitId);
+        public Task<Dictionary<string, double>> GetMonthlySuccessRateForHabit(int habitId, int year);
         public Task<int> GetPerfectDaysForHabit(int habitId);
         public Task<int> GetTotalFriendsHelpingForHabit(int habitId);
         public Task<int> GetTotalCompletionsForHabit(int habitId);

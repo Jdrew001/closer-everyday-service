@@ -239,24 +239,66 @@ namespace CED.Services.Core
             return maxStreak;
         }
 
-        public async Task<int[]> GetMonthlySuccessRateForHabit(int habitId)
+        public async Task<Dictionary<string, double>> GetMonthlySuccessRateForHabit(int habitId, int year)
         {
-            throw new NotImplementedException();
+            var habitLogs = await _habitService.GetLogsForHabit(habitId);
+            Dictionary<string, double> monthlyRates = new Dictionary<string, double>();
+
+            if (habitLogs != null)
+            {
+                var habitLogsForGivenYear = habitLogs.FindAll(o => o.CreatedAt.Year == year);
+
+                //loop through the months
+                foreach (var month in ServiceConstants.MONTHS_OF_YEAR)
+                {
+                    var habitsForMonth = habitLogsForGivenYear.FindAll(o => o.CreatedAt.Month == month.Key);
+
+                    // rate: (total complete / total) * 100 percentage
+                    double totalComplete = Convert.ToDouble(habitsForMonth.FindAll(o => o.Value == 'C').Count);
+                    double total = Convert.ToDouble(habitsForMonth.Count);
+                    double rate = 0;
+
+                    if (totalComplete != 0 && total != 0)
+                        rate = (totalComplete / total) * 100;
+
+                    monthlyRates.Add(month.Value, rate);
+                }
+            }
+
+            return monthlyRates;
         }
 
         public async Task<int> GetPerfectDaysForHabit(int habitId)
         {
-            throw new NotImplementedException();
+            var perfectDays = 0;
+            //Get all users habit logs
+            var logs = await _habitService.GetLogsForHabit(habitId);
+
+            if (logs != null)
+            {
+                var habitLogDates = logs.Select(o => o.CreatedAt).Distinct().ToList();
+                habitLogDates.ForEach(date =>
+                {
+                    var count = logs.FindAll(o => o.CreatedAt.Date == date.Date);
+                    var completedLogs = logs.FindAll(o => o.CreatedAt.Date == date.Date && o.Value == 'C');
+
+                    if (count.Count == completedLogs.Count)
+                        perfectDays++;
+                });
+            }
+
+            return perfectDays;
         }
 
         public async Task<int> GetTotalFriendsHelpingForHabit(int habitId)
         {
-            throw new NotImplementedException();
+            return await _habitStatRepository.GetFriendStat(habitId);
         }
 
         public async Task<int> GetTotalCompletionsForHabit(int habitId)
         {
-            throw new NotImplementedException();
+            var habitLogs = await _habitService.GetAllCompletedLogsForHabit(habitId);
+            return habitLogs?.Count ?? 0;
         }
         #endregion
     }
