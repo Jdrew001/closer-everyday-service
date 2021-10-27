@@ -110,6 +110,13 @@ namespace CED.Controllers
             return Ok(GenerateSuccessResponse("Success", habitStats));
         }
 
+        [HttpGet("getHabitStats/{habitId}/{year}")]
+        public async Task<IActionResult> GetHabitStats(int habitId, int year)
+        {
+            var habitStats = _habitStatService.GetHabitStats(habitId, year);
+            return Ok(GenerateSuccessResponse("Success", habitStats));
+        }
+
         private UpdateHabitLogDTO MapHabitLogDto(HabitLog log)
         {
             return new UpdateHabitLogDTO()

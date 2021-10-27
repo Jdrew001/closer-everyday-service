@@ -10,7 +10,7 @@ namespace CED.Models.DTO
     {
         public int currentStreak { get; set; }
         public int maxStreak { get; set; }
-        public double averageSuccessReate { get; set; }
+        public double averageSuccessRate { get; set; }
         public Dictionary<string, double> monthlySuccessRate { get; set; }
         public int perfectDays { get; set; }
         public int totalFriendsHelping { get; set; }

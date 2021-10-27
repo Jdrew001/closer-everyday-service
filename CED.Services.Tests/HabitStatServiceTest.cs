@@ -17,6 +17,46 @@ namespace CED.Services.Tests
     {
         #region Habit Max Streak
         [Fact]
+        public async void GetMaxStreakHabitDatesInStreak0Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>();
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetMaxStreak(20);
+            var expectedResult = 0;
+
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public async void GetMaxStreakHabitDatesInStreak1Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetMaxStreak(20);
+            var expectedResult = 1;
+
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
         public async void GetMaxStreakHabitDatesInStreak3()
         {
             var habitService = new Mock<IHabitService>();
@@ -328,6 +368,47 @@ namespace CED.Services.Tests
 
         #region Habit Current Streak
         [Fact]
+        public async void GetCurrentHabitStreak0Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>();
+
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetCurrentStreak(20);
+            var expectedResult = 0;
+
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public async void GetCurrentHabitStreak1Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetCurrentStreak(20);
+            var expectedResult = 1;
+
+            Assert.Equal(expectedResult, result);
+        }
+        [Fact]
         public async void GetCurrentHabitStreak2()
         {
             var habitService = new Mock<IHabitService>();
@@ -512,6 +593,44 @@ namespace CED.Services.Tests
         #endregion
 
         #region Global habit perfect days tests
+        [Fact]
+        public async void GetPerfectDays0Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>();
+            habitService.Setup(o => o.GetUserHabitLogs(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetPerfectDays(20);
+            var expectedResult = 0;
+
+            Assert.Equal(expectedResult, result);
+        }
+        [Fact]
+        public async void GetPerfectDays1Log()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+            habitService.Setup(o => o.GetUserHabitLogs(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetPerfectDays(20);
+            var expectedResult = 1;
+
+            Assert.Equal(expectedResult, result);
+        }
         [Fact]
         public async void GetPerfectDays2()
         {
@@ -707,7 +826,54 @@ namespace CED.Services.Tests
         #endregion
 
         #region Monthly success reate tests
+        [Fact]
+        public async void GetMonthlySuccessRate0Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
 
+            var habitLogs = new List<HabitLog>();
+            habitService.Setup(o => o.GetUserHabitLogs(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetMonthlySuccessRate(20, 2021);
+            var janExpectedResultRate = 0;
+            var decExpectedResultRate = 0;
+            var marchExpectedResultRate = 0;
+
+            Assert.Equal(janExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[1]]);
+            Assert.Equal(marchExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[3]]);
+            Assert.Equal(decExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[12]]);
+        }
+        [Fact]
+        public async void GetMonthlySuccessRate1Log()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-01-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+            habitService.Setup(o => o.GetUserHabitLogs(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetMonthlySuccessRate(20, 2021);
+            var janExpectedResultRate = 100;
+            var decExpectedResultRate = 0;
+            var marchExpectedResultRate = 0;
+
+            Assert.Equal(janExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[1]]);
+            Assert.Equal(marchExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[3]]);
+            Assert.Equal(decExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[12]]);
+        }
         [Fact]
         public async void GetMonthlySuccessRate()
         {
@@ -812,6 +978,44 @@ namespace CED.Services.Tests
 
         #region Get Total Completions
         [Fact]
+        public async void GetTotalCompletions0Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>();
+
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetTotalCompletions(20);
+            var expectedResult = 0;
+
+            Assert.Equal(result, expectedResult);
+        }
+        [Fact]
+        public async void GetTotalCompletions1Log()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+
+            habitService.Setup(o => o.GetAllCompletedLogsForUser(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetTotalCompletions(20);
+            var expectedResult = 1;
+
+            Assert.Equal(result, expectedResult);
+        }
+        [Fact]
         public async void GetTotalCompletions6()
         {
             var habitService = new Mock<IHabitService>();
@@ -878,6 +1082,44 @@ namespace CED.Services.Tests
         #endregion
 
         #region Current Streak for habits
+        [Fact]
+        public async void GetCurrentStreakForHabit0()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>();
+
+            habitService.Setup(o => o.GetLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetCurrentStreakForHabit(20);
+            var expectedResult = 0;
+
+            Assert.Equal(result, expectedResult);
+        }
+        [Fact]
+        public async void GetCurrentStreakForHabit1()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-07T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+
+            habitService.Setup(o => o.GetLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetCurrentStreakForHabit(20);
+            var expectedResult = 1;
+
+            Assert.Equal(result, expectedResult);
+        }
         [Fact]
         public async void GetCurrentStreakForHabit6()
         {
@@ -958,8 +1200,46 @@ namespace CED.Services.Tests
             Assert.Equal(result, expectedResult);
         }
         #endregion
-        
+
         #region Get Max streak for habit
+        [Fact]
+        public async void GetMaxStreakForHabitDates1StreakZeroLogs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>();
+            habitService.Setup(o => o.GetLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetMaxStreakForHabit(20);
+            var expectedResult = 0;
+
+            Assert.Equal(expectedResult, result);
+        }
+        [Fact]
+        public async void GetMaxStreakForHabitDates1StreakOneLog()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+            habitService.Setup(o => o.GetLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetMaxStreakForHabit(20);
+            var expectedResult = 1;
+
+            Assert.Equal(expectedResult, result);
+        }
         [Fact]
         public async void GetMaxStreakForHabitDates1Streak()
         {
@@ -1044,6 +1324,54 @@ namespace CED.Services.Tests
         #endregion
 
         #region Get Monthly Success Rate for Habit
+        [Fact]
+        public async void GetMonthlySuccessRateForHabit0Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+
+            var habitLogs = new List<HabitLog>();
+            habitService.Setup(o => o.GetLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetMonthlySuccessRateForHabit(20, 2021);
+            var janExpectedResultRate = 0;
+            var decExpectedResultRate = 0;
+            var marchExpectedResultRate = 0;
+
+            Assert.Equal(janExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[1]]);
+            Assert.Equal(marchExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[3]]);
+            Assert.Equal(decExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[12]]);
+        }
+        [Fact]
+        public async void GetMonthlySuccessRateForHabit1log()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-01-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+            habitService.Setup(o => o.GetLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetMonthlySuccessRateForHabit(20, 2021);
+            var janExpectedResultRate = 100;
+            var decExpectedResultRate = 0;
+            var marchExpectedResultRate = 0;
+
+            Assert.Equal(janExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[1]]);
+            Assert.Equal(marchExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[3]]);
+            Assert.Equal(decExpectedResultRate, result[ServiceConstants.MONTHS_OF_YEAR[12]]);
+        }
         [Fact]
         public async void GetMonthlySuccessRateForHabit()
         {
@@ -1149,6 +1477,44 @@ namespace CED.Services.Tests
 
         #region Get Perfect Days for Habit
         [Fact]
+        public async void GetHabitPerfectDays0Log()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>();
+            habitService.Setup(o => o.GetLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetPerfectDaysForHabit(20);
+            var expectedResult = 0;
+
+            Assert.Equal(expectedResult, result);
+        }
+        [Fact]
+        public async void GetHabitPerfectDays1Log()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+            habitService.Setup(o => o.GetLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+
+            var result = await service.GetPerfectDaysForHabit(20);
+            var expectedResult = 1;
+
+            Assert.Equal(expectedResult, result);
+        }
+        [Fact]
         public async void GetHabitPerfectDays2()
         {
             var habitService = new Mock<IHabitService>();
@@ -1214,6 +1580,44 @@ namespace CED.Services.Tests
         #endregion
 
         #region Get Total Completions for habit
+        [Fact]
+        public async void GetTotalCompletionsForHabit0Logs()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>();
+
+            habitService.Setup(o => o.GetAllCompletedLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetTotalCompletionsForHabit(20);
+            var expectedResult = 0;
+
+            Assert.Equal(result, expectedResult);
+        }
+        [Fact]
+        public async void GetTotalCompletionsForHabit1()
+        {
+            var habitService = new Mock<IHabitService>();
+            var habitRepo = new Mock<IHabitStatRepository>();
+            var habitLogs = new List<HabitLog>()
+            {
+                new HabitLog()
+                {
+                    Id = 3,
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = 1,
+                    UserId = 20,
+                    Value = 'C'
+                }
+            };
+
+            habitService.Setup(o => o.GetAllCompletedLogsForHabit(20)).Returns(Task.FromResult(habitLogs));
+            HabitStatService service = new HabitStatService(habitService.Object, habitRepo.Object);
+            var result = await service.GetTotalCompletionsForHabit(20);
+            var expectedResult = 1;
+
+            Assert.Equal(result, expectedResult);
+        }
         [Fact]
         public async void GetTotalCompletionsForHabit6()
         {

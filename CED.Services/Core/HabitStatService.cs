@@ -36,7 +36,7 @@ namespace CED.Services.Core
             {
                 currentStreak = currentStreak,
                 maxStreak = maxStreak,
-                averageSuccessReate = avgSuccessRate,
+                averageSuccessRate = avgSuccessRate,
                 monthlySuccessRate = monthlySuccessRate,
                 perfectDays = perfectDays,
                 totalFriendsHelping = totalFriendsHelping,
@@ -58,21 +58,28 @@ namespace CED.Services.Core
                 habitIds.ForEach(habitId => {
                     var habitLogs = logs.FindAll(o => o.HabitId == habitId);
                     var streak = 0;
-
-                    for (int i = habitLogs.Count - 1; i >= 0; i--)
+                    if (habitLogs.Count > 1)
                     {
-                        if (i > 0)
+                        for (int i = habitLogs.Count - 1; i >= 0; i--)
                         {
-                            // subtract latest day from previous
-                            if ((habitLogs[i].CreatedAt.Date - habitLogs[i - 1].CreatedAt.Date).Days == 1)
-                                streak++;
-                        }
-                        else
-                        {
-                            if (Math.Abs((habitLogs[i].CreatedAt.Date - habitLogs[i + 1].CreatedAt.Date).Days) == 1)
-                                streak++;
+                            if (i > 0)
+                            {
+                                // subtract latest day from previous
+                                if ((habitLogs[i].CreatedAt.Date - habitLogs[i - 1].CreatedAt.Date).Days == 1)
+                                    streak++;
+                            }
+                            else
+                            {
+                                if (Math.Abs((habitLogs[i].CreatedAt.Date - habitLogs[i + 1].CreatedAt.Date).Days) == 1)
+                                    streak++;
+                            }
                         }
                     }
+                    else
+                    {
+                        streak++;
+                    }
+                    
 
                     if (streak > currentStreak)
                         currentStreak = streak;
@@ -101,22 +108,29 @@ namespace CED.Services.Core
                     // find all logs for a given habit id
                     var habitLogs = logs.FindAll(o => o.HabitId == habitId);
                     var streak = 0;
-
-                    for (int i = 0; i < habitLogs.Count; i++)
+                    if (habitLogs.Count > 1)
                     {
-                        // if difference between next date and current date is 1 then add to local streak variable
-                        if (i == habitLogs.Count - 1)
+                        for (int i = 0; i < habitLogs.Count; i++)
                         {
-                            // check the previous streak
-                            if ((habitLogs[i].CreatedAt.Date - habitLogs[i - 1].CreatedAt.Date).Days == 1)
-                                streak++;
-                        }
-                        else
-                        {
-                            if (i == habitLogs.Count - 1 || (habitLogs[i + 1].CreatedAt.Date - habitLogs[i].CreatedAt.Date).Days == 1)
-                                streak++;
+                            // if difference between next date and current date is 1 then add to local streak variable
+                            if (i == habitLogs.Count - 1)
+                            {
+                                // check the previous streak
+                                if ((habitLogs[i].CreatedAt.Date - habitLogs[i - 1].CreatedAt.Date).Days == 1)
+                                    streak++;
+                            }
+                            else
+                            {
+                                if (i == habitLogs.Count - 1 || (habitLogs[i + 1].CreatedAt.Date - habitLogs[i].CreatedAt.Date).Days == 1)
+                                    streak++;
+                            }
                         }
                     }
+                    else
+                    {
+                        streak++;
+                    }
+                    
 
                     // if the local variable streak is higher than maxStreak, then update maxStreak!
                     if (streak > maxStreak)
@@ -197,26 +211,54 @@ namespace CED.Services.Core
         #endregion
 
         #region Habit Stats
+        public async Task<HabitStatDTO> GetHabitStats(int habitId, int year)
+        {
+            var currentStreak = await GetCurrentStreakForHabit(habitId);
+            var maxStreak = await GetMaxStreakForHabit(habitId);
+            var monthlySuccessRate = await GetMonthlySuccessRateForHabit(habitId, year);
+            var perfectDays = await GetPerfectDaysForHabit(habitId);
+            var totalFriendsHelping = await GetTotalFriendsHelpingForHabit(habitId);
+            var totalCompletions = await GetTotalCompletionsForHabit(habitId);
+
+            return new HabitStatDTO()
+            {
+                currentStreak = currentStreak,
+                maxStreak = maxStreak,
+                averageSuccessRate = -1.0,
+                monthlySuccessRate = monthlySuccessRate,
+                perfectDays = perfectDays,
+                totalFriendsHelping = totalFriendsHelping,
+                totalCompletions = totalCompletions
+            };
+        }
         public async Task<int> GetCurrentStreakForHabit(int habitId)
         {
             var currentStreak = 0;
             var logs = await _habitService.GetLogsForHabit(habitId);
             var streak = 0;
-            if (logs != null)
+            if (logs != null && logs.Count != 0)
             {
-                for (int i = logs.Count - 1; i >= 0; i--)
+                var completedLogs = logs.FindAll(o => o.Value == 'C');
+                if (completedLogs.Count > 1)
                 {
-                    if (i > 0)
+                    for (int i = completedLogs.Count - 1; i >= 0; i--)
                     {
-                        // subtract latest day from previous
-                        if ((logs[i].CreatedAt.Date - logs[i - 1].CreatedAt.Date).Days == 1)
-                            streak++;
+                        if (i > 0)
+                        {
+                            // subtract latest day from previous
+                            if ((completedLogs[i].CreatedAt.Date - completedLogs[i - 1].CreatedAt.Date).Days == 1)
+                                streak++;
+                        }
+                        else
+                        {
+                            if (Math.Abs((completedLogs[i].CreatedAt.Date - completedLogs[i + 1].CreatedAt.Date).Days) == 1)
+                                streak++;
+                        }
                     }
-                    else
-                    {
-                        if (Math.Abs((logs[i].CreatedAt.Date - logs[i + 1].CreatedAt.Date).Days) == 1)
-                            streak++;
-                    }
+                }
+                else
+                {
+                    streak++;
                 }
 
                 if (streak > currentStreak)
@@ -228,29 +270,37 @@ namespace CED.Services.Core
 
         public async Task<int> GetMaxStreakForHabit(int habitId)
         {
-            // This will be the max streak, the value returnedd
+            // This will be the max streak, the value returned
             var maxStreak = 0;
 
             // Get all habit logs for a given user all habits ---- can call once
             var logs = await _habitService.GetLogsForHabit(habitId);
             var streak = 0;
 
-            if (logs != null)
+            if (logs != null && logs.Count != 0)
             {
-                for (int i = 0; i < logs.Count; i++)
+                var completedLogs = logs.FindAll(o => o.Value == 'C');
+                if (completedLogs.Count > 1)
                 {
-                    // if difference between next date and current date is 1 then add to local streak variable
-                    if (i == logs.Count - 1)
+                    for (int i = 0; i < completedLogs.Count; i++)
                     {
-                        // check the previous streak
-                        if ((logs[i].CreatedAt.Date - logs[i - 1].CreatedAt.Date).Days == 1)
-                            streak++;
+                        // if difference between next date and current date is 1 then add to local streak variable
+                        if (i == completedLogs.Count - 1)
+                        {
+                            // check the previous streak
+                            if ((completedLogs[i].CreatedAt.Date - completedLogs[i - 1].CreatedAt.Date).Days == 1)
+                                streak++;
+                        }
+                        else
+                        {
+                            if (i == completedLogs.Count - 1 || (completedLogs[i + 1].CreatedAt.Date - completedLogs[i].CreatedAt.Date).Days == 1)
+                                streak++;
+                        }
                     }
-                    else
-                    {
-                        if (i == logs.Count - 1 || (logs[i + 1].CreatedAt.Date - logs[i].CreatedAt.Date).Days == 1)
-                            streak++;
-                    }
+                }
+                else
+                {
+                    streak++;
                 }
 
                 // if the local variable streak is higher than maxStreak, then update maxStreak!
