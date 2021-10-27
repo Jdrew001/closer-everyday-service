@@ -26,11 +26,10 @@ jobs:
         uses: appleboy/scp-action@master
         with:
           source: /github/workspace/backups
-          target: /CED
+          target: ~/CED
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.SCP_PORT }}
   build:
     name: Build and Test CED Application
     needs: backup_db
