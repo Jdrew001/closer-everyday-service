@@ -34,7 +34,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("FriendId", userId);
             command.Parameters.AddWithValue("HabitId", habitId);
             command.Parameters.AddWithValue("OwnerId", ownerId);
 

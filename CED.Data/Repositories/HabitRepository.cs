@@ -12,13 +12,16 @@ namespace CED.Data.Repositories
     public class HabitRepository : DataProvider, IHabitRepository
     {
         private readonly IFrequencyRepository _frequencyRepository;
+        private readonly IScheduleRepository _scheduleRepository;
 
         public HabitRepository(
             IOptions<ConnectionStrings> connectionStrings,
-            IFrequencyRepository frequencyRepository)
+            IFrequencyRepository frequencyRepository,
+            IScheduleRepository scheduleRepository)
             : base(connectionStrings.Value.CEDDB)
         {
             _frequencyRepository = frequencyRepository;
+            _scheduleRepository = scheduleRepository;
         }
 
         #region Habit Methods
@@ -85,10 +88,28 @@ namespace CED.Data.Repositories
             return habit;
         }
 
-        public Task<Habit> SaveHabit(Habit habit)
+        public async Task<Habit> SaveHabit(Habit habit)
         {
-            //CreateHabit
-            throw new System.NotImplementedException();
+            string spName = "SaveHabit";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("Name", habit.Name);
+            command.Parameters.AddWithValue("Icon", habit.Icon);
+            command.Parameters.AddWithValue("Reminder", habit.Reminder);
+            command.Parameters.AddWithValue("ReminderAt", habit.ReminderAt);
+            command.Parameters.AddWithValue("VisibleToFriends", habit.VisibleToFriends);
+            command.Parameters.AddWithValue("Description", habit.Description);
+            command.Parameters.AddWithValue("Status", habit.Status);
+            command.Parameters.AddWithValue("HabitTypeId", habit.HabitType.Id);
+            command.Parameters.AddWithValue("UserId", habit.UserId);
+            command.Parameters.AddWithValue("ScheduleId", habit.Schedule.Id);
+
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                habit = ReadHabit(drh);
+
+            return habit;
         }
 
         public Task<Habit> UpdateHabit(Habit habit)
@@ -286,8 +307,7 @@ namespace CED.Data.Repositories
             return new FriendHabit()
             {
                 Id = drh.Get<int>("id"),
-                Firstname = drh.Get<string>("firstname"),
-                LastName = drh.Get<string>("lastname"),
+                FriendId = drh.Get<int>("friendId"),
                 OwnerId = drh.Get<int>("ownerId")
             };
         }

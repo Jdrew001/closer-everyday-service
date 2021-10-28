@@ -51,6 +51,18 @@ namespace CED.Controllers
             return Ok(GenerateSuccessResponse(null, habit));
         }
 
+        public async Task<IActionResult> SaveHabit(Habit habit)
+        {
+            var userId = await GetUserId();
+            if (userId == -1)
+            {
+                return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+            }
+
+            var result = await _habitService.SaveHabit(habit);
+            return Ok(GenerateSuccessResponse("Success", habit));
+        }
+
         [HttpPost("updateHabitLog")]
         public async Task<IActionResult> UpdateHabitLog(HabitLogUpdateRequestDTO logUpdateDto)
         {

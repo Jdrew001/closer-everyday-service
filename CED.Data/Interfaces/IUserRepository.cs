@@ -11,6 +11,7 @@ namespace CED.Data.Interfaces
     public interface IUserRepository
     {
         Task<User> GetUserByEmail(string email);
+        Task<User> GetUserById(int userId);
         Task CreateNewUser(RegistrationDTO registrationDTO);
         Task<User> GetUserByRefreshToken(RefreshTokenDTO refreshTokenDTO);
         Task Logout(string token);
