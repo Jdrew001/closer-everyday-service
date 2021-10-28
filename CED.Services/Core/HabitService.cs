@@ -15,21 +15,18 @@ namespace CED.Services.Core
         private readonly IFrequencyService _frequencyService;
         private readonly IScheduleService _scheduleService;
         private readonly IFriendService _friendService;
-        private readonly IUserRepository _userRepository;
 
         public HabitService(
             ILogger<HabitService> log,
             IHabitRepository habitRepository,
             IFrequencyService frequencyService,
             IScheduleService scheduleService,
-            IFriendService friendService,
-            IUserRepository userRepository)
+            IFriendService friendService)
         {
             _habitRepository = habitRepository;
             _frequencyService = frequencyService;
             _friendService = friendService;
             _scheduleService = scheduleService;
-            _userRepository = userRepository;
             _log = log;
         }
 
@@ -110,9 +107,9 @@ namespace CED.Services.Core
                 var habitFriends = new List<FriendHabit>();
                 _log.LogDebug("Saving Habit Friends : {Habit Friends}", habit.friendHabits);
                 // save friend habits
-                habit.friendHabits.ForEach(o =>
+                habit.friendHabits.ForEach(async o =>
                 {
-                    var habitFriend = _friendService.SaveFriendToHabit(o.FriendId, habit.Id, habit.UserId).Result;
+                    var habitFriend = await _friendService.SaveFriendToHabit(o.FriendId, habit.Id, habit.UserId);
                     if (habitFriend != null)
                         habitFriends.Add(habitFriend);
                 });

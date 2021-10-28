@@ -20,6 +20,11 @@ namespace CED.Data.Repositories
         {
         }
 
+        public async Task<User> GetUserById(int userId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task CreateNewUser(RegistrationDTO registrationDTO)
         {
             var hashAndSalt = Hash.GetHash(registrationDTO.password);

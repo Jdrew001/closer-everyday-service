@@ -13,14 +13,10 @@ namespace CED.Data.Repositories
 {
     public class ScheduleRepository : DataProvider, IScheduleRepository
     {
-        private readonly IScheduleTypeRepository _scheduleTypeRepository;
-
         public ScheduleRepository(
-            IOptions<ConnectionStrings> connectionStrings,
-            IScheduleTypeRepository scheduleTypeRepository)
+            IOptions<ConnectionStrings> connectionStrings)
             : base(connectionStrings.Value.CEDDB)
         {
-            _scheduleTypeRepository = scheduleTypeRepository;
         }
 
         public async Task<Schedule> GetScheduleByHabitId(int habitId)

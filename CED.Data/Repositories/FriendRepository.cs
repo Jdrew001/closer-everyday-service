@@ -69,10 +69,10 @@ namespace CED.Data.Repositories
         {
             return new FriendHabit()
             {
-                Firstname = drh.Get<string>("firstName"),
                 Id = drh.Get<int>("Id"),
-                LastName = drh.Get<string>("lastName"),
-                OwnerId = drh.Get<int>("ownerId")
+                OwnerId = drh.Get<int>("ownerId"),
+                FriendId = drh.Get<int>("friendId"),
+                HabitId = drh.Get<int>("habitId")
             };
         }
     }

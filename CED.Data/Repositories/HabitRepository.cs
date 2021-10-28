@@ -12,16 +12,13 @@ namespace CED.Data.Repositories
     public class HabitRepository : DataProvider, IHabitRepository
     {
         private readonly IFrequencyRepository _frequencyRepository;
-        private readonly IScheduleRepository _scheduleRepository;
 
         public HabitRepository(
             IOptions<ConnectionStrings> connectionStrings,
-            IFrequencyRepository frequencyRepository,
-            IScheduleRepository scheduleRepository)
+            IFrequencyRepository frequencyRepository)
             : base(connectionStrings.Value.CEDDB)
         {
             _frequencyRepository = frequencyRepository;
-            _scheduleRepository = scheduleRepository;
         }
 
         #region Habit Methods
