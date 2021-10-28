@@ -23,6 +23,22 @@ namespace CED.Data.Repositories
             _scheduleTypeRepository = scheduleTypeRepository;
         }
 
+        public async Task<Schedule> GetScheduleByHabitId(int habitId)
+        {
+            Schedule schedule = null;
+            string spName = "SaveSchedule";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habitId);
+
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                schedule = ReadSchedule(drh);
+
+            return schedule;
+        }
+
         public async Task<Schedule> SaveSchedule(Schedule schedule)
         {
             string spName = "SaveSchedule";
