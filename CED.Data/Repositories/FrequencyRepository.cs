@@ -43,6 +43,22 @@ namespace CED.Data.Repositories
             return frequencies;
         }
 
+        public async Task<Frequency> SaveHabitFrequency(int frequencyId, int habitId)
+        {
+            Frequency frequency = null;
+            string spName = "SaveHabitFrequency";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("FrequencyId", frequencyId);
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                frequency = ReadFrequency(drh);
+
+            return frequency;
+        }
+
         private Frequency ReadFrequency(DataReaderHelper drh)
         {
             return new Frequency()
