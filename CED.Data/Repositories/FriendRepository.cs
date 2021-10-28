@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 using CED.Data.Interfaces;
 using CED.Models;
 using CED.Models.Core;
+using Microsoft.Extensions.Options;
 
 namespace CED.Data.Repositories
 {
     public class FriendRepository : DataProvider, IFriendRepository
     {
-        public FriendRepository(string connectionStringName)
-            : base(connectionStringName)
+        public FriendRepository(
+            IOptions<ConnectionStrings> connectionStrings)
+            : base(connectionStrings.Value.CEDDB)
         {
         }
 

@@ -51,6 +51,7 @@ namespace CED.Controllers
             return Ok(GenerateSuccessResponse(null, habit));
         }
 
+        [HttpPost("save")]
         public async Task<IActionResult> SaveHabit(Habit habit)
         {
             var userId = await GetUserId();
