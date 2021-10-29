@@ -50,7 +50,7 @@ jobs:
     name: Failure Notification Discord
     runs-on: ubuntu-latest
     if: ${{ failure() }}
-    needs: [build,publish_upload,deploy,db_deploy]
+    needs: build
     steps:
       - name: Discord notification
         env:
@@ -80,7 +80,7 @@ jobs:
     name: Success Notification Discord
     runs-on: ubuntu-latest
     if: ${{ success() }}
-    needs: [build,publish_upload,deploy,db_deploy]
+    needs: build
     steps:
       - name: Discord notification
         env:
