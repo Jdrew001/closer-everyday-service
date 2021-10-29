@@ -46,6 +46,18 @@ jobs:
           from: CED Pipeline Failure
           body: Github pipeline has failed to run -- Pull Request
           priority: high
+  discord_failure:
+    name: Failure Notification Discord
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    needs: [build,publish_upload,deploy,db_deploy]
+    steps:
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'PULL REQUEST: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} app has failed to deploy.'
   notification_success:
     name: Success Notification Email
     runs-on: ubuntu-latest
@@ -64,11 +76,15 @@ jobs:
           from: CED Pipeline Success
           body: Github pipeline has succeeded -- Pull Request
           priority: high
-    # - name: Copy via ssh
-    #   uses: garygrossgarten/github-action-scp@v0.5.3
-    #   with:
-    #     local: /home/runner/work/closer-everyday-service/closer-everyday-service/CED/bin/Release/net5.0/
-    #     remote: /var/www/ced-service/
-    #     host: ${{ secrets.REMOTE_HOST }}
-    #     username: ${{ secrets.USERNAME }}
-    #     password: ${{ secrets.PASSWORD }}
+  discord_success:
+    name: Success Notification Discord
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    needs: [build,publish_upload,deploy,db_deploy]
+    steps:
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'PULL REQUEST: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} app has been deployed.'
