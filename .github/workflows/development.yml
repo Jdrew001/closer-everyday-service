@@ -131,7 +131,7 @@ jobs:
           body: Github pipeline has failed to run
           priority: high
   discord_failure:
-    name: Failure Notification Discord Successful
+    name: Failure Notification Discord
     runs-on: ubuntu-latest
     if: ${{ failure() }}
     needs: [build,publish_upload,deploy,db_deploy]
@@ -141,7 +141,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: '{{ EVENT_PAYLOAD.repository.full_name }} app has failed to deploy.'
+          args: 'BRANCH: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} app has failed to deploy.'
   notification_success:
     name: Success Notification Email
     runs-on: ubuntu-latest
@@ -161,7 +161,7 @@ jobs:
           body: Github pipeline has succeeded
           priority: high
   discord_success:
-    name: Success Notification Discord Successful
+    name: Success Notification Discord
     runs-on: ubuntu-latest
     if: ${{ success() }}
     needs: [build,publish_upload,deploy,db_deploy]
@@ -171,4 +171,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: '{{ EVENT_PAYLOAD.repository.full_name }} app has been deployed.'
+          args: 'BRANCH: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} app has been deployed.'
