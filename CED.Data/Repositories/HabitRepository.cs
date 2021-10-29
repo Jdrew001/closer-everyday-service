@@ -57,9 +57,6 @@ namespace CED.Data.Repositories
             while (drh.Read())
             {
                 var habit = ReadHabit(drh);
-                habit.Frequencies = await _frequencyRepository.GetHabitFrequencies(habit.Id);
-                habit.friendHabits = await GetFriendHabits(habit.Id);
-                habit.habitLog = await GetHabitLogByIdAndDate(habit.Id, date);
                 habits.Add(habit);
             }
 
@@ -305,6 +302,9 @@ namespace CED.Data.Repositories
             {
                 Id = drh.Get<int>("id"),
                 FriendId = drh.Get<int>("friendId"),
+                FriendFirstName = drh.Get<string>("FirstName"),
+                FriendLastName = drh.Get<string>("LastName"),
+                FriendEmail = drh.Get<string>("Email"),
                 OwnerId = drh.Get<int>("ownerId")
             };
         }

@@ -4,6 +4,7 @@ using CED.Models.Core;
 using CED.Services.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CED.Models.DTO;
 using Microsoft.Extensions.Logging;
 
 namespace CED.Services.Core
@@ -35,9 +36,16 @@ namespace CED.Services.Core
             return _habitRepository.GetAllHabits();
         }
 
-        public Task<List<Habit>> GetAllUserHabits(int userId, string date)
+        public async Task<List<Habit>> GetAllUserHabits(int userId, string date)
         {
-            return _habitRepository.GetAllUserHabits(userId, date);
+            var habits = await _habitRepository.GetAllUserHabits(userId, date);
+            habits.ForEach(async o =>
+            {
+                o.Frequencies = await _frequencyService.GetHabitFrequencies(o.Id);
+                o.friendHabits = await _friendService.GetFriendsForHabit(o.Id);
+                o.habitLog = await GetHabitLogByIdDate(o.Id, date);
+            });
+            return habits;
         }
 
         public Task<Habit> GetHabitById(int id)

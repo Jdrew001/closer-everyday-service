@@ -1,0 +1,39 @@
+create new habit
+update new habit
+
+{
+    "name": "Wake Up earlyUPDATED!s",
+    "icon": "",
+    "reminder": false,
+    "reminderAt": "2021-10-08T22:59:28",
+    "visibleToFriends": true,
+    "description": "this is a habit",
+    "status": "P",
+    "habitType": 1,
+    "schedule": {
+        "scheduleType": 1,
+        "userId": 20,
+        "scheduleTime": "2021-10-08T22:59:28"
+    },
+    "userId": 20,
+    "frequencies": [
+        {
+            "id": 2,
+            "value": "Monday"
+        },
+        {
+            "id": 4,
+            "value": "Wednesday"
+        },
+        {
+            "id": 6,
+            "value": "Friday"
+        }
+    ],
+    "friendHabits": [
+        {
+            "friendId": 7,
+            "ownerId": 20
+        }
+    ]
+}

@@ -21,7 +21,18 @@ namespace CED.Data.Repositories
 
         public async Task<List<FriendHabit>> GetFriendsForHabit(int habitId)
         {
-            throw new NotImplementedException();
+            List<FriendHabit> habitFriends = new List<FriendHabit>();
+            string spName = "GetHabitFriends";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habitId);
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+            while (drh.Read())
+                habitFriends.Add(ReadFriendHabit(drh));
+
+            return habitFriends;
         }
 
         public async Task<FriendHabit> GetFriendHabitById(int friendHabitId)
@@ -71,10 +82,12 @@ namespace CED.Data.Repositories
         {
             return new FriendHabit()
             {
-                Id = drh.Get<int>("Id"),
-                OwnerId = drh.Get<int>("ownerId"),
+                Id = drh.Get<int>("id"),
                 FriendId = drh.Get<int>("friendId"),
-                HabitId = drh.Get<int>("habitId")
+                FriendFirstName = drh.Get<string>("FirstName"),
+                FriendLastName = drh.Get<string>("LastName"),
+                FriendEmail = drh.Get<string>("Email"),
+                OwnerId = drh.Get<int>("ownerId")
             };
         }
     }

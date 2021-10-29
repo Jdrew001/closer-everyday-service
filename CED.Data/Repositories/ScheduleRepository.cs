@@ -22,7 +22,7 @@ namespace CED.Data.Repositories
         public async Task<Schedule> GetScheduleByHabitId(int habitId)
         {
             Schedule schedule = null;
-            string spName = "SaveSchedule";
+            string spName = "GetScheduleByHabitId";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
