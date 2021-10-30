@@ -191,8 +191,10 @@ CREATE PROCEDURE GetHabitFriends(
 BEGIN
     SELECT 
 		fh.idfriend_habit as "id",
-        u.firstname,
-        u.lastname,
+        u.iduser as "friendId",
+        u.firstname as "FirstName",
+        u.lastname as "LastName",
+        u.email as "Email",
         fh.ownerId
     FROM `CEDDB`.`friend_habit` fh
 	JOIN User u ON fh.friendId=u.iduser

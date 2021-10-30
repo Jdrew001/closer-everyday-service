@@ -23,3 +23,50 @@ END //
 
 DELIMITER ;
 -- --------------------------------------
+
+
+-- --------------------------------------
+
+DROP PROCEDURE IF EXISTS SaveSchedule;
+
+DELIMITER //
+
+CREATE PROCEDURE SaveSchedule(
+	IN
+    ScheduleTypeId INT,
+    UserId BIGINT,
+    ScheduleTime DATETIME
+)
+BEGIN
+    INSERT INTO `ceddb`.`schedule` (`schedule_type_id`, `user_id`, `schedule_time`)
+	VALUES(ScheduleTypeId, UserId, ScheduleTime);
+    
+    SELECT * FROM `ceddb`.`schedule` s WHERE s.`idschedule`=(SELECT last_insert_id());
+END //
+
+DELIMITER ;
+-- --------------------------------------
+
+DROP PROCEDURE IF EXISTS UpdateSchedule;
+
+DELIMITER //
+
+CREATE PROCEDURE UpdateSchedule(
+	IN
+    Id INT,
+    ScheduleTypeId INT,
+    UserId BIGINT,
+    ScheduleTime DATETIME
+)
+BEGIN
+    UPDATE `ceddb`.`schedule` s SET
+		`schedule_type_id`= ScheduleTypeId,
+        user_id = UserId,
+        schedule_time = ScheduleTime
+	WHERE s.idschedule = Id;
+    
+    SELECT * FROM `ceddb`.`schedule` s WHERE s.`idschedule`=Id;
+END //
+
+DELIMITER ;
+-- --------------------------------------
