@@ -38,7 +38,7 @@ namespace CED.Data.Repositories
                     Created = drh.Get<DateTime>("Created"),
                     Revoked = drh.Get<DateTime?>("Revoked"),
                     isRevoked = drh.Get<bool>("is_revoked"),
-                    DeviceId = drh.Get<Guid>("deviceId")
+                    DeviceId = new Guid(drh.Get<string>("deviceId"))
                 };
             }
 
@@ -52,7 +52,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -102,7 +102,7 @@ namespace CED.Data.Repositories
                 Expires = drh.Get<DateTime>("expires"),
                 Created = drh.Get<DateTime>("created"),
                 Revoked = drh.Get<DateTime>("revoked"),
-                DeviceId = drh.Get<Guid>("deviceId")
+                DeviceId = new Guid(drh.Get<string>("deviceId"))
             };
         }
     }

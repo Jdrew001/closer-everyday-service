@@ -26,7 +26,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
@@ -43,7 +43,7 @@ namespace CED.Data.Repositories
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("ScheduleTypeId", schedule.ScheduleType.Id);
-            command.Parameters.AddWithValue("UserId", schedule.UserId);
+            command.Parameters.AddWithValue("UserId", schedule.UserId.ToString());
             command.Parameters.AddWithValue("ScheduleTime", schedule.ScheduleTime);
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
@@ -59,9 +59,9 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("Id", schedule.Id);
+            command.Parameters.AddWithValue("Id", schedule.Id.ToString());
             command.Parameters.AddWithValue("ScheduleTypeId", schedule.ScheduleType.Id);
-            command.Parameters.AddWithValue("UserId", schedule.UserId);
+            command.Parameters.AddWithValue("UserId", schedule.UserId.ToString());
             command.Parameters.AddWithValue("ScheduleTime", schedule.ScheduleTime);
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
@@ -75,14 +75,14 @@ namespace CED.Data.Repositories
         {
             return new Schedule()
             {
-                Id = drh.Get<Guid>("Id"),
+                Id = new Guid(drh.Get<string>("Id")),
                 ScheduleTime = drh.Get<DateTime>("ScheduleTime"),
                 ScheduleType = new ScheduleType()
                 {
                     Id = drh.Get<int>("idschedule_type"),
                     Value = drh.Get<string>("scheduleType")
                 },
-                UserId = drh.Get<Guid>("UserId")
+                UserId = new Guid(drh.Get<string>("UserId"))
             };
         }
     }

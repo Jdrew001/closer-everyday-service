@@ -26,7 +26,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -47,9 +47,9 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("FriendId", userId);
-            command.Parameters.AddWithValue("HabitId", habitId);
-            command.Parameters.AddWithValue("OwnerId", ownerId);
+            command.Parameters.AddWithValue("FriendId", userId.ToString());
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
+            command.Parameters.AddWithValue("OwnerId", ownerId.ToString());
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
@@ -82,12 +82,12 @@ namespace CED.Data.Repositories
         {
             return new FriendHabit()
             {
-                Id = drh.Get<Guid>("id"),
-                FriendId = drh.Get<Guid>("friendId"),
+                Id = new Guid(drh.Get<string>("id")),
+                FriendId = new Guid(drh.Get<string>("friendId")),
                 FriendFirstName = drh.Get<string>("FirstName"),
                 FriendLastName = drh.Get<string>("LastName"),
                 FriendEmail = drh.Get<string>("Email"),
-                OwnerId = drh.Get<Guid>("ownerId")
+                OwnerId = new Guid(drh.Get<string>("ownerId"))
             };
         }
     }

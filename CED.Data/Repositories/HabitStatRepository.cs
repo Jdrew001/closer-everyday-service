@@ -22,7 +22,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
@@ -38,7 +38,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())

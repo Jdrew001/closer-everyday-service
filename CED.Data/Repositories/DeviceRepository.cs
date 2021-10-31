@@ -29,7 +29,7 @@ namespace CED.Data.Repositories
             command.Parameters.AddWithValue("Platform", dto.Platform);
             command.Parameters.AddWithValue("UUID", dto.UUID);
             command.Parameters.AddWithValue("Manufacturer", dto.Manufacturer);
-            command.Parameters.AddWithValue("UserId", dto.UserId);
+            command.Parameters.AddWithValue("UserId", dto.UserId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())

@@ -35,7 +35,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -51,8 +51,8 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", habitId);
-            command.Parameters.AddWithValue("FrequencyId", frequencyId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
+            command.Parameters.AddWithValue("FrequencyId", frequencyId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
                 frequency = ReadFrequency(drh);
@@ -64,7 +64,7 @@ namespace CED.Data.Repositories
         {
             return new Frequency()
             {
-                Id = drh.Get<Guid>("idfrequency"),
+                Id = new Guid(drh.Get<string>("idfrequency")),
                 Value = drh.Get<string>("frequency")
             };
         }

@@ -50,7 +50,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
             command.Parameters.AddWithValue("DateValue", date);
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
@@ -70,7 +70,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", id);
+            command.Parameters.AddWithValue("HabitId", id.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -96,8 +96,8 @@ namespace CED.Data.Repositories
             command.Parameters.AddWithValue("Description", habit.Description);
             command.Parameters.AddWithValue("Status", habit.Status);
             command.Parameters.AddWithValue("HabitTypeId", habit.HabitType.Id);
-            command.Parameters.AddWithValue("UserId", habit.UserId);
-            command.Parameters.AddWithValue("ScheduleId", habit.Schedule.Id);
+            command.Parameters.AddWithValue("UserId", habit.UserId.ToString());
+            command.Parameters.AddWithValue("ScheduleId", habit.Schedule.Id.ToString());
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
@@ -125,7 +125,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -144,8 +144,8 @@ namespace CED.Data.Repositories
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("Value", status);
-            command.Parameters.AddWithValue("UserId", userId);
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
@@ -162,7 +162,7 @@ namespace CED.Data.Repositories
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("Value", status);
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
             command.Parameters.AddWithValue("DateValue", date);
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
@@ -179,7 +179,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", id);
+            command.Parameters.AddWithValue("HabitId", id.ToString());
             command.Parameters.AddWithValue("DateValue", date);
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
@@ -196,7 +196,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -211,7 +211,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", id);
+            command.Parameters.AddWithValue("HabitId", id.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -226,7 +226,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
                 logs.Add(ReadHabitLog(drh));
@@ -241,7 +241,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
                 logs.Add(ReadHabitLog(drh));
@@ -255,7 +255,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
                 logs.Add(ReadHabitLog(drh));
@@ -269,7 +269,7 @@ namespace CED.Data.Repositories
         {
             return new Habit()
             {
-                Id = drh.Get<Guid>("idhabit"),
+                Id = new Guid(drh.Get<string>("idhabit")),
                 Name = drh.Get<string>("name"),
                 Icon = drh.Get<byte[]>("icon"),
                 Reminder = drh.Get<bool>("reminder"),
@@ -285,7 +285,7 @@ namespace CED.Data.Repositories
                 },
                 Schedule = new Schedule()
                 {
-                    Id = drh.Get<Guid>("idSchedule"),
+                    Id = new Guid(drh.Get<string>("idSchedule")),
                     ScheduleTime = drh.Get<DateTime>("schedule_time"),
                     ScheduleType = new ScheduleType()
                     {
@@ -293,29 +293,29 @@ namespace CED.Data.Repositories
                         Value = drh.Get<string>("scheduleType")
                     }
                 },
-                UserId = drh.Get<Guid>("userId")
+                UserId = new Guid(drh.Get<string>("userId"))
             };
         }
         private FriendHabit ReadFriendHabit(DataReaderHelper drh)
         {
             return new FriendHabit()
             {
-                Id = drh.Get<Guid>("id"),
-                FriendId = drh.Get<Guid>("friendId"),
+                Id = new Guid(drh.Get<string>("id")),
+                FriendId = new Guid(drh.Get<string>("friendId")),
                 FriendFirstName = drh.Get<string>("FirstName"),
                 FriendLastName = drh.Get<string>("LastName"),
                 FriendEmail = drh.Get<string>("Email"),
-                OwnerId = drh.Get<Guid>("ownerId")
+                OwnerId = new Guid(drh.Get<string>("ownerId"))
             };
         }
         private HabitLog ReadHabitLog(DataReaderHelper drh)
         {
             return new HabitLog()
             {
-                Id = drh.Get<Guid>("id"),
+                Id = new Guid(drh.Get<string>("id")),
                 Value = drh.Get<char>("value"),
-                UserId = drh.Get<Guid>("userId"),
-                HabitId = drh.Get<Guid>("habitId"),
+                UserId = new Guid(drh.Get<string>("userId")),
+                HabitId = new Guid(drh.Get<string>("habitId")),
                 CreatedAt = drh.Get<DateTime>("createdAt")
             };
         }
