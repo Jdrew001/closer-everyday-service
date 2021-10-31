@@ -17,16 +17,18 @@ CREATE PROCEDURE RegisterAccount(
     Manufacturer VARCHAR(100)
 )
 BEGIN
+SET @id = UUID();
+
 INSERT INTO `ceddb`.`user`
-(`firstname`,`lastname`,`email`,`passwordSalt`, `locked`, `password`)
-	VALUES(Firstname, Lastname, Email, Salt, false, UserHash);
+(`iduser`, `firstname`,`lastname`,`email`,`passwordSalt`, `locked`, `password`)
+	VALUES(@id, Firstname, Lastname, Email, Salt, false, UserHash);
     
 call CreateUserDevice(
 	DeviceGUID,
     DeviceModel,
     DevicePlatform,
     Manufacturer,
-    (SELECT `ceddb`.`user`.`iduser` FROM `ceddb`.`user` WHERE `ceddb`.`user`.`iduser`=(SELECT last_insert_id())));
+    (SELECT `ceddb`.`user`.`iduser` FROM `ceddb`.`user` WHERE `ceddb`.`user`.`iduser`=@id));
 END //
 
 DELIMITER ;
@@ -69,7 +71,7 @@ DROP PROCEDURE IF EXISTS GetUserRefreshTokenById;
 DELIMITER //
 
 CREATE PROCEDURE GetUserRefreshTokenById(
-	IN UserId VARCHAR(256)
+	IN UserId VARCHAR(255)
 )
 BEGIN
 	SELECT re.token, re.expires, re.created, re.isExpired, re.revoked, re.deviceId
@@ -89,7 +91,7 @@ DROP PROCEDURE IF EXISTS SaveRefreshToken;
 DELIMITER //
 
 CREATE PROCEDURE SaveRefreshToken(
-	IN UserId INT, Token VARCHAR(255), IsExpired Boolean, Expires DATETIME, Created DATETIME, Revoked DATETIME, IsRevoked Boolean, DeviceId INT
+	IN UserId VARCHAR(255), Token VARCHAR(255), IsExpired Boolean, Expires DATETIME, Created DATETIME, Revoked DATETIME, IsRevoked Boolean, DeviceId INT
 )
 BEGIN
   INSERT INTO refresh_token(`token`, `expires`, `isExpired`, `created`, `revoked`, `is_revoked`, `userId`, `deviceId`)

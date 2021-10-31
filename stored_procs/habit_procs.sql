@@ -11,12 +11,12 @@ CREATE PROCEDURE UpdateHabit(
     VisibleToFriends TINYINT,
     Description VARCHAR(100),
     Status char(1),
-    UserId INT,
-    ScheduleId INT,
+    UserId VARCHAR(255),
+    ScheduleId VARCHAR(255),
     HabitTypeId INT,
     CreatedAt DateTime,
     ActiveInd char(1),
-    HabitId INT
+    HabitId VARCHAR(255)
 )
 BEGIN
     UPDATE `ceddb`.`habit` h SET
@@ -53,17 +53,19 @@ CREATE PROCEDURE CreateHabit(
     VisibleToFriends TINYINT,
     Description VARCHAR(100),
     Status char(1),
-    UserId INT,
-    ScheduleId INT,
+    UserId VARCHAR(255),
+    ScheduleId VARCHAR(255),
     HabitTypeId INT,
     CreatedAt DateTime,
     ActiveInd char(1)
 )
 BEGIN
-	INSERT INTO `ceddb`.`habit` (`name`, `icon`, `reminder`, `reminderAt`, `visibleToFriends`, `description`, `status`, `userId`, `scheduleId`, `habitTypeId`, `createdAt`, `active_ind`)
-	VALUES(Name, Icon, Reminder, ReminderAt, VisibleToFriends, Description, Status, UserId, ScheduleId, HabitTypeId, CreatedAt, ActiveInd);
+	SET @id = UUID();
+
+	INSERT INTO `ceddb`.`habit` (`idhabit`, `name`, `icon`, `reminder`, `reminderAt`, `visibleToFriends`, `description`, `status`, `userId`, `scheduleId`, `habitTypeId`, `createdAt`, `active_ind`)
+	VALUES(@id, Name, Icon, Reminder, ReminderAt, VisibleToFriends, Description, Status, UserId, ScheduleId, HabitTypeId, CreatedAt, ActiveInd);
     
-    SELECT * FROM `ceddb`.`habit` d WHERE d.`idhabit`=(SELECT last_insert_id());
+    SELECT * FROM `ceddb`.`habit` d WHERE d.`idhabit`=@id;
 END //
 
 DELIMITER ;
@@ -75,7 +77,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetAllUserHabits(
 	IN
-    UserId INT
+    UserId VARCHAR(255)
 )
 BEGIN
     SELECT 
@@ -148,7 +150,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetHabitById(
 	IN
-    HabitId INT
+    HabitId VARCHAR(255)
 )
 BEGIN
     SELECT 
@@ -186,7 +188,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetHabitFriends(
 	IN
-    HabitId INT
+    HabitId VARCHAR(255)
 )
 BEGIN
     SELECT 
@@ -210,7 +212,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetHabitLogById(
 	IN
-    HabitId INT
+    HabitId VARCHAR(255)
 )
 BEGIN
 	SET @id = (SELECT hl.idhabit_log FROM `ceddb`.`habit_log` hl
@@ -235,7 +237,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetHabitLogByIdAndDate(
 	IN
-    HabitId INT,
+    HabitId VARCHAR(255),
     DateValue DATETIME
 )
 BEGIN
@@ -259,7 +261,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetAllLogsForHabit(
 	IN
-    HabitId INT
+    HabitId VARCHAR(255)
 )
 BEGIN
     SELECT hl.`idhabit_log` as `id`,
@@ -282,17 +284,21 @@ DELIMITER //
 
 CREATE PROCEDURE AddHabitLog(
 	IN
-    HabitId INT,
-    UserId INT,
+    HabitId VARCHAR(255),
+    UserId VARCHAR(255),
     `Value` CHAR(1)
 )
 BEGIN
+	SET @id = UUID();
+    
     INSERT INTO `ceddb`.`habit_log`
-		(`log_value`,
+		(`idhabit_log`,
+        `log_value`,
 		`user_id`,
 		`habit_id`)
 	VALUES
-		(`Value`,
+		(@id,
+        `Value`,
 		UserId,
 		HabitId);
         
@@ -301,7 +307,7 @@ BEGIN
 		hl.`user_id` as `userId`,
 		hl.`habit_id` as `habitId`,
 		hl.`created_at` as `createdAt`
-    FROM `ceddb`.`habit_log` hl WHERE hl.`idhabit_log`=(SELECT last_insert_id());
+    FROM `ceddb`.`habit_log` hl WHERE hl.`idhabit_log`=@id;
 END //
 
 DELIMITER ;
@@ -314,7 +320,7 @@ DELIMITER //
 CREATE PROCEDURE UpdateHabitLog(
 	IN
     `Value` CHAR(1),
-    HabitId INT,
+    HabitId VARCHAR(255),
     DateValue DATETIME
 )
 BEGIN
@@ -342,7 +348,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetCompletedLogsForUser(
 	IN
-    UserId INT
+    UserId VARCHAR(255)
 )
 BEGIN
 	select * 
@@ -360,7 +366,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetCompletedLogsForHabit(
 	IN
-    HabitId INT
+    HabitId VARCHAR(255)
 )
 BEGIN
 	select * 

@@ -6,7 +6,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetScheduleByHabitId(
 	IN
-    HabitId INT
+    HabitId VARCHAR(255)
 )
 BEGIN
     SELECT 
@@ -38,10 +38,11 @@ CREATE PROCEDURE SaveSchedule(
     ScheduleTime DATETIME
 )
 BEGIN
-    INSERT INTO `ceddb`.`schedule` (`schedule_type_id`, `user_id`, `schedule_time`)
-	VALUES(ScheduleTypeId, UserId, ScheduleTime);
+	SET @id = UUID();
+    INSERT INTO `ceddb`.`schedule` (`idschedule`, `schedule_type_id`, `user_id`, `schedule_time`)
+	VALUES(@id, ScheduleTypeId, UserId, ScheduleTime);
     
-    SELECT * FROM `ceddb`.`schedule` s WHERE s.`idschedule`=(SELECT last_insert_id());
+    SELECT * FROM `ceddb`.`schedule` s WHERE s.`idschedule`=@id;
 END //
 
 DELIMITER ;
@@ -53,9 +54,9 @@ DELIMITER //
 
 CREATE PROCEDURE UpdateSchedule(
 	IN
-    Id INT,
+    Id VARCHAR(255),
     ScheduleTypeId INT,
-    UserId BIGINT,
+    UserId VARCHAR(255),
     ScheduleTime DATETIME
 )
 BEGIN

@@ -81,69 +81,69 @@ DROP INDEX `user_friend_id_idx`;
 
 -- update user - iduser
 ALTER TABLE `ceddb`.`user` 
-CHANGE COLUMN `iduser` `iduser` BIGINT(64) UNSIGNED NOT NULL AUTO_INCREMENT;
+CHANGE COLUMN `iduser` `iduser` VARCHAR(255) NOT NULL UNIQUE;
 
 -- update all user id references to big int
 -- comment
 ALTER TABLE `ceddb`.`comment` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`device` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`friend_habit` 
-CHANGE COLUMN `friendId` `friendId` BIGINT(64) UNSIGNED NOT NULL,
-CHANGE COLUMN `ownerId` `ownerId` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `friendId` `friendId` VARCHAR(255) NOT NULL,
+CHANGE COLUMN `ownerId` `ownerId` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`habit` 
-CHANGE COLUMN `userId` `userId` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `userId` `userId` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`habit_log` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`like` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`milestone` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`refresh_token` 
-CHANGE COLUMN `userId` `userId` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `userId` `userId` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`schedule` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`subscription` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`user_friends` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL,
-CHANGE COLUMN `friend_id` `friend_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL,
+CHANGE COLUMN `friend_id` `friend_id` VARCHAR(255) NOT NULL;
 ;
 
 
 ALTER TABLE `ceddb`.`user_friends` 
-CHANGE COLUMN `user_id` `user_id` BIGINT(64) UNSIGNED NOT NULL;
+CHANGE COLUMN `user_id` `user_id` VARCHAR(255) NOT NULL;
 
 -- add foreign keys----------------------------------------------------
 ALTER TABLE `ceddb`.`comment` 
@@ -293,4 +293,8 @@ ADD CONSTRAINT `user_friend_id`
   ON UPDATE NO ACTION;
   
   
+  -- user friends
+ALTER TABLE `ceddb`.`user_friends` 
+CHANGE COLUMN `iduser_friends` `iduser_friends` BINARY(16) NOT NULL;
+;
   

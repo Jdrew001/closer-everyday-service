@@ -4,7 +4,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetHabitFrequencies(
 	IN
-    HabitId INT
+    HabitId VARCHAR(255)
 )
 BEGIN
     SELECT

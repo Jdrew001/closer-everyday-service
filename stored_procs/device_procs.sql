@@ -11,14 +11,15 @@ CREATE PROCEDURE CreateUserDevice(
     DeviceModel VARCHAR(100),
     DevicePlatform VARCHAR(100),
     Manufacturer VARCHAR(100),
-    UserId INT
+    UserId VARCHAR(255)
 )
 BEGIN
+	SET @id = UUID();
 	INSERT INTO `ceddb`.`device`
-	(`model`,`platform`,`uuid`,`manufacturer`, `user_id`, `active`)
-		VALUES(DeviceModel, DevicePlatform, DeviceGUID, Manufacturer, UserId, true);
+	(`iddevice`, `model`,`platform`,`uuid`,`manufacturer`, `user_id`, `active`)
+		VALUES(@id, DeviceModel, DevicePlatform, DeviceGUID, Manufacturer, UserId, true);
         
-	SELECT * FROM `ceddb`.`device` d WHERE d.`iddevice`=(SELECT last_insert_id());
+	SELECT * FROM `ceddb`.`device` d WHERE d.`iddevice`=@id;
 END //
 
 DELIMITER ;
@@ -52,7 +53,7 @@ DELIMITER //
 
 CREATE PROCEDURE GetUsersDevices(
 	IN
-    UserId INT
+    UserId VARCHAR(255)
 )
 BEGIN
 	SELECT * FROM `ceddb`.`device` d
