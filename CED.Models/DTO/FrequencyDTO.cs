@@ -13,7 +13,7 @@ namespace CED.Models.DTO
     public class FrequencyDTO
     {
         [JsonProperty("id")]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [JsonProperty("value")]
         public string Value { get; set; }

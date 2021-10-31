@@ -37,7 +37,7 @@ namespace CED.Controllers
         {
 
             var userId = await GetUserId();
-            if (userId == -1)
+            if (userId == Guid.Empty)
             {
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }
@@ -48,7 +48,7 @@ namespace CED.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetHabit(int id)
+        public async Task<IActionResult> GetHabit(Guid id)
         {
             var habit = await _habitService.GetHabitById(id);
             if (habit == null)
@@ -64,7 +64,7 @@ namespace CED.Controllers
         public async Task<IActionResult> UpdateHabitLogsForDate(DateTime date)
         {
             var userId = await GetUserId();
-            if (userId == -1)
+            if (userId == Guid.Empty)
             {
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }
@@ -89,7 +89,7 @@ namespace CED.Controllers
         public async Task<IActionResult> GetGlobalHabitStats(int year)
         {
             var userId = await GetUserId();
-            if (userId == -1)
+            if (userId == Guid.Empty)
             {
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }
@@ -100,7 +100,7 @@ namespace CED.Controllers
         }
 
         [HttpGet("getHabitStats/{habitId}/{year}")]
-        public async Task<IActionResult> GetHabitStats(int habitId, int year)
+        public async Task<IActionResult> GetHabitStats(Guid habitId, int year)
         {
             var habitStats = _habitStatService.GetHabitStats(habitId, year);
             return Ok(GenerateSuccessResponse("Success", habitStats));
@@ -112,7 +112,7 @@ namespace CED.Controllers
         public async Task<IActionResult> SaveHabit(HabitSaveDTO habit)
         {
             var userId = await GetUserId();
-            if (userId == -1)
+            if (userId == Guid.Empty)
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
 
             var result = await _habitService.SaveHabit(_mapper.Map<HabitSaveDTO, Habit>(habit));
@@ -128,7 +128,7 @@ namespace CED.Controllers
         public async Task<IActionResult> UpdateHabitLog(HabitLogUpdateRequestDTO logUpdateDto)
         {
             var userId = await GetUserId();
-            if (userId == -1)
+            if (userId == Guid.Empty)
             {
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }

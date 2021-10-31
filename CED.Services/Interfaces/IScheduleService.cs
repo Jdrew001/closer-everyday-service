@@ -9,7 +9,7 @@ namespace CED.Services.Interfaces
 {
     public interface IScheduleService
     {
-        public Task<Schedule> GetScheduleByHabitId(int habitId);
+        public Task<Schedule> GetScheduleByHabitId(Guid habitId);
         public Task<Schedule> SaveSchedule(Schedule schedule);
         public Task<Schedule> UpdateSchedule(Schedule schedule);
     }

@@ -19,7 +19,7 @@ namespace CED.Services.Core
             _scheduleRepository = scheduleRepository;
         }
 
-        public async Task<Schedule> GetScheduleByHabitId(int habitId)
+        public async Task<Schedule> GetScheduleByHabitId(Guid habitId)
         {
             return await _scheduleRepository.GetScheduleByHabitId(habitId);
         }

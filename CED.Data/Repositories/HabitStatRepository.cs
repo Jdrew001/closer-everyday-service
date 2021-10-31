@@ -1,4 +1,5 @@
-﻿using CED.Data.Interfaces;
+﻿using System;
+using CED.Data.Interfaces;
 using CED.Models;
 using Microsoft.Extensions.Options;
 using System.Data;
@@ -14,7 +15,7 @@ namespace CED.Data.Repositories
         {
         }
 
-        public async Task<double> GetGlobalSuccessRate(int userId)
+        public async Task<double> GetGlobalSuccessRate(Guid userId)
         {
             double rate = 0;
             string spName = "GetAvgSuccessLogsForUser";
@@ -30,7 +31,7 @@ namespace CED.Data.Repositories
             return rate;
         }
 
-        public async Task<int> GetFriendStat(int userId)
+        public async Task<int> GetFriendStat(Guid userId)
         {
             int count = 0;
             string spName = "GetAvgSuccessLogsForUser";

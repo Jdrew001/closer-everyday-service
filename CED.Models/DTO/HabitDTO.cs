@@ -9,7 +9,7 @@ namespace CED.Models.DTO
 {
     public class HabitDTO
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public byte[] Icon { get; set; }
         public bool Reminder { get; set; }
@@ -19,7 +19,7 @@ namespace CED.Models.DTO
         public string Status { get; set; }
         public HabitType HabitType { get; set; }
         public Schedule Schedule { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public List<Frequency> Frequencies { get; set; }
         public List<FriendHabit> friendHabits { get; set; }
         public HabitLog habitLog { get; set; }

@@ -22,17 +22,17 @@ namespace CED.Services.Core
             return await _frequencyRepository.GetAllFrequencies();
         }
 
-        public async Task<Frequency> GetFrequencyById(int id)
+        public async Task<Frequency> GetFrequencyById(Guid id)
         {
             return await _frequencyRepository.GetFrequencyById(id);
         }
 
-        public async Task<List<Frequency>> GetHabitFrequencies(int habitId)
+        public async Task<List<Frequency>> GetHabitFrequencies(Guid habitId)
         {
             return await _frequencyRepository.GetHabitFrequencies(habitId);
         }
 
-        public async Task<List<Frequency>> SaveHabitFrequencies(List<Frequency> frequencies, int habitId)
+        public async Task<List<Frequency>> SaveHabitFrequencies(List<Frequency> frequencies, Guid habitId)
         {
             var savedFrequencies = new List<Frequency>();
             for (int i = 0; i < frequencies.Count; i++)

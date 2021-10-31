@@ -38,14 +38,14 @@ namespace CED.Data.Repositories
                     Created = drh.Get<DateTime>("Created"),
                     Revoked = drh.Get<DateTime?>("Revoked"),
                     isRevoked = drh.Get<bool>("is_revoked"),
-                    DeviceId = drh.Get<int>("deviceId")
+                    DeviceId = drh.Get<Guid>("deviceId")
                 };
             }
 
             return result;
         }
 
-        public async Task<List<RefreshToken>> GetUserRefreshTokens(int userId)
+        public async Task<List<RefreshToken>> GetUserRefreshTokens(Guid userId)
         {
             List<RefreshToken> result = new List<RefreshToken>();
             string spName = "GetUserRefreshTokenById";
@@ -61,20 +61,20 @@ namespace CED.Data.Repositories
             return result;
         }
 
-        public async Task SaveRefreshToken(RefreshToken token, int userId)
+        public async Task SaveRefreshToken(RefreshToken token, Guid userId)
         {
             string spName = "SaveRefreshToken";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
             command.Parameters.AddWithValue("Token", token.Token);
             command.Parameters.AddWithValue("IsExpired", token.IsExpired);
             command.Parameters.AddWithValue("Expires", token.Expires.ToUniversalTime());
             command.Parameters.AddWithValue("Created", token.Created.ToUniversalTime());
             command.Parameters.AddWithValue("Revoked", token.Revoked?.ToUniversalTime());
             command.Parameters.AddWithValue("IsRevoked", token.isRevoked);
-            command.Parameters.AddWithValue("DeviceId", token.DeviceId);
+            command.Parameters.AddWithValue("DeviceId", token.DeviceId.ToString());
             await command.ExecuteNonQueryAsync();
         }
 
@@ -102,7 +102,7 @@ namespace CED.Data.Repositories
                 Expires = drh.Get<DateTime>("expires"),
                 Created = drh.Get<DateTime>("created"),
                 Revoked = drh.Get<DateTime>("revoked"),
-                DeviceId = drh.Get<int>("deviceId")
+                DeviceId = drh.Get<Guid>("deviceId")
             };
         }
     }

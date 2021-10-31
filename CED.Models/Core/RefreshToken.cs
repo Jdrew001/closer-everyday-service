@@ -15,6 +15,6 @@ namespace CED.Models.Core
         public DateTime? Revoked { get; set; }
         public Boolean isRevoked { get; set; }
         public bool IsActive => !isRevoked && !IsExpired;
-        public int DeviceId { get; set; }
+        public Guid DeviceId { get; set; }
     }
 }

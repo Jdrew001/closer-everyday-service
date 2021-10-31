@@ -8,7 +8,7 @@ namespace CED.Models.Core
 {
     public class Frequency
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Value { get; set; }
     }
 }

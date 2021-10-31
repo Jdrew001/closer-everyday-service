@@ -1,4 +1,5 @@
-﻿using CED.Data.Interfaces;
+﻿using System;
+using CED.Data.Interfaces;
 using CED.Models;
 using CED.Models.Core;
 using Microsoft.Extensions.Options;
@@ -21,12 +22,12 @@ namespace CED.Data.Repositories
             throw new System.NotImplementedException();
         }
 
-        public Task<Frequency> GetFrequencyById(int id)
+        public Task<Frequency> GetFrequencyById(Guid id)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<Frequency>> GetHabitFrequencies(int habitId)
+        public async Task<List<Frequency>> GetHabitFrequencies(Guid habitId)
         {
             //GetHabitFrequencies
             List<Frequency> frequencies = new List<Frequency>();
@@ -43,7 +44,7 @@ namespace CED.Data.Repositories
             return frequencies;
         }
 
-        public async Task<Frequency> SaveHabitFrequency(int frequencyId, int habitId)
+        public async Task<Frequency> SaveHabitFrequency(Guid frequencyId, Guid habitId)
         {
             Frequency frequency = null;
             string spName = "SaveHabitFrequency";
@@ -63,7 +64,7 @@ namespace CED.Data.Repositories
         {
             return new Frequency()
             {
-                Id = drh.Get<int>("idfrequency"),
+                Id = drh.Get<Guid>("idfrequency"),
                 Value = drh.Get<string>("frequency")
             };
         }

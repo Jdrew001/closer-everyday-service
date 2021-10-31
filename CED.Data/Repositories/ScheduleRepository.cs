@@ -19,7 +19,7 @@ namespace CED.Data.Repositories
         {
         }
 
-        public async Task<Schedule> GetScheduleByHabitId(int habitId)
+        public async Task<Schedule> GetScheduleByHabitId(Guid habitId)
         {
             Schedule schedule = null;
             string spName = "GetScheduleByHabitId";
@@ -35,6 +35,7 @@ namespace CED.Data.Repositories
             return schedule;
         }
 
+        // User will be able to add their schedule -- it will be four records (anytime, morning, afternoon, evening)
         public async Task<Schedule> SaveSchedule(Schedule schedule)
         {
             string spName = "SaveSchedule";
@@ -74,14 +75,14 @@ namespace CED.Data.Repositories
         {
             return new Schedule()
             {
-                Id = drh.Get<int>("Id"),
+                Id = drh.Get<Guid>("Id"),
                 ScheduleTime = drh.Get<DateTime>("ScheduleTime"),
                 ScheduleType = new ScheduleType()
                 {
                     Id = drh.Get<int>("idschedule_type"),
                     Value = drh.Get<string>("scheduleType")
                 },
-                UserId = drh.Get<int>("UserId")
+                UserId = drh.Get<Guid>("UserId")
             };
         }
     }

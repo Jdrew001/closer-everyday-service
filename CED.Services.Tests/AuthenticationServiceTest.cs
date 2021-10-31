@@ -31,7 +31,7 @@ namespace CED.Services.Tests
             var refreshTokenRepo = new Mock<IRefreshTokenRepository>();
             var testUser = new User()
             {
-                Id = 1,
+                Id = Guid.NewGuid(),
                 Email = "dtatkison@gmail.com",
                 Username = "dtatkison",
                 FirstName = "Drew",

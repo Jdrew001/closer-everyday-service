@@ -42,7 +42,7 @@ namespace CED.Data.Repositories
 
             return habits;
         }
-        public async Task<List<Habit>> GetAllUserHabits(int userId, string date)
+        public async Task<List<Habit>> GetAllUserHabits(Guid userId, string date)
         {
             //GetAllUserHabits
             List<Habit> habits = new List<Habit>();
@@ -62,7 +62,7 @@ namespace CED.Data.Repositories
 
             return habits;
         }
-        public async Task<Habit> GetHabitById(int id)
+        public async Task<Habit> GetHabitById(Guid id)
         {
             //GetHabitById
             Habit habit = null;
@@ -111,14 +111,14 @@ namespace CED.Data.Repositories
             // UpdateHabit
             throw new System.NotImplementedException();
         }
-        public bool DeleteHabitById(int id)
+        public bool DeleteHabitById(Guid id)
         {
             throw new System.NotImplementedException();
         }
         #endregion
 
         #region Friend Methods
-        public async Task<List<FriendHabit>> GetFriendHabits(int habitId)
+        public async Task<List<FriendHabit>> GetFriendHabits(Guid habitId)
         {
             List<FriendHabit> friendHabits = new List<FriendHabit>();
             string spName = "GetHabitFriends";
@@ -136,7 +136,7 @@ namespace CED.Data.Repositories
         #endregion
 
         #region Habit Log Methods
-        public async Task<HabitLog> SaveHabitLog(char status, int userId, int habitId)
+        public async Task<HabitLog> SaveHabitLog(char status, Guid userId, Guid habitId)
         {
             HabitLog log = null;
             string spName = "AddHabitLog";
@@ -154,7 +154,7 @@ namespace CED.Data.Repositories
             return log;
         }
 
-        public async Task<HabitLog> UpdateHabitLog(char status, int habitId, string date)
+        public async Task<HabitLog> UpdateHabitLog(char status, Guid habitId, string date)
         {
             HabitLog log = null;
             string spName = "UpdateHabitLog";
@@ -172,7 +172,7 @@ namespace CED.Data.Repositories
             return log;
         }
 
-        public async Task<HabitLog> GetHabitLogByIdAndDate(int id, string date)
+        public async Task<HabitLog> GetHabitLogByIdAndDate(Guid id, string date)
         {
             HabitLog log = null;
             string spName = "GetHabitLogByIdAndDate";
@@ -189,7 +189,7 @@ namespace CED.Data.Repositories
             return log;
         }
 
-        public async Task<List<HabitLog>> GetLogsForHabit(int habitId)
+        public async Task<List<HabitLog>> GetLogsForHabit(Guid habitId)
         {
             List<HabitLog> habitLogs = new List<HabitLog>();
             string spName = "GetAllLogsForHabit";
@@ -204,7 +204,7 @@ namespace CED.Data.Repositories
 
             return habitLogs;
         }
-        public async Task<HabitLog> GetHabitLogById(int id)
+        public async Task<HabitLog> GetHabitLogById(Guid id)
         {
             HabitLog log = null;
             string spName = "GetHabitLogById";
@@ -219,7 +219,7 @@ namespace CED.Data.Repositories
 
             return log;
         }
-        public async Task<List<HabitLog>> GetAllCompletedLogsForUser(int userId)
+        public async Task<List<HabitLog>> GetAllCompletedLogsForUser(Guid userId)
         {
             List<HabitLog> logs = new List<HabitLog>();
             string spName = "GetCompletedLogsForUser";
@@ -234,7 +234,7 @@ namespace CED.Data.Repositories
             return logs;
         }
 
-        public async Task<List<HabitLog>> GetAllLogsForUser(int userId)
+        public async Task<List<HabitLog>> GetAllLogsForUser(Guid userId)
         {
             List<HabitLog> logs = new List<HabitLog>();
             string spName = "GetLogsForUser";
@@ -248,7 +248,7 @@ namespace CED.Data.Repositories
 
             return logs;
         }
-        public async Task<List<HabitLog>> GetAllCompletedLogsForHabit(int habitId)
+        public async Task<List<HabitLog>> GetAllCompletedLogsForHabit(Guid habitId)
         {
             List<HabitLog> logs = new List<HabitLog>();
             string spName = "GetCompletedLogsForHabit";
@@ -269,7 +269,7 @@ namespace CED.Data.Repositories
         {
             return new Habit()
             {
-                Id = drh.Get<int>("idhabit"),
+                Id = drh.Get<Guid>("idhabit"),
                 Name = drh.Get<string>("name"),
                 Icon = drh.Get<byte[]>("icon"),
                 Reminder = drh.Get<bool>("reminder"),
@@ -285,7 +285,7 @@ namespace CED.Data.Repositories
                 },
                 Schedule = new Schedule()
                 {
-                    Id = drh.Get<int>("idSchedule"),
+                    Id = drh.Get<Guid>("idSchedule"),
                     ScheduleTime = drh.Get<DateTime>("schedule_time"),
                     ScheduleType = new ScheduleType()
                     {
@@ -293,29 +293,29 @@ namespace CED.Data.Repositories
                         Value = drh.Get<string>("scheduleType")
                     }
                 },
-                UserId = drh.Get<int>("userId")
+                UserId = drh.Get<Guid>("userId")
             };
         }
         private FriendHabit ReadFriendHabit(DataReaderHelper drh)
         {
             return new FriendHabit()
             {
-                Id = drh.Get<int>("id"),
-                FriendId = drh.Get<int>("friendId"),
+                Id = drh.Get<Guid>("id"),
+                FriendId = drh.Get<Guid>("friendId"),
                 FriendFirstName = drh.Get<string>("FirstName"),
                 FriendLastName = drh.Get<string>("LastName"),
                 FriendEmail = drh.Get<string>("Email"),
-                OwnerId = drh.Get<int>("ownerId")
+                OwnerId = drh.Get<Guid>("ownerId")
             };
         }
         private HabitLog ReadHabitLog(DataReaderHelper drh)
         {
             return new HabitLog()
             {
-                Id = drh.Get<int>("id"),
+                Id = drh.Get<Guid>("id"),
                 Value = drh.Get<char>("value"),
-                UserId = drh.Get<int>("userId"),
-                HabitId = drh.Get<int>("habitId"),
+                UserId = drh.Get<Guid>("userId"),
+                HabitId = drh.Get<Guid>("habitId"),
                 CreatedAt = drh.Get<DateTime>("createdAt")
             };
         }

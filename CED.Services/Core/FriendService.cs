@@ -21,7 +21,7 @@ namespace CED.Services.Core
             _friendRepository = friendRepository;
         }
 
-        public async Task<List<FriendHabit>> GetFriendsForHabit(int habitId)
+        public async Task<List<FriendHabit>> GetFriendsForHabit(Guid habitId)
         {
             List<FriendHabit> friendHabits = new List<FriendHabit>();
             try
@@ -37,7 +37,7 @@ namespace CED.Services.Core
             return friendHabits;
         }
 
-        public async Task<FriendHabit> GetFriendHabitById(int friendHabitId)
+        public async Task<FriendHabit> GetFriendHabitById(Guid friendHabitId)
         {
             FriendHabit friendHabit;
             try
@@ -53,7 +53,7 @@ namespace CED.Services.Core
             return friendHabit;
         }
 
-        public async Task<FriendHabit> SaveFriendToHabit(int userId, int habitId, int ownerId)
+        public async Task<FriendHabit> SaveFriendToHabit(Guid userId, Guid habitId, Guid ownerId)
         {
             FriendHabit friendHabit;
             try
@@ -70,21 +70,21 @@ namespace CED.Services.Core
             return friendHabit;
         }
 
-        public async Task<User> GetFriendById(int id)
+        public async Task<User> GetFriendById(Guid id)
         {
             throw new NotImplementedException();
         }
-        public async Task<bool> RemoveFriendById(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<User> AddFriendById(int id)
+        public async Task<bool> RemoveFriendById(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<User>> GetUserFriends(int userId)
+        public async Task<User> AddFriendById(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<User>> GetUserFriends(Guid userId)
         {
             throw new NotImplementedException();
         }

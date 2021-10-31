@@ -8,19 +8,19 @@ namespace CED.Data.Interfaces
     public interface IHabitRepository
     {
         Task<List<Habit>> GetAllHabits();
-        Task<List<Habit>> GetAllUserHabits(int userId, string date);
-        Task<Habit> GetHabitById(int id);
-        Task<List<FriendHabit>> GetFriendHabits(int habitId);
-        Task<HabitLog> GetHabitLogById(int id);
-        Task<HabitLog> GetHabitLogByIdAndDate(int id, string date);
-        Task<List<HabitLog>> GetLogsForHabit(int habitId);
-        Task<List<HabitLog>> GetAllCompletedLogsForUser(int userId);
-        Task<List<HabitLog>> GetAllLogsForUser(int userId);
-        Task<List<HabitLog>> GetAllCompletedLogsForHabit(int habitId);
+        Task<List<Habit>> GetAllUserHabits(Guid userId, string date);
+        Task<Habit> GetHabitById(Guid id);
+        Task<List<FriendHabit>> GetFriendHabits(Guid habitId);
+        Task<HabitLog> GetHabitLogById(Guid id);
+        Task<HabitLog> GetHabitLogByIdAndDate(Guid id, string date);
+        Task<List<HabitLog>> GetLogsForHabit(Guid habitId);
+        Task<List<HabitLog>> GetAllCompletedLogsForUser(Guid userId);
+        Task<List<HabitLog>> GetAllLogsForUser(Guid userId);
+        Task<List<HabitLog>> GetAllCompletedLogsForHabit(Guid habitId);
         Task<Habit> SaveHabit(Habit habit);
-        Task<HabitLog> SaveHabitLog(char status, int userId, int habitId);
-        Task<HabitLog> UpdateHabitLog(char status, int habitId, string date);
+        Task<HabitLog> SaveHabitLog(char status, Guid userId, Guid habitId);
+        Task<HabitLog> UpdateHabitLog(char status, Guid habitId, string date);
         Task<Habit> UpdateHabit(Habit habit);
-        bool DeleteHabitById(int id);
+        bool DeleteHabitById(Guid id);
     }
 }

@@ -19,7 +19,7 @@ namespace CED.Data.Repositories
         {
         }
 
-        public async Task<List<FriendHabit>> GetFriendsForHabit(int habitId)
+        public async Task<List<FriendHabit>> GetFriendsForHabit(Guid habitId)
         {
             List<FriendHabit> habitFriends = new List<FriendHabit>();
             string spName = "GetHabitFriends";
@@ -35,12 +35,12 @@ namespace CED.Data.Repositories
             return habitFriends;
         }
 
-        public async Task<FriendHabit> GetFriendHabitById(int friendHabitId)
+        public async Task<FriendHabit> GetFriendHabitById(Guid friendHabitId)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<FriendHabit> SaveFriendToHabit(int userId, int habitId, int ownerId)
+        public async Task<FriendHabit> SaveFriendToHabit(Guid userId, Guid habitId, Guid ownerId)
         {
             FriendHabit friendHabit = null;
             string spName = "SaveFriendHabit";
@@ -58,22 +58,22 @@ namespace CED.Data.Repositories
             return friendHabit;
         }
 
-        public async Task<User> GetFriendById(int id)
+        public async Task<User> GetFriendById(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> RemoveFriendById(int id)
+        public async Task<bool> RemoveFriendById(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<User> AddFriendById(int id)
+        public async Task<User> AddFriendById(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<User>> GetUserFriends(int userId)
+        public async Task<List<User>> GetUserFriends(Guid userId)
         {
             throw new NotImplementedException();
         }
@@ -82,12 +82,12 @@ namespace CED.Data.Repositories
         {
             return new FriendHabit()
             {
-                Id = drh.Get<int>("id"),
-                FriendId = drh.Get<int>("friendId"),
+                Id = drh.Get<Guid>("id"),
+                FriendId = drh.Get<Guid>("friendId"),
                 FriendFirstName = drh.Get<string>("FirstName"),
                 FriendLastName = drh.Get<string>("LastName"),
                 FriendEmail = drh.Get<string>("Email"),
-                OwnerId = drh.Get<int>("ownerId")
+                OwnerId = drh.Get<Guid>("ownerId")
             };
         }
     }

@@ -36,7 +36,7 @@ namespace CED.Services.Core
             return _habitRepository.GetAllHabits();
         }
 
-        public async Task<List<Habit>> GetAllUserHabits(int userId, string date)
+        public async Task<List<Habit>> GetAllUserHabits(Guid userId, string date)
         {
             var habits = await _habitRepository.GetAllUserHabits(userId, date);
             habits.ForEach(async o =>
@@ -48,42 +48,42 @@ namespace CED.Services.Core
             return habits;
         }
 
-        public Task<Habit> GetHabitById(int id)
+        public Task<Habit> GetHabitById(Guid id)
         {
             return _habitRepository.GetHabitById(id);
         }
 
-        public Task<HabitLog> GetHabitLogByIdDate(int id, string date)
+        public Task<HabitLog> GetHabitLogByIdDate(Guid id, string date)
         {
             return _habitRepository.GetHabitLogByIdAndDate(id, date);
         }
 
-        public Task<HabitLog> GetHabitLog(int id)
+        public Task<HabitLog> GetHabitLog(Guid id)
         {
             return _habitRepository.GetHabitLogById(id);
         }
 
-        public Task<List<HabitLog>> GetAllCompletedLogsForUser(int userId)
+        public Task<List<HabitLog>> GetAllCompletedLogsForUser(Guid userId)
         {
             return _habitRepository.GetAllCompletedLogsForUser(userId);
         }
 
-        public async Task<List<HabitLog>> GetAllCompletedLogsForHabit(int habitId)
+        public async Task<List<HabitLog>> GetAllCompletedLogsForHabit(Guid habitId)
         {
             return await _habitRepository.GetAllCompletedLogsForHabit(habitId);
         }
 
-        public async Task<List<HabitLog>> GetUserHabitLogs(int userId)
+        public async Task<List<HabitLog>> GetUserHabitLogs(Guid userId)
         {
             return await _habitRepository.GetAllLogsForUser(userId);
         }
 
-        public bool MarkHabitInactive(int id)
+        public bool MarkHabitInactive(Guid id)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<HabitLog>> GetLogsForHabit(int habitId)
+        public async Task<List<HabitLog>> GetLogsForHabit(Guid habitId)
         {
             return await _habitRepository.GetLogsForHabit(habitId);
         }
@@ -140,7 +140,7 @@ namespace CED.Services.Core
             return _habitRepository.UpdateHabit(habit);
         }
 
-        public async Task<HabitLog> SaveHabitLog(char status, int userId, int habitId, string date)
+        public async Task<HabitLog> SaveHabitLog(char status, Guid userId, Guid habitId, string date)
         {
             if (!status.Equals('C') && !status.Equals('F') && !status.Equals('P'))
                 return null;

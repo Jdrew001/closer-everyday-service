@@ -20,7 +20,7 @@ namespace CED.Data.Repositories
         {
         }
 
-        public async Task<User> GetUserById(int userId)
+        public async Task<User> GetUserById(Guid userId)
         {
             throw new NotImplementedException();
         }
@@ -91,7 +91,7 @@ namespace CED.Data.Repositories
         {
             return new User()
             {
-                Id = drh.Get<int>("iduser"),
+                Id = new Guid(drh.Get<string>("iduser")),
                 Email = drh.Get<string>("email"),
                 Username = drh.Get<string>("username"),
                 FirstName = drh.Get<string>("firstname"),

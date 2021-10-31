@@ -1,4 +1,5 @@
-﻿using CED.Data.Interfaces;
+﻿using System;
+using CED.Data.Interfaces;
 using CED.Models;
 using CED.Models.Core;
 using CED.Models.DTO;
@@ -51,14 +52,14 @@ namespace CED.Data.Repositories
 
             return device;
         }
-        public async Task<List<Device>> GetUserDevices(int userId)
+        public async Task<List<Device>> GetUserDevices(Guid userId)
         {
             List<Device> devices = new List<Device>();
             string spName = "GetUsersDevices";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", userId);
+            command.Parameters.AddWithValue("UserId", userId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -100,7 +101,7 @@ namespace CED.Data.Repositories
         {
             return new Device()
             {
-                DeviceId = drh.Get<int>("iddevice"),
+                DeviceId = new Guid(drh.Get<string>("iddevice")),
                 Model = drh.Get<string>("model"),
                 Platform = drh.Get<string>("platform"),
                 UUID = drh.Get<string>("uuid"),

@@ -16,7 +16,7 @@ namespace CED.Models.DTO
         public int ScheduleType { get; set; }
 
         [JsonProperty("userId")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [JsonProperty("scheduleTime")]
         public DateTime ScheduleTime { get; set; }

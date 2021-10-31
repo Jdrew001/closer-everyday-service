@@ -8,7 +8,7 @@ namespace CED.Models.Core
 {
     public class Device
     {
-        public int DeviceId { get; set; }
+        public Guid DeviceId { get; set; }
         public string Model { get; set; }
         public string Platform { get; set; }
         public string UUID { get; set; }

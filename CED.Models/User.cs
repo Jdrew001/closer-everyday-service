@@ -10,7 +10,7 @@ namespace CED.Models
 {
     public class User
     {
-        public Int32 Id { get; set; }
+        public Guid Id { get; set; }
         public string Username { get; set; }
         public string FirstName { get; set; }
         public string Password { get; set; }

@@ -37,7 +37,7 @@ namespace CED.Models.DTO
         public ScheduleDTO Schedule { get; set; }
 
         [JsonProperty("userId")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [JsonProperty("frequencies")]
         public List<FrequencyDTO> Frequencies { get; set; }

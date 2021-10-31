@@ -10,13 +10,13 @@ namespace CED.Services.Interfaces
 {
     public interface IFriendService
     {
-        public Task<List<FriendHabit>> GetFriendsForHabit(int habitId);
-        public Task<FriendHabit> GetFriendHabitById(int friendHabitId);
-        public Task<FriendHabit> SaveFriendToHabit(int userId, int habitId, int ownerId);
-        public Task<User> GetFriendById(int id);
-        public Task<bool> RemoveFriendById(int id);
-        public Task<User> AddFriendById(int id);
-        public Task<List<User>> GetUserFriends(int userId);
+        public Task<List<FriendHabit>> GetFriendsForHabit(Guid habitId);
+        public Task<FriendHabit> GetFriendHabitById(Guid friendHabitId);
+        public Task<FriendHabit> SaveFriendToHabit(Guid userId, Guid habitId, Guid ownerId);
+        public Task<User> GetFriendById(Guid id);
+        public Task<bool> RemoveFriendById(Guid id);
+        public Task<User> AddFriendById(Guid id);
+        public Task<List<User>> GetUserFriends(Guid userId);
 
     }
 }

@@ -13,9 +13,9 @@ namespace CED.Models.DTO
     public class FriendHabitDTO
     {
         [JsonProperty("friendId")]
-        public int FriendId { get; set; }
+        public Guid FriendId { get; set; }
         
         [JsonProperty("ownerId")]
-        public int OwnerId { get; set; }
+        public Guid OwnerId { get; set; }
     }
 }

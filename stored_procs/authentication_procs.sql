@@ -91,7 +91,7 @@ DROP PROCEDURE IF EXISTS SaveRefreshToken;
 DELIMITER //
 
 CREATE PROCEDURE SaveRefreshToken(
-	IN UserId VARCHAR(255), Token VARCHAR(255), IsExpired Boolean, Expires DATETIME, Created DATETIME, Revoked DATETIME, IsRevoked Boolean, DeviceId INT
+	IN UserId VARCHAR(255), Token VARCHAR(255), IsExpired Boolean, Expires DATETIME, Created DATETIME, Revoked DATETIME, IsRevoked Boolean, DeviceId VARCHAR(255)
 )
 BEGIN
   INSERT INTO refresh_token(`token`, `expires`, `isExpired`, `created`, `revoked`, `is_revoked`, `userId`, `deviceId`)
