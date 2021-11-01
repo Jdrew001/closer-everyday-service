@@ -11,7 +11,7 @@ namespace CED.Data.Interfaces
     public interface IDeviceRepository
     {
         Task<Device> GetDeviceByUUID(string UUID);
-        Task<List<Device>> GetUserDevices(int userId);
+        Task<List<Device>> GetUserDevices(Guid userId);
         Task<Device> CreateDevice(DeviceDTO dto);
         Task<Device> ActivateDevice(string UUID);
         Task<Device> DeactivateDevice(string uuid);

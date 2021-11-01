@@ -36,12 +36,12 @@ namespace CED.Services.Core
             return _deviceRepository.CreateDevice(dto);
         }
 
-        public Task<Device> GetDeviceById(int id)
+        public Task<Device> GetDeviceById(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<Device>> GetUserDevices(int userId)
+        public Task<List<Device>> GetUserDevices(Guid userId)
         {
             return _deviceRepository.GetUserDevices(userId);
         }

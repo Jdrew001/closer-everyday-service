@@ -10,9 +10,9 @@ namespace CED.Services.Interfaces
 {
     public interface IDeviceService
     {
-        Task<List<Device>> GetUserDevices(int userId);
+        Task<List<Device>> GetUserDevices(Guid userId);
 
-        Task<Device> GetDeviceById(int id);
+        Task<Device> GetDeviceById(Guid id);
         Task<Device> CreateNewUserDevice(DeviceDTO dto);
         Task<Device> DeactivateUserDevice(DeviceDTO dto);
     }

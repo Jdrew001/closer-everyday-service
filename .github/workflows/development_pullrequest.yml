@@ -50,14 +50,14 @@ jobs:
     name: Failure Notification Discord
     runs-on: ubuntu-latest
     if: ${{ failure() }}
-    needs: [build,publish_upload,deploy,db_deploy]
+    needs: build
     steps:
       - name: Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'PULL REQUEST: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} app has failed to deploy.'
+          args: 'PULL REQUEST: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} build has failed.'
   notification_success:
     name: Success Notification Email
     runs-on: ubuntu-latest
@@ -80,11 +80,11 @@ jobs:
     name: Success Notification Discord
     runs-on: ubuntu-latest
     if: ${{ success() }}
-    needs: [build,publish_upload,deploy,db_deploy]
+    needs: build
     steps:
       - name: Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'PULL REQUEST: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} app has been deployed.'
+          args: 'PULL REQUEST: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} build has succeeded.'

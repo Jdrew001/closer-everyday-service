@@ -13,6 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
+using AutoMapper;
+using CED.Profiles;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 
@@ -45,6 +47,13 @@ namespace CED
 
             services.AddServices();
             services.AddRepositories();
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddMaps("CED");
+                mc.AddProfile(new HabitProfile());
+            });
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
 
             var allowedHost = Configuration.GetSection("AllowedHosts").Get<string>();
 

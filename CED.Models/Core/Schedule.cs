@@ -8,9 +8,9 @@ namespace CED.Models.Core
 {
     public class Schedule
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public ScheduleType ScheduleType { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public DateTime ScheduleTime { get; set; }
     }
 }

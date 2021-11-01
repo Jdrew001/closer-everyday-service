@@ -21,17 +21,17 @@ namespace CED.Controllers
                 .Value.FirstOrDefault().Remove(0, 7);
         }
 
-        protected async Task<int> GetUserId()
+        protected async Task<Guid> GetUserId()
         {
             var reqToken = RetrieveToken();
             if (string.IsNullOrEmpty(reqToken))
-                return -1;
+                return Guid.Empty;
 
             var token = await _tokenService.ReadJwtToken(RetrieveToken());
             if (token == null)
-                return -1;
+                return Guid.Empty;
 
-            return Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
+            return Guid.Parse(token.Claims.First(x => x.Type == "uid").Value);
         }
 
         protected GenericResponseDTO GenerateErrorResponse(string message, object data)

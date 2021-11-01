@@ -9,11 +9,11 @@ namespace CED.Models.Core
 {
     public class HabitLog
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [JsonIgnore]
         public char Value { get; set; }
-        public int UserId { get; set; }
-        public int HabitId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid HabitId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

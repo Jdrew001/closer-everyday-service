@@ -22,7 +22,7 @@ namespace CED.Services.Core
 
         #region global stats for user
 
-        public async Task<HabitStatDTO> GetGlobalHabitStats(int userId, int year)
+        public async Task<HabitStatDTO> GetGlobalHabitStats(Guid userId, int year)
         {
             var currentStreak = await GetCurrentStreak(userId);
             var maxStreak = await GetMaxStreak(userId);
@@ -44,7 +44,7 @@ namespace CED.Services.Core
             };
         }
 
-        public async Task<int> GetCurrentStreak(int userId)
+        public async Task<int> GetCurrentStreak(Guid userId)
         {
             var currentStreak = 0;
 
@@ -56,7 +56,7 @@ namespace CED.Services.Core
                 var habitIds = logs.Select(o => o.HabitId).Distinct().ToList();
 
                 habitIds.ForEach(habitId => {
-                    var habitLogs = logs.FindAll(o => o.HabitId == habitId);
+                    var habitLogs = logs.FindAll(o => o.HabitId.ToString().Equals(habitId.ToString()));
                     var streak = 0;
                     if (habitLogs.Count > 1)
                     {
@@ -89,7 +89,7 @@ namespace CED.Services.Core
             return currentStreak;
         }
 
-        public async Task<int> GetMaxStreak(int userId)
+        public async Task<int> GetMaxStreak(Guid userId)
         {
             // This will be the max streak, the value returnedd
             var maxStreak = 0;
@@ -106,7 +106,7 @@ namespace CED.Services.Core
                 habitIds.ForEach(habitId =>
                 {
                     // find all logs for a given habit id
-                    var habitLogs = logs.FindAll(o => o.HabitId == habitId);
+                    var habitLogs = logs.FindAll(o => o.HabitId.ToString().Equals(habitId.ToString()));
                     var streak = 0;
                     if (habitLogs.Count > 1)
                     {
@@ -141,12 +141,12 @@ namespace CED.Services.Core
             return maxStreak;
         }
 
-        public async Task<double> GetAverageSuccessRate(int userId)
+        public async Task<double> GetAverageSuccessRate(Guid userId)
         {
             return await this._habitStatRepository.GetGlobalSuccessRate(userId);
         }
 
-        public async Task<Dictionary<string, double>> GetMonthlySuccessRate(int userId, int year)
+        public async Task<Dictionary<string, double>> GetMonthlySuccessRate(Guid userId, int year)
         {
             var habitLogs = await _habitService.GetUserHabitLogs(userId);
             Dictionary<string, double> monthlyRates = new Dictionary<string, double>();
@@ -175,7 +175,7 @@ namespace CED.Services.Core
             return monthlyRates;
         }
 
-        public async Task<int> GetPerfectDays(int userId)
+        public async Task<int> GetPerfectDays(Guid userId)
         {
             var perfectDays = 0;
             //Get all users habit logs
@@ -198,12 +198,12 @@ namespace CED.Services.Core
             return perfectDays;
         }
 
-        public async Task<int> GetTotalFriendsSupporting(int userId)
+        public async Task<int> GetTotalFriendsSupporting(Guid userId)
         {
             return await _habitStatRepository.GetFriendStat(userId);
         }
 
-        public async Task<int> GetTotalCompletions(int userId)
+        public async Task<int> GetTotalCompletions(Guid userId)
         {
             var habitLogs = await _habitService.GetAllCompletedLogsForUser(userId);
             return habitLogs?.Count ?? 0;
@@ -211,7 +211,7 @@ namespace CED.Services.Core
         #endregion
 
         #region Habit Stats
-        public async Task<HabitStatDTO> GetHabitStats(int habitId, int year)
+        public async Task<HabitStatDTO> GetHabitStats(Guid habitId, int year)
         {
             var currentStreak = await GetCurrentStreakForHabit(habitId);
             var maxStreak = await GetMaxStreakForHabit(habitId);
@@ -231,7 +231,7 @@ namespace CED.Services.Core
                 totalCompletions = totalCompletions
             };
         }
-        public async Task<int> GetCurrentStreakForHabit(int habitId)
+        public async Task<int> GetCurrentStreakForHabit(Guid habitId)
         {
             var currentStreak = 0;
             var logs = await _habitService.GetLogsForHabit(habitId);
@@ -268,7 +268,7 @@ namespace CED.Services.Core
             return currentStreak;
         }
 
-        public async Task<int> GetMaxStreakForHabit(int habitId)
+        public async Task<int> GetMaxStreakForHabit(Guid habitId)
         {
             // This will be the max streak, the value returned
             var maxStreak = 0;
@@ -311,7 +311,7 @@ namespace CED.Services.Core
             return maxStreak;
         }
 
-        public async Task<Dictionary<string, double>> GetMonthlySuccessRateForHabit(int habitId, int year)
+        public async Task<Dictionary<string, double>> GetMonthlySuccessRateForHabit(Guid habitId, int year)
         {
             var habitLogs = await _habitService.GetLogsForHabit(habitId);
             Dictionary<string, double> monthlyRates = new Dictionary<string, double>();
@@ -340,7 +340,7 @@ namespace CED.Services.Core
             return monthlyRates;
         }
 
-        public async Task<int> GetPerfectDaysForHabit(int habitId)
+        public async Task<int> GetPerfectDaysForHabit(Guid habitId)
         {
             var perfectDays = 0;
             //Get all users habit logs
@@ -362,12 +362,12 @@ namespace CED.Services.Core
             return perfectDays;
         }
 
-        public async Task<int> GetTotalFriendsHelpingForHabit(int habitId)
+        public async Task<int> GetTotalFriendsHelpingForHabit(Guid habitId)
         {
             return await _habitStatRepository.GetFriendStat(habitId);
         }
 
-        public async Task<int> GetTotalCompletionsForHabit(int habitId)
+        public async Task<int> GetTotalCompletionsForHabit(Guid habitId)
         {
             var habitLogs = await _habitService.GetAllCompletedLogsForHabit(habitId);
             return habitLogs?.Count ?? 0;

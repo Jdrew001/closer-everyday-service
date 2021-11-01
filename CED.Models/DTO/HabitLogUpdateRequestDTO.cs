@@ -9,7 +9,7 @@ namespace CED.Models.DTO
     public class HabitLogUpdateRequestDTO
     {
         public char status { get; set; }
-        public int habitId { get; set; }
+        public Guid habitId { get; set; }
         public DateTime date { get; set; }
     }
 }

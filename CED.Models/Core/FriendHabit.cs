@@ -8,9 +8,12 @@ namespace CED.Models.Core
 {
     public class FriendHabit
     {
-        public int Id { get; set; }
-        public string Firstname { get; set; }
-        public string LastName { get; set; }
-        public int OwnerId { get; set; }
+        public Guid Id { get; set; }
+        public Guid HabitId { get; set; }
+        public Guid FriendId { get; set; }
+        public string FriendFirstName { get; set; }
+        public string FriendLastName { get; set; }
+        public string FriendEmail { get; set; }
+        public Guid OwnerId { get; set; }
     }
 }
