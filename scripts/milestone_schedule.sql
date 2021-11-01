@@ -27,7 +27,7 @@ ALTER TABLE `ceddb`.`like`
 ADD CONSTRAINT `like_milestone_id`
   FOREIGN KEY (`milestone_id`)
   REFERENCES `ceddb`.`milestone` (`idmilestone`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
   
 ALTER TABLE `ceddb`.`comment` 
@@ -37,7 +37,7 @@ ALTER TABLE `ceddb`.`comment`
 ADD CONSTRAINT `milestone_comment_id`
   FOREIGN KEY (`milestone_id`)
   REFERENCES `ceddb`.`milestone` (`idmilestone`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
   
   
@@ -64,7 +64,7 @@ ALTER TABLE `ceddb`.`habit`
 ADD CONSTRAINT `schedule_habit_id`
   FOREIGN KEY (`scheduleId`)
   REFERENCES `ceddb`.`schedule` (`idschedule`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
  
   

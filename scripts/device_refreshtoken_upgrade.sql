@@ -18,5 +18,5 @@ ALTER TABLE `ceddb`.`refresh_token`
 ADD CONSTRAINT `token_device_id`
   FOREIGN KEY (`deviceId`)
   REFERENCES `ceddb`.`device` (`iddevice`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;

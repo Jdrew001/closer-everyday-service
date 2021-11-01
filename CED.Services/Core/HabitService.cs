@@ -109,7 +109,7 @@ namespace CED.Services.Core
                 // Save frequencies
                 _log.LogDebug("Saving Frequencies : {Frequencies}", habit.Frequencies);
                 var frequencies = await _frequencyService.SaveHabitFrequencies(habit.Frequencies, savedHabit.Id);
-                habit.Frequencies = frequencies;
+                savedHabit.Frequencies = frequencies;
                 _log.LogDebug("Saved Frequencies : {Frequencies}", habit.Frequencies);
 
                 var habitFriends = new List<FriendHabit>();
@@ -122,7 +122,7 @@ namespace CED.Services.Core
                         habitFriends.Add(habitFriend);
                 });
 
-                habit.friendHabits = habitFriends;
+                savedHabit.friendHabits = habitFriends;
                 _log.LogDebug("Saved Habit Friends : {Habit Friends}", habit.friendHabits);
             }
             catch (Exception e)

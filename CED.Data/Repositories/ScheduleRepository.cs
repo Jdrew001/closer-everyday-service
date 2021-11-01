@@ -39,6 +39,7 @@ namespace CED.Data.Repositories
         public async Task<Schedule> SaveSchedule(Schedule schedule)
         {
             string spName = "SaveSchedule";
+            Schedule newSchedule = null;
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
@@ -48,9 +49,9 @@ namespace CED.Data.Repositories
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
-                schedule = ReadSchedule(drh);
+                newSchedule = ReadSchedule(drh);
 
-            return schedule;
+            return newSchedule;
         }
 
         public async Task<Schedule> UpdateSchedule(Schedule schedule)
@@ -66,7 +67,11 @@ namespace CED.Data.Repositories
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
-                schedule = ReadSchedule(drh);
+            {
+                var test = ReadSchedule(drh);
+                schedule = test;
+            }
+                
 
             return schedule;
         }

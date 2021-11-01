@@ -153,7 +153,7 @@ ALTER TABLE `ceddb`.`comment`
 ADD CONSTRAINT `user_comment_id`
   FOREIGN KEY (`user_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 ;
@@ -166,7 +166,7 @@ ALTER TABLE `ceddb`.`device`
 ADD CONSTRAINT `user_device_id`
   FOREIGN KEY (`user_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 ;
@@ -179,12 +179,12 @@ ALTER TABLE `ceddb`.`friend_habit`
 ADD CONSTRAINT `friend_id`
   FOREIGN KEY (`friendId`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION,
 ADD CONSTRAINT `owner_id`
   FOREIGN KEY (`ownerId`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 ;
@@ -197,7 +197,7 @@ ALTER TABLE `ceddb`.`habit`
 ADD CONSTRAINT `habitUserId`
   FOREIGN KEY (`userId`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 
@@ -209,7 +209,7 @@ ALTER TABLE `ceddb`.`habit_log`
 ADD CONSTRAINT `history_user_id`
   FOREIGN KEY (`user_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 
@@ -222,7 +222,7 @@ ALTER TABLE `ceddb`.`like`
 ADD CONSTRAINT `like_user_id`
   FOREIGN KEY (`user_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 
@@ -234,7 +234,7 @@ ALTER TABLE `ceddb`.`milestone`
 ADD CONSTRAINT `milestone_user_id`
   FOREIGN KEY (`user_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 
@@ -246,7 +246,7 @@ ALTER TABLE `ceddb`.`refresh_token`
 ADD CONSTRAINT `userId`
   FOREIGN KEY (`userId`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 
@@ -259,7 +259,7 @@ ALTER TABLE `ceddb`.`schedule`
 ADD CONSTRAINT `schedule_user_id`
   FOREIGN KEY (`user_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 
@@ -271,7 +271,7 @@ ALTER TABLE `ceddb`.`subscription`
 ADD CONSTRAINT `sub_user_id`
   FOREIGN KEY (`user_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
 ;
 
@@ -284,12 +284,12 @@ ALTER TABLE `ceddb`.`user_friends`
 ADD CONSTRAINT `friend_user_id`
   FOREIGN KEY (`user_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION,
 ADD CONSTRAINT `user_friend_id`
   FOREIGN KEY (`friend_id`)
   REFERENCES `ceddb`.`user` (`iduser`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
   
   

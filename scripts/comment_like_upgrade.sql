@@ -22,5 +22,5 @@ ALTER TABLE `ceddb`.`like`
 ADD CONSTRAINT `like_comment_id`
   FOREIGN KEY (`comment_id`)
   REFERENCES `ceddb`.`comment` (`idcomment`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;

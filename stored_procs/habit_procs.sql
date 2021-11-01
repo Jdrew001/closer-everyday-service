@@ -52,7 +52,6 @@ CREATE PROCEDURE CreateHabit(
     ReminderAt DateTime,
     VisibleToFriends TINYINT,
     Description VARCHAR(100),
-    Status char(1),
     UserId VARCHAR(255),
     ScheduleId VARCHAR(255),
     HabitTypeId INT,
@@ -63,9 +62,13 @@ BEGIN
 	SET @id = UUID();
 
 	INSERT INTO `ceddb`.`habit` (`idhabit`, `name`, `icon`, `reminder`, `reminderAt`, `visibleToFriends`, `description`, `status`, `userId`, `scheduleId`, `habitTypeId`, `createdAt`, `active_ind`)
-	VALUES(@id, Name, Icon, Reminder, ReminderAt, VisibleToFriends, Description, Status, UserId, ScheduleId, HabitTypeId, CreatedAt, ActiveInd);
+	VALUES(@id, Name, Icon, Reminder, ReminderAt, VisibleToFriends, Description, 'P', UserId, ScheduleId, HabitTypeId, CreatedAt, ActiveInd);
     
-    SELECT * FROM `ceddb`.`habit` d WHERE d.`idhabit`=@id;
+    SELECT * FROM `ceddb`.`habit` h
+    JOIN Schedule s ON h.scheduleId=s.idschedule
+	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
+	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId
+    WHERE h.idhabit = @id;
 END //
 
 DELIMITER ;

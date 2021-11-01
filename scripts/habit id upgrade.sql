@@ -40,7 +40,7 @@ ALTER TABLE `ceddb`.`friend_habit`
 ADD CONSTRAINT `friend_habit_id`
   FOREIGN KEY (`habitId`)
   REFERENCES `ceddb`.`habit` (`idhabit`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
   
 ALTER TABLE `ceddb`.`habit_frequency` 
@@ -50,7 +50,7 @@ ALTER TABLE `ceddb`.`habit_frequency`
 ADD CONSTRAINT `freq_habit_id`
   FOREIGN KEY (`freq_habit_id`)
   REFERENCES `ceddb`.`habit` (`idhabit`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
   
 ALTER TABLE `ceddb`.`habit_log` 
@@ -60,7 +60,7 @@ ALTER TABLE `ceddb`.`habit_log`
 ADD CONSTRAINT `history_habit_id`
   FOREIGN KEY (`habit_id`)
   REFERENCES `ceddb`.`habit` (`idhabit`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;
   
 ALTER TABLE `ceddb`.`milestone` 
@@ -70,5 +70,5 @@ ALTER TABLE `ceddb`.`milestone`
 ADD CONSTRAINT `milestone_habit_id`
   FOREIGN KEY (`habit_id`)
   REFERENCES `ceddb`.`habit` (`idhabit`)
-  ON DELETE NO ACTION
+  ON DELETE CASCADE
   ON UPDATE NO ACTION;

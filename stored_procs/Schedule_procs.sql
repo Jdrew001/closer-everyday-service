@@ -24,9 +24,6 @@ END //
 DELIMITER ;
 -- --------------------------------------
 
-
--- --------------------------------------
-
 DROP PROCEDURE IF EXISTS SaveSchedule;
 
 DELIMITER //
@@ -34,7 +31,7 @@ DELIMITER //
 CREATE PROCEDURE SaveSchedule(
 	IN
     ScheduleTypeId INT,
-    UserId BIGINT,
+    UserId VARCHAR(255),
     ScheduleTime DATETIME
 )
 BEGIN
@@ -42,7 +39,15 @@ BEGIN
     INSERT INTO `ceddb`.`schedule` (`idschedule`, `schedule_type_id`, `user_id`, `schedule_time`)
 	VALUES(@id, ScheduleTypeId, UserId, ScheduleTime);
     
-    SELECT * FROM `ceddb`.`schedule` s WHERE s.`idschedule`=@id;
+    SELECT
+    s.idschedule as "Id",
+    s.schedule_time as "ScheduleTime",
+    st.idschedule_type as "idschedule_type",
+    st.schedule_value as "scheduleType",
+    s.user_id as "UserId"
+    FROM `ceddb`.`schedule` s 
+    INNER JOIN schedule_type st ON st.idschedule_type = schedule_type_id
+    WHERE s.`idschedule`=@id;
 END //
 
 DELIMITER ;
