@@ -94,7 +94,7 @@ namespace CED.Controllers
                 return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
             }
 
-            var habitStats = _habitStatService.GetGlobalHabitStats(userId, year);
+            var habitStats = await _habitStatService.GetGlobalHabitStats(userId, year);
 
             return Ok(GenerateSuccessResponse("Success", habitStats));
         }
