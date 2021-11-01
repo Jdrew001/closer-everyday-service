@@ -56,7 +56,7 @@ namespace CED.Services.Core
                 var habitIds = logs.Select(o => o.HabitId).Distinct().ToList();
 
                 habitIds.ForEach(habitId => {
-                    var habitLogs = logs.FindAll(o => o.HabitId == habitId);
+                    var habitLogs = logs.FindAll(o => o.HabitId.ToString().Equals(habitId.ToString()));
                     var streak = 0;
                     if (habitLogs.Count > 1)
                     {
@@ -106,7 +106,7 @@ namespace CED.Services.Core
                 habitIds.ForEach(habitId =>
                 {
                     // find all logs for a given habit id
-                    var habitLogs = logs.FindAll(o => o.HabitId == habitId);
+                    var habitLogs = logs.FindAll(o => o.HabitId.ToString().Equals(habitId.ToString()));
                     var streak = 0;
                     if (habitLogs.Count > 1)
                     {
