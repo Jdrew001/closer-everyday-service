@@ -101,7 +101,7 @@ namespace CED
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CED v1"));
             } else
             {
-                app.UseHsts();
+                //app.UseHsts();
             }
 
             app.UseExceptionHandlerMiddleware();
