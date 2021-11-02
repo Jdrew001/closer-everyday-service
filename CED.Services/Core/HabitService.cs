@@ -153,15 +153,21 @@ namespace CED.Services.Core
                 updatedHabit = await _habitRepository.UpdateHabit(habit);
                 _log.LogInformation("Updated habit : {Habit}", habit);
 
-                // Save frequencies
+                // Update frequencies
                 _log.LogInformation("Saving Frequencies : {Frequencies}", habit.Frequencies);
-                var frequencies = await _frequencyService.UpdateHabitFrequencies(habit.Frequencies, updatedHabit.Id);
+                var cleared = await _frequencyService.ClearHabitFrequencies(habit.Id);
+                if (cleared.Count > 0)
+                    return null;
+
+                var frequencies = await _frequencyService.SaveHabitFrequencies(habit.Frequencies, updatedHabit.Id);
                 updatedHabit.Frequencies = frequencies;
                 _log.LogInformation("Saved Frequencies : {Frequencies}", habit.Frequencies);
 
+
+                // TODO: Need to complete below
                 var habitFriends = new List<FriendHabit>();
                 _log.LogInformation("Updating Habit Friends : {Habit Friends}", habit.friendHabits);
-                // save friend habits
+                // Update friend habits
                 habit.friendHabits.ForEach(async o =>
                 {
                     var habitFriend = await _friendService.SaveFriendToHabit(o.FriendId, habit.Id, habit.UserId);

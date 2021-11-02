@@ -44,9 +44,9 @@ namespace CED.Services.Core
             return savedFrequencies;
         }
 
-        public async Task<List<Frequency>> UpdateHabitFrequencies(List<Frequency> frequencies, Guid habitId)
+        public async Task<List<Frequency>> ClearHabitFrequencies(Guid habitId)
         {
-            throw new NotImplementedException();
+            return await _frequencyRepository.ClearHabitFrequencies(habitId);
         }
     }
 }

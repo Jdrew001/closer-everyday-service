@@ -60,6 +60,23 @@ namespace CED.Data.Repositories
             return frequency;
         }
 
+        public async Task<List<Frequency>> ClearHabitFrequencies(Guid habitId)
+        {
+            List<Frequency> frequencies = new List<Frequency>();
+            string spName = "ClearFrequenciesForHabit";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
+
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+            while (drh.Read())
+                frequencies.Add(ReadFrequency(drh));
+
+            return frequencies;
+        }
+
         private Frequency ReadFrequency(DataReaderHelper drh)
         {
             return new Frequency()
