@@ -32,7 +32,7 @@ namespace CED.Controllers
         public async Task<IActionResult> Login(LoginRequestDTO request)
         {
             request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            string deviceUUID = RetrieveDeviceUUID();
+            string deviceUUID = request.DeviceUUID;
 
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
@@ -47,8 +47,7 @@ namespace CED.Controllers
         public async Task<IActionResult> RefreshToken(RefreshTokenDTO refreshTokenDTO)
         {
             refreshTokenDTO.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            string deviceUUID = RetrieveDeviceUUID();
-
+            string deviceUUID = refreshTokenDTO.DeviceUUID;
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
                 return BadRequest("DEVICE NOT FOUND");
@@ -57,11 +56,6 @@ namespace CED.Controllers
             refreshTokenDTO.DeviceUUID = deviceUUID;
             var response = await _authenticationService.RefreshToken(refreshTokenDTO);
             return response.IsAuthenticated ? Ok(response): BadRequest(response);
-        }
-
-        private string RetrieveDeviceUUID()
-        {
-            return HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "DEVICE_UUID").Value.FirstOrDefault();
         }
     }
 }
