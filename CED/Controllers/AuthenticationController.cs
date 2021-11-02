@@ -36,7 +36,7 @@ namespace CED.Controllers
 
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
-                return BadRequest();
+                return BadRequest("DEVICE NOT FOUND");
             }
 
             var response = await _authenticationService.Login(request, deviceUUID);
@@ -51,7 +51,7 @@ namespace CED.Controllers
 
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
-                return BadRequest();
+                return BadRequest("DEVICE NOT FOUND");
             }
 
             refreshTokenDTO.DeviceUUID = deviceUUID;
