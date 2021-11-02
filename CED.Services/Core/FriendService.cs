@@ -63,11 +63,16 @@ namespace CED.Services.Core
             catch (Exception e)
             {
                 _log.LogCritical(e, "ERROR: Exception inside (SaveFriendToHabit)" +
-                                    "User I: {User}, Habit Id {Habit Id}, Owner Id {ownerId}", userId, habitId, ownerId);
+                                    "User Id: {User}, Habit Id {Habit Id}, Owner Id {ownerId}", userId, habitId, ownerId);
                 throw;
             }
 
             return friendHabit;
+        }
+
+        public async Task<FriendHabit> UpdateFriendToHabit(Guid userId, Guid habitId, Guid ownerId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<User> GetFriendById(Guid id)
