@@ -91,29 +91,29 @@ namespace CED.Services.Core
         public async Task<Habit> SaveHabit(Habit habit)
         {
             Habit savedHabit = null;
-            _log.LogDebug("BEGIN SaveHabit - {Habit}", habit);
+            _log.LogInformation("BEGIN SaveHabit - {Habit}", habit);
             try
             {
-                _log.LogDebug("Saving schedule : {Schedule}", habit.Schedule);
+                _log.LogInformation("Saving schedule : {Schedule}", habit.Schedule);
                 Schedule schedule = await _scheduleService.SaveSchedule(habit.Schedule);
-                _log.LogDebug("Saved schedule : {Schedule}", habit.Schedule);
+                _log.LogInformation("Saved schedule : {Schedule}", habit.Schedule);
 
                 
                 habit.Schedule = schedule;
 
                 //Save Habit
-                _log.LogDebug("Saving habit : {Habit}", habit);
+                _log.LogInformation("Saving habit : {Habit}", habit);
                 savedHabit = await _habitRepository.SaveHabit(habit);
-                _log.LogDebug("Saved habit : {Habit}", habit);
+                _log.LogInformation("Saved habit : {Habit}", habit);
 
                 // Save frequencies
-                _log.LogDebug("Saving Frequencies : {Frequencies}", habit.Frequencies);
+                _log.LogInformation("Saving Frequencies : {Frequencies}", habit.Frequencies);
                 var frequencies = await _frequencyService.SaveHabitFrequencies(habit.Frequencies, savedHabit.Id);
                 savedHabit.Frequencies = frequencies;
-                _log.LogDebug("Saved Frequencies : {Frequencies}", habit.Frequencies);
+                _log.LogInformation("Saved Frequencies : {Frequencies}", habit.Frequencies);
 
                 var habitFriends = new List<FriendHabit>();
-                _log.LogDebug("Saving Habit Friends : {Habit Friends}", habit.friendHabits);
+                _log.LogInformation("Saving Habit Friends : {Habit Friends}", habit.friendHabits);
                 // save friend habits
                 habit.friendHabits.ForEach(async o =>
                 {
@@ -123,7 +123,7 @@ namespace CED.Services.Core
                 });
 
                 savedHabit.friendHabits = habitFriends;
-                _log.LogDebug("Saved Habit Friends : {Habit Friends}", habit.friendHabits);
+                _log.LogInformation("Saved Habit Friends : {Habit Friends}", habit.friendHabits);
             }
             catch (Exception e)
             {
@@ -131,7 +131,7 @@ namespace CED.Services.Core
                 return null;
             }
 
-            _log.LogDebug("END SaveHabit - {Habit}", savedHabit);
+            _log.LogInformation("END SaveHabit - {Habit}", savedHabit);
             return savedHabit;
         }
 

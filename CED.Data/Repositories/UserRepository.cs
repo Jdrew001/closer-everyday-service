@@ -32,7 +32,7 @@ namespace CED.Data.Repositories
 
         public async Task CreateNewUser(RegistrationDTO registrationDTO)
         {
-            _log.LogDebug("UserRepository: Start CreateNewUser : {Registration DTO}", registrationDTO);
+            _log.LogInformation("UserRepository: Start CreateNewUser : {Registration DTO}", registrationDTO);
             try
             {
                 var hashAndSalt = Hash.GetHash(registrationDTO.password);
@@ -60,7 +60,7 @@ namespace CED.Data.Repositories
 
         public async Task<User> GetUserByEmail(string email)
         {
-            _log.LogDebug("UserRepository: Start Get User By Email : {Email}", email);
+            _log.LogInformation("UserRepository: Start Get User By Email : {Email}", email);
             User result = null;
             try
             {
@@ -84,7 +84,7 @@ namespace CED.Data.Repositories
 
         public async Task<User> GetUserByRefreshToken(RefreshTokenDTO refreshTokenDTO)
         {
-            _log.LogDebug("UserRepository: Start Get User By Refresh Token : {Refresh Token DTO}", refreshTokenDTO);
+            _log.LogInformation("UserRepository: Start Get User By Refresh Token : {Refresh Token DTO}", refreshTokenDTO);
             User result = null;
             try
             {
@@ -108,7 +108,7 @@ namespace CED.Data.Repositories
 
         public async Task Logout(string token)
         {
-            _log.LogDebug("UserRepository: Start Logout : {Token}", token);
+            _log.LogInformation("UserRepository: Start Logout : {Token}", token);
             try
             {
                 string spName = "RevokeToken";
