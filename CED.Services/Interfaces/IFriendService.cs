@@ -13,7 +13,7 @@ namespace CED.Services.Interfaces
         public Task<List<FriendHabit>> GetFriendsForHabit(Guid habitId);
         public Task<FriendHabit> GetFriendHabitById(Guid friendHabitId);
         public Task<FriendHabit> SaveFriendToHabit(Guid userId, Guid habitId, Guid ownerId);
-        public Task<FriendHabit> UpdateFriendToHabit(Guid userId, Guid habitId, Guid ownerId);
+        public Task<FriendHabit> ClearFriendToHabit(Guid userId, Guid habitId, Guid ownerId);
         public Task<User> GetFriendById(Guid id);
         public Task<bool> RemoveFriendById(Guid id);
         public Task<User> AddFriendById(Guid id);

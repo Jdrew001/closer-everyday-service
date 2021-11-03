@@ -27,3 +27,28 @@ END //
 
 DELIMITER ;
 -- --------------------------------------
+
+DROP PROCEDURE IF EXISTS ClearFriendHabit;
+
+DELIMITER //
+
+CREATE PROCEDURE ClearFriendHabit(
+	IN
+    FriendId VARCHAR(255),
+    HabitId VARCHAR(255),
+    OwnerId VARCHAR(255)
+)
+BEGIN
+	DELETE from friend_habit fh WHERE
+    fh.friendId = FriendId AND 
+    fh.habitId = HabitId AND 
+    fh.ownerId = OwnerId;
+    
+    SELECT * FROM `ceddb`.`friend_habit` fh WHERE
+    fh.friendId = FriendId AND 
+    fh.habitId = HabitId AND 
+    fh.ownerId = OwnerId;
+END //
+
+DELIMITER ;
+-- --------------------------------------

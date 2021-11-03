@@ -70,9 +70,21 @@ namespace CED.Services.Core
             return friendHabit;
         }
 
-        public async Task<FriendHabit> UpdateFriendToHabit(Guid userId, Guid habitId, Guid ownerId)
+        public async Task<FriendHabit> ClearFriendToHabit(Guid userId, Guid habitId, Guid ownerId)
         {
-            throw new NotImplementedException();
+            FriendHabit friendHabit;
+            try
+            {
+                friendHabit = await _friendRepository.ClearFriendToHabit(userId, habitId, ownerId);
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "ERROR: Exception inside (SaveFriendToHabit)" +
+                                    "User Id: {User}, Habit Id {Habit Id}, Owner Id {ownerId}", userId, habitId, ownerId);
+                throw;
+            }
+
+            return friendHabit;
         }
 
         public async Task<User> GetFriendById(Guid id)

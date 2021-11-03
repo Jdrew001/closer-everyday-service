@@ -71,7 +71,15 @@ BEGIN
         schedule_time = ScheduleTime
 	WHERE s.idschedule = Id;
     
-    SELECT * FROM `ceddb`.`schedule` s WHERE s.`idschedule`=Id;
+    SELECT
+		s.idschedule as "Id",
+		s.schedule_time as "ScheduleTime",
+		st.idschedule_type as "idschedule_type",
+		st.schedule_value as "scheduleType",
+		s.user_id as "UserId"
+    FROM `ceddb`.`schedule` s 
+    INNER JOIN schedule_type st ON st.idschedule_type = schedule_type_id
+    WHERE s.`idschedule`=Id;
 END //
 
 DELIMITER ;

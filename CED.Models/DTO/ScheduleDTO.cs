@@ -12,6 +12,8 @@ namespace CED.Models.DTO
 {
     public class ScheduleDTO
     {
+        [JsonProperty("id")]
+        public Guid Id { get; set; }
         [JsonProperty("scheduleType")]
         public int ScheduleType { get; set; }
 

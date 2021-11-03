@@ -24,6 +24,7 @@ namespace CED.Profiles
 
             CreateMap<HabitUpdateDTO, Habit>()
                 .ForPath(o => o.HabitType.Id, opt => opt.MapFrom(src => src.HabitType))
+                .ForPath(o => o.Schedule.Id, opt => opt.MapFrom(src => src.Schedule.Id))
                 .ForPath(o => o.Schedule.ScheduleType.Id, opt => opt.MapFrom(src => src.Schedule.ScheduleType))
                 .ForPath(o => o.Schedule.ScheduleTime, opt => opt.MapFrom(src => src.Schedule.ScheduleTime))
                 .ForPath(o => o.Schedule.UserId, opt => opt.MapFrom(src => src.Schedule.UserId))
