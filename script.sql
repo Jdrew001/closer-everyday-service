@@ -78,3 +78,47 @@ END //
 
 DELIMITER ;
 -- --------------------------------------
+
+DROP PROCEDURE IF EXISTS UpdateHabit;
+
+DELIMITER //
+
+CREATE PROCEDURE UpdateHabit(
+	IN
+    `Name` VARCHAR(145),
+    Icon BLOB,
+    Reminder TINYINT,
+    ReminderAt DateTime,
+    VisibleToFriends TINYINT,
+    Description VARCHAR(100),
+    UserId VARCHAR(255),
+    ScheduleId VARCHAR(255),
+    HabitTypeId INT,
+    CreatedAt DateTime,
+    ActiveInd char(1),
+    HabitId VARCHAR(255)
+)
+BEGIN
+    UPDATE `ceddb`.`habit` h SET
+		`name`= Name,
+        icon = Icon,
+        reminder = Reminder,
+        reminderAt = ReminderAt,
+        visibleToFriends = VisibleToFriends,
+        description = Description,
+        userid = UserId,
+        scheduleId = ScheduleId,
+        habitTypeId = HabitTypeId,
+        createdAt = CreatedAt,
+        active_ind = ActiveInd
+	WHERE h.idhabit = HabitId;
+    
+    SELECT * FROM `ceddb`.`habit` h
+    JOIN Schedule s ON h.scheduleId=s.idschedule
+	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
+	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId
+    WHERE h.idhabit = HabitId;
+END //
+
+DELIMITER ;
+-- --------------------------------------
