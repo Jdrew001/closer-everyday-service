@@ -63,7 +63,24 @@ namespace CED.Services.Core
             catch (Exception e)
             {
                 _log.LogCritical(e, "ERROR: Exception inside (SaveFriendToHabit)" +
-                                    "User I: {User}, Habit Id {Habit Id}, Owner Id {ownerId}", userId, habitId, ownerId);
+                                    "User Id: {User}, Habit Id {Habit Id}, Owner Id {ownerId}", userId, habitId, ownerId);
+                throw;
+            }
+
+            return friendHabit;
+        }
+
+        public async Task<FriendHabit> ClearFriendToHabit(Guid userId, Guid habitId, Guid ownerId)
+        {
+            FriendHabit friendHabit;
+            try
+            {
+                friendHabit = await _friendRepository.ClearFriendToHabit(userId, habitId, ownerId);
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "ERROR: Exception inside (SaveFriendToHabit)" +
+                                    "User Id: {User}, Habit Id {Habit Id}, Owner Id {ownerId}", userId, habitId, ownerId);
                 throw;
             }
 

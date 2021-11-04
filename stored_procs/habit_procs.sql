@@ -10,7 +10,6 @@ CREATE PROCEDURE UpdateHabit(
     ReminderAt DateTime,
     VisibleToFriends TINYINT,
     Description VARCHAR(100),
-    Status char(1),
     UserId VARCHAR(255),
     ScheduleId VARCHAR(255),
     HabitTypeId INT,
@@ -26,7 +25,6 @@ BEGIN
         reminderAt = ReminderAt,
         visibleToFriends = VisibleToFriends,
         description = Description,
-        status = Status,
         userid = UserId,
         scheduleId = ScheduleId,
         habitTypeId = HabitTypeId,
@@ -34,7 +32,30 @@ BEGIN
         active_ind = ActiveInd
 	WHERE h.idhabit = HabitId;
     
-    SELECT * FROM `ceddb`.`habit` h WHERE h.`idhabit`=HabitId;
+    SELECT
+		h.idhabit,
+		h.name,
+		h.icon,
+		h.reminder,
+		h.reminderAt,
+		h.visibleToFriends,
+		h.description,
+		h.status,
+		h.userId,
+		h.createdAt,
+		h.active_ind,
+		s.idSchedule,
+		s.schedule_time,
+		st.idschedule_type,
+		st.schedule_value as "scheduleType",
+		ht.habitTypeId,
+		ht.habitTypeValue as "habitType",
+		ht.description as "habitTypeDescription"
+    FROM `ceddb`.`habit` h
+    JOIN Schedule s ON h.scheduleId=s.idschedule
+	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
+	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId
+    WHERE h.idhabit = HabitId;
 END //
 
 DELIMITER ;
@@ -64,7 +85,26 @@ BEGIN
 	INSERT INTO `ceddb`.`habit` (`idhabit`, `name`, `icon`, `reminder`, `reminderAt`, `visibleToFriends`, `description`, `status`, `userId`, `scheduleId`, `habitTypeId`, `createdAt`, `active_ind`)
 	VALUES(@id, Name, Icon, Reminder, ReminderAt, VisibleToFriends, Description, 'P', UserId, ScheduleId, HabitTypeId, CreatedAt, ActiveInd);
     
-    SELECT * FROM `ceddb`.`habit` h
+    SELECT
+		h.idhabit,
+		h.name,
+		h.icon,
+		h.reminder,
+		h.reminderAt,
+		h.visibleToFriends,
+		h.description,
+		h.status,
+		h.userId,
+		h.createdAt,
+		h.active_ind,
+		s.idSchedule,
+		s.schedule_time,
+		st.idschedule_type,
+		st.schedule_value as "scheduleType",
+		ht.habitTypeId,
+		ht.habitTypeValue as "habitType",
+		ht.description as "habitTypeDescription"
+    FROM `ceddb`.`habit` h
     JOIN Schedule s ON h.scheduleId=s.idschedule
 	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
 	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId

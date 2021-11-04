@@ -43,5 +43,10 @@ namespace CED.Services.Core
 
             return savedFrequencies;
         }
+
+        public async Task<List<Frequency>> ClearHabitFrequencies(Guid habitId)
+        {
+            return await _frequencyRepository.ClearHabitFrequencies(habitId);
+        }
     }
 }

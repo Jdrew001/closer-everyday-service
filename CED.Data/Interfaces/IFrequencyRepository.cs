@@ -14,5 +14,7 @@ namespace CED.Data.Interfaces
         Task<List<Frequency>> GetHabitFrequencies(Guid habitId);
 
         Task<Frequency> SaveHabitFrequency(int frequencyId, Guid habitId);
+
+        Task<List<Frequency>> ClearHabitFrequencies(Guid habitId);
     }
 }

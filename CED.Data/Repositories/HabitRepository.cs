@@ -107,10 +107,30 @@ namespace CED.Data.Repositories
             return habit;
         }
 
-        public Task<Habit> UpdateHabit(Habit habit)
+        public async Task<Habit> UpdateHabit(Habit habit)
         {
-            // UpdateHabit
-            throw new System.NotImplementedException();
+            string spName = "UpdateHabit";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habit.Id.ToString());
+            command.Parameters.AddWithValue("Name", habit.Name);
+            command.Parameters.AddWithValue("Icon", habit.Icon);
+            command.Parameters.AddWithValue("Reminder", habit.Reminder);
+            command.Parameters.AddWithValue("ReminderAt", habit.ReminderAt);
+            command.Parameters.AddWithValue("VisibleToFriends", habit.VisibleToFriends);
+            command.Parameters.AddWithValue("Description", habit.Description);
+            command.Parameters.AddWithValue("HabitTypeId", habit.HabitType.Id);
+            command.Parameters.AddWithValue("UserId", habit.UserId.ToString());
+            command.Parameters.AddWithValue("CreatedAt", new DateTime());
+            command.Parameters.AddWithValue("ActiveInd", "A");
+            command.Parameters.AddWithValue("ScheduleId", habit.Schedule.Id.ToString());
+
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                habit = ReadHabit(drh);
+
+            return habit;
         }
         public bool DeleteHabitById(Guid id)
         {
@@ -282,7 +302,7 @@ namespace CED.Data.Repositories
                 {
                     Id = drh.Get<int>("habitTypeId"),
                     Value = drh.Get<string>("habitType"),
-                    Description = drh.Get<string>("description")
+                    Description = drh.Get<string>("habitTypeDescription")
                 },
                 Schedule = new Schedule()
                 {

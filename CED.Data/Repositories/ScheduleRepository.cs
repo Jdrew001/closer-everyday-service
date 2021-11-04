@@ -56,6 +56,7 @@ namespace CED.Data.Repositories
 
         public async Task<Schedule> UpdateSchedule(Schedule schedule)
         {
+            Schedule newSchedule = null;
             string spName = "UpdateSchedule";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
@@ -67,13 +68,10 @@ namespace CED.Data.Repositories
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
-            {
-                var test = ReadSchedule(drh);
-                schedule = test;
-            }
-                
+                newSchedule = ReadSchedule(drh);
 
-            return schedule;
+
+            return newSchedule;
         }
 
         private Schedule ReadSchedule(DataReaderHelper drh)

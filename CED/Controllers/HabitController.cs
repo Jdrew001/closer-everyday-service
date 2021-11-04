@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using CED.Models.Core;
+using CED.Utils;
 
 namespace CED.Controllers
 {
@@ -39,7 +40,7 @@ namespace CED.Controllers
             var userId = await GetUserId();
             if (userId == Guid.Empty)
             {
-                return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+                return Unauthorized(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
             }
 
             var habits = await _habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
@@ -66,7 +67,7 @@ namespace CED.Controllers
             var userId = await GetUserId();
             if (userId == Guid.Empty)
             {
-                return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+                return Unauthorized(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
             }
 
             var habits = await _habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
@@ -91,7 +92,7 @@ namespace CED.Controllers
             var userId = await GetUserId();
             if (userId == Guid.Empty)
             {
-                return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+                return Unauthorized(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
             }
 
             var habitStats = await _habitStatService.GetGlobalHabitStats(userId, year);
@@ -113,13 +114,29 @@ namespace CED.Controllers
         {
             var userId = await GetUserId();
             if (userId == Guid.Empty)
-                return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+                return Unauthorized(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
 
             var result = await _habitService.SaveHabit(_mapper.Map<HabitSaveDTO, Habit>(habit));
             var habitDto = _mapper.Map<HabitDTO>(result);
 
             if (habitDto == null)
-                return BadRequest(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
+
+            return Ok(GenerateSuccessResponse("Success", habitDto));
+        }
+
+        [HttpPost("update")]
+        public async Task<IActionResult> UpdateHabit(HabitUpdateDTO habit)
+        {
+            var userId = await GetUserId();
+            if (userId == Guid.Empty)
+                return Unauthorized(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
+
+            var result = await _habitService.UpdateHabit(_mapper.Map<HabitUpdateDTO, Habit>(habit));
+            var habitDto = _mapper.Map<HabitDTO>(result);
+
+            if (habitDto == null)
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
 
             return Ok(GenerateSuccessResponse("Success", habitDto));
         }
