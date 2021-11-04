@@ -11,14 +11,14 @@ CREATE PROCEDURE GetScheduleByHabitId(
 BEGIN
     SELECT 
 		s.idschedule AS "scheduleId",
-        s.userId as "userId",
+        s.user_id as "userId",
         s.schedule_time AS "scheduleTime",
         st.idschedule_type AS "idScheduleType",
         st.schedule_value AS "scheduleTypeValue"
     FROM `CEDDB`.`habit` h
 	JOIN `CEDDB`.`Schedule` s ON h.scheduleId=s.idschedule
-    JOIN `CEDDB`.`ScheduleType` st ON s.schedule_type_id=st.idschedule_type
-	WHERE h.habitId = HabitId;
+    JOIN `CEDDB`.`Schedule_type` st ON s.schedule_type_id=st.idschedule_type
+	WHERE h.idhabit = HabitId;
 END //
 
 DELIMITER ;

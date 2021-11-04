@@ -166,17 +166,11 @@ namespace CED.Services.Core
 
                 // TODO: Need to complete below
                 var habitFriends = new List<FriendHabit>();
-                var shouldSave = true;
                 _log.LogInformation("Updating Habit Friends : {Habit Friends}", habit.friendHabits);
                 // Update friend habits
                 habit.friendHabits.ForEach(async o =>
                 {
-                    var clearedFriend = await _friendService.ClearFriendToHabit(o.FriendId, habit.Id, habit.UserId);
-                    if (clearedFriend != null)
-                    {
-                        shouldSave = false;
-                        return;
-                    }
+                    await _friendService.ClearFriendToHabit(o.FriendId, habit.Id, habit.UserId);
                 });
 
                 habit.friendHabits.ForEach(async o =>

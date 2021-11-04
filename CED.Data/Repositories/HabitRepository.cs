@@ -302,7 +302,7 @@ namespace CED.Data.Repositories
                 {
                     Id = drh.Get<int>("habitTypeId"),
                     Value = drh.Get<string>("habitType"),
-                    Description = drh.Get<string>("description")
+                    Description = drh.Get<string>("habitTypeDescription")
                 },
                 Schedule = new Schedule()
                 {
