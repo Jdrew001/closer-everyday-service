@@ -22,7 +22,7 @@ namespace CED.Controllers
         [HttpGet("environment")]
         public IActionResult actionResult()
         {
-            return Ok("Hello World");
+            return Ok(_hostingEnv.EnvironmentName);
         }
     }
 }

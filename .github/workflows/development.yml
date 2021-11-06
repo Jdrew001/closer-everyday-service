@@ -108,7 +108,7 @@ jobs:
         with:
           DATABASE_HOST: ${{ secrets.REMOTE_HOST }}
           DATABASE_PORT: '3306'
-          DATABASE_NAME: 'ceddb'
+          DATABASE_NAME: 'ced_dev'
           DATABASE_USERNAME: ${{ secrets.MYSQL_USER }}
           DATABASE_PASSWORD: ${{ secrets.MYSQL_PASS }}
           DATABASE_SCRIPT: 'script.sql'
