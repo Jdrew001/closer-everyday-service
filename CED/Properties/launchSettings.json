@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "CED": {
+    "Development": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,

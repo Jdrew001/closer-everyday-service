@@ -38,14 +38,14 @@ BEGIN
 	SET @id = UUID();
     INSERT INTO `ceddb`.`schedule` (`idschedule`, `schedule_type_id`, `user_id`, `schedule_time`)
 	VALUES(@id, ScheduleTypeId, UserId, ScheduleTime);
-    
+
     SELECT
     s.idschedule as "Id",
     s.schedule_time as "ScheduleTime",
     st.idschedule_type as "idschedule_type",
     st.schedule_value as "scheduleType",
     s.user_id as "UserId"
-    FROM `ceddb`.`schedule` s 
+    FROM `ceddb`.`schedule` s
     INNER JOIN schedule_type st ON st.idschedule_type = schedule_type_id
     WHERE s.`idschedule`=@id;
 END //
@@ -70,14 +70,14 @@ BEGIN
         user_id = UserId,
         schedule_time = ScheduleTime
 	WHERE s.idschedule = Id;
-    
+
     SELECT
 		s.idschedule as "Id",
 		s.schedule_time as "ScheduleTime",
 		st.idschedule_type as "idschedule_type",
 		st.schedule_value as "scheduleType",
 		s.user_id as "UserId"
-    FROM `ceddb`.`schedule` s 
+    FROM `ceddb`.`schedule` s
     INNER JOIN schedule_type st ON st.idschedule_type = schedule_type_id
     WHERE s.`idschedule`=Id;
 END //
