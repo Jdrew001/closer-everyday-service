@@ -124,6 +124,29 @@ namespace CED.Data.Repositories
             }
         }
 
+        public async Task<List<User>> SearchForUser(string param)
+        {
+            List<User> result = new List<User>();
+            try
+            {
+                string spName = "SearchForUser";
+                using DataConnectionProvider dcp = CreateConnection();
+                await using var command = dcp.CreateCommand(spName);
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("Param", param.ToLower());
+                using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+                while (drh.Read())
+                    result.Add(ReadUser(drh));
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (SearchForUser) param : {param}", param);
+            }
+            
+            return result;
+        }
+
         private User ReadUser(DataReaderHelper drh)
         {
             Guid guid;
