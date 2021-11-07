@@ -15,5 +15,6 @@ namespace CED.Data.Interfaces
         Task CreateNewUser(RegistrationDTO registrationDTO);
         Task<User> GetUserByRefreshToken(RefreshTokenDTO refreshTokenDTO);
         Task Logout(string token);
+        Task<List<User>> SearchForUser(string param);
     }
 }

@@ -51,6 +51,7 @@ namespace CED
             {
                 mc.AddMaps("CED");
                 mc.AddProfile(new HabitProfile());
+                mc.AddProfile(new UserProfile());
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
@@ -94,7 +95,7 @@ namespace CED
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-            if (env.IsDevelopment())
+            if (env.IsEnvironment("Local"))
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();

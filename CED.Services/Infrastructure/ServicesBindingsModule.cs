@@ -17,6 +17,7 @@ namespace CED.Services.Infrastructure
             services.AddScoped<IFrequencyService, FrequencyService>();
             services.AddScoped<IFriendService, FriendService>();
             services.AddScoped<IScheduleService, ScheduleService>();
+            services.AddScoped<IUserService, UserService>();
 
             return services;
         }
