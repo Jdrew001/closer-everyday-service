@@ -15,9 +15,9 @@ namespace CED.Controllers
     [ApiController]
     public class UserController : CEDBaseController
     {
-        private IMapper _mapper;
-        private IUserService _userService;
-        private ILogger<UserController> _logger;
+        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
+        private readonly ILogger<UserController> _logger;
 
         public UserController(
             ITokenService tokenService,

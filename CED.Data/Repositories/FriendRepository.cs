@@ -76,24 +76,59 @@ namespace CED.Data.Repositories
             return friendHabit;
         }
 
-        public async Task<User> GetFriendById(Guid id)
+        public async Task<FriendUser> GetFriendById(Guid id)
         {
             throw new NotImplementedException();
         }
 
         public async Task<bool> RemoveFriendById(Guid id)
         {
-            throw new NotImplementedException();
+            string addedId = null;
+            string spName = "AddFriendToUser";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("UserId", id.ToString());
+
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                addedId = drh.Get<string>("iduser_friends");
+
+            return addedId == null;
         }
 
-        public async Task<User> AddFriendById(Guid id)
+        public async Task<FriendUser> AddFriendById(Guid userId, Guid friendId)
         {
-            throw new NotImplementedException();
+            FriendUser friendUser = null;
+            string spName = "AddFriendToUser";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("UserId", userId.ToString());
+            command.Parameters.AddWithValue("FriendId", friendId.ToString());
+            command.Parameters.AddWithValue("CreatedAt", new DateTime());
+
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                friendUser = ReadFriendUser(drh);
+
+            return friendUser;
         }
 
-        public async Task<List<User>> GetUserFriends(Guid userId)
+        public async Task<List<FriendUser>> GetUserFriends(Guid userId)
         {
-            throw new NotImplementedException();
+            List<FriendUser> friendUsers = new List<FriendUser>();
+            string spName = "GetUserFriends";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("Id", userId.ToString());
+
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                friendUsers.Add(ReadFriendUser(drh));
+
+            return friendUsers;
         }
 
         private FriendHabit ReadFriendHabit(DataReaderHelper drh)
@@ -106,6 +141,18 @@ namespace CED.Data.Repositories
                 FriendLastName = drh.Get<string>("LastName"),
                 FriendEmail = drh.Get<string>("Email"),
                 OwnerId = new Guid(drh.Get<string>("ownerId"))
+            };
+        }
+
+        private FriendUser ReadFriendUser(DataReaderHelper drh)
+        {
+            return new FriendUser()
+            {
+                Id = new Guid(drh.Get<string>("id")),
+                UserId = new Guid(drh.Get<string>("userId")),
+                FirstName = drh.Get<string>("firstName"),
+                LastName = drh.Get<string>("lastName"),
+                Email = drh.Get<string>("email")
             };
         }
     }
