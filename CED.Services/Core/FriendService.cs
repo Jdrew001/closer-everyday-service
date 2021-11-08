@@ -91,19 +91,54 @@ namespace CED.Services.Core
         {
             throw new NotImplementedException();
         }
-        public async Task<bool> RemoveFriendById(Guid id)
+        public async Task<bool> RemoveFriendById(Guid userId, Guid friendId)
         {
-            throw new NotImplementedException();
+            var result = false;
+            try
+            {
+                result = await _friendRepository.RemoveFriendById(userId, friendId);
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "ERROR: Exception inside(RemoveFriendById) - User Id: {userId}, Friend Id {friendId}", userId, friendId);
+                throw;
+            }
+
+            return result;
         }
 
-        public async Task<User> AddFriendById(Guid id)
+        public async Task<FriendUser> AddFriendById(Guid userId, Guid friendId)
         {
-            throw new NotImplementedException();
+            FriendUser user = null;
+            try
+            {
+                user = await _friendRepository.AddFriendById(userId, friendId);
+                //TODO: Send notification to user
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "ERROR: Exception inside(AddFriendById) - User Id: {userId}, Friend Id {friendId}", userId, friendId);
+                throw;
+            }
+
+            return user;
         }
 
-        public async Task<List<User>> GetUserFriends(Guid userId)
+        public async Task<List<FriendUser>> GetUserFriends(Guid userId)
         {
-            throw new NotImplementedException();
+            List<FriendUser> users = null;
+            try
+            {
+                users = await _friendRepository.GetUserFriends(userId);
+                //TODO: Send notification to user
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "ERROR: Exception inside(GetUserFriends) - User Id: {userId}", userId);
+                throw;
+            }
+
+            return users;
         }
     }
 }

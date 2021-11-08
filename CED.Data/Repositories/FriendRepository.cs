@@ -76,19 +76,15 @@ namespace CED.Data.Repositories
             return friendHabit;
         }
 
-        public async Task<FriendUser> GetFriendById(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<bool> RemoveFriendById(Guid id)
+        public async Task<bool> RemoveFriendById(Guid userId, Guid friendId)
         {
             string addedId = null;
-            string spName = "AddFriendToUser";
+            string spName = "RemoveFriendToUser";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("UserId", id.ToString());
+            command.Parameters.AddWithValue("UserId", userId.ToString());
+            command.Parameters.AddWithValue("FriendId", friendId.ToString());
 
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
             while (drh.Read())
