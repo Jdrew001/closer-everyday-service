@@ -329,7 +329,8 @@ CREATE PROCEDURE AddHabitLog(
 	IN
     HabitId VARCHAR(255),
     UserId VARCHAR(255),
-    `Value` CHAR(1)
+    `Value` CHAR(1),
+    CreatedAt DATETIME
 )
 BEGIN
 	SET @id = UUID();
@@ -338,14 +339,17 @@ BEGIN
 		(`idhabit_log`,
         `log_value`,
 		`user_id`,
-		`habit_id`)
+		`habit_id`,
+        `created_at`)
 	VALUES
 		(@id,
         `Value`,
 		UserId,
-		HabitId);
+		HabitId,
+        CreatedAt);
         
 	SELECT 
+		hl.`idhabit_log` as `id`,
 		hl.`log_value` as `value`,
 		hl.`user_id` as `userId`,
 		hl.`habit_id` as `habitId`,

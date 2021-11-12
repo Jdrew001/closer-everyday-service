@@ -3,12 +3,14 @@ using CED.Data.Interfaces;
 using CED.Models.Core;
 using CED.Services.Interfaces;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using CED.Models.DTO;
 using Microsoft.Extensions.Logging;
 
 namespace CED.Services.Core
 {
+
     public class HabitService : IHabitService
     {
         private readonly ILogger<HabitService> _log;
@@ -16,19 +18,22 @@ namespace CED.Services.Core
         private readonly IFrequencyService _frequencyService;
         private readonly IScheduleService _scheduleService;
         private readonly IFriendService _friendService;
+        private readonly IMilestoneService _milestoneService;
 
         public HabitService(
             ILogger<HabitService> log,
             IHabitRepository habitRepository,
             IFrequencyService frequencyService,
             IScheduleService scheduleService,
-            IFriendService friendService)
+            IFriendService friendService,
+            IMilestoneService milestoneService)
         {
             _habitRepository = habitRepository;
             _frequencyService = frequencyService;
             _friendService = friendService;
             _scheduleService = scheduleService;
             _log = log;
+            _milestoneService = milestoneService;
         }
 
         public Task<List<Habit>> GetAllHabits()
@@ -195,26 +200,31 @@ namespace CED.Services.Core
 
         public async Task<HabitLog> SaveHabitLog(char status, Guid userId, Guid habitId, string date)
         {
+            HabitLog log = null;
             if (!status.Equals('C') && !status.Equals('F') && !status.Equals('P'))
                 return null;
             // Habit log not null, then update otherwise create a new one
             var habit = await GetHabitById(habitId);
-            checkHabitStatusUpdate(status, habit);
 
             if (habit == null)
                 return null;
 
             var habitLog = await GetHabitLogByIdDate(habitId, date); // need to get by date passed in
             if (habitLog == null)
-                return await _habitRepository.SaveHabitLog(status, userId, habitId);
+                log = await _habitRepository.SaveHabitLog(status, userId, habitId);
             else
-                return await _habitRepository.UpdateHabitLog(status, habitId, date); //save by created date
+                log = await _habitRepository.UpdateHabitLog(status, habitId, date); //save by created date
+
+            GetCheckGlobalMilestone(userId, habitId);
+            GetCheckHabitMilestone(userId, habitId);
+
+            return log;
         }
 
         /// <summary>
         /// Check for different status updates and send notification to user if habit is visible to friends
         /// </summary>
-        private void checkHabitStatusUpdate(char status, Habit habit)
+        private void GetCheckHabitStatusUpdate(char status, Habit habit)
         {
             if (habit.VisibleToFriends)
             {
@@ -228,6 +238,46 @@ namespace CED.Services.Core
                 {
                 }
             }
+        }
+
+        private void GetCheckGlobalMilestone(Guid userId, Guid habitId)
+        {
+            Task task = Task.Run(() =>
+            {
+                try
+                {
+                    _milestoneService.CheckForGlobalMilestones(userId);
+                }
+                catch (Exception exception)
+                {
+                    _log.LogCritical(exception, "Exception is Global Milestone thread - User: {userId}, Habit: {habitId}",
+                        userId, habitId);
+                }
+                finally
+                {
+                    System.Diagnostics.Debug.Write("Finally called");
+                }
+            });
+        }
+
+        private void GetCheckHabitMilestone(Guid userId, Guid habitId)
+        {
+            Task task = Task.Run(() =>
+            {
+                //try
+                //{
+                //    _milestoneService.CheckForGlobalMilestones(userId);
+                //}
+                //catch (Exception exception)
+                //{
+                //    _log.LogCritical(exception, "Exception is Global Milestone thread - User: {userId}, Habit: {habitId}",
+                //        userId, habitId);
+                //}
+                //finally
+                //{
+                //    System.Diagnostics.Debug.Write("Finally called");
+                //}
+            });
         }
     }
 }
