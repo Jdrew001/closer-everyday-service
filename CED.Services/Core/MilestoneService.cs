@@ -70,19 +70,8 @@ namespace CED.Services.Core
         {
             var completedLogsLength = logs.FindAll(o => o.Value.ToString().ToLower() == "c").Count;
             var lengths = MilestoneConstants.VALUES;
-            foreach (int entry in lengths)
-            {
-                if (completedLogsLength == entry)
-                {
-                    // TODO: create new milestone
-                    var milestone = await GetMilestoneByType(MileStoneScope.Global, MileStoneSubType.Perfect, entry.ToString());
-                    if (milestone == null)
-                    {
-                        await CreateGlobalMilestone(MileStoneSubType.Completion, userId, entry.ToString());
-                    }
-                    break;
-                }
-            }
+            var completedLength = 0;
+            CheckMilestoneLength(completedLogsLength, MileStoneScope.Global, MileStoneSubType.Completion, userId);
         }
 
         public async void GlobalPerfectDays(Guid userId, List<HabitLog> logs)
@@ -90,6 +79,7 @@ namespace CED.Services.Core
             int perfectDays = 0;
             // Get all distinct dates for a user's logs
             var dates = logs.Select(o => o.CreatedAt).Distinct().ToList();
+            
             foreach (var date in dates)
             {
                 var logsForDate = logs.FindAll(o => o.CreatedAt == date).Distinct().ToList();
@@ -100,13 +90,25 @@ namespace CED.Services.Core
                     perfectDays++;
                 }
             }
-
-            var milestone = await GetMilestoneByType(MileStoneScope.Global, MileStoneSubType.Perfect, perfectDays.ToString());
-            if (milestone == null)
-            {
-                await CreateGlobalMilestone(MileStoneSubType.Perfect, userId, perfectDays.ToString());
-            }
+            CheckMilestoneLength(perfectDays, MileStoneScope.Global, MileStoneSubType.Perfect, userId);       
         }
         #endregion
+
+        private async void CheckMilestoneLength(int value, MileStoneScope scope, MileStoneSubType type, Guid userId)
+        {
+            var lengths = MilestoneConstants.VALUES;
+            foreach (int entry in lengths)
+            {
+                if (value == entry)
+                {
+                    var milestone = await GetMilestoneByType(scope, type, value.ToString());
+                    if (milestone == null)
+                    {
+                        await CreateGlobalMilestone(type, userId, value.ToString());
+                    }
+                    break;
+                }
+            }
+        }
     }
 }
