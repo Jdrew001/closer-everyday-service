@@ -38,6 +38,7 @@ namespace CED.Services.Tests
         public void FirstCompletedHabitMilestoneExists()
         {
             #region Setup Data
+            Milestone nullMilestone = null;
             var habitLogs = new List<HabitLog>()
             {
                 new()
@@ -75,7 +76,15 @@ namespace CED.Services.Tests
 
             #region Setup Mocks
             _milestoneRepository.Setup(o =>
-                o.GetMilestoneByType(MileStoneScope.Global, MileStoneSubType.Perfect, _milestones[0].ToString()))
+                o.GetMilestoneType(MileStoneScope.Global, MileStoneSubType.Completion))
+                .Returns(Task.FromResult(milestoneType));
+
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneByType(MileStoneScope.Global, MileStoneSubType.Completion, "1"))
+                .Returns(Task.FromResult(nullMilestone));
+
+            _milestoneRepository.Setup(o =>
+                o.CreateGlobalMilestone(milestoneType.Id, _userId, milestone.Value))
                 .Returns(Task.FromResult(milestone));
             #endregion
 
@@ -85,7 +94,7 @@ namespace CED.Services.Tests
 
             #region Assert
             _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
-                1, _userId, _milestones[0].ToString()), Times.Never);
+                1, _userId, _milestones[0].ToString()), Times.Once);
             #endregion
         }
 
@@ -230,6 +239,7 @@ namespace CED.Services.Tests
         [Fact]
         public void FirstCompletedHabitFalse()
         {
+            #region Setup Data
             var habitLogs = new List<HabitLog>()
             {
                 new()
@@ -261,15 +271,150 @@ namespace CED.Services.Tests
             _milestoneRepository.Setup(o =>
                 o.GetMilestoneByType(MileStoneScope.Global, MileStoneSubType.Perfect, _milestones[0].ToString()))
                 .Returns(Task.FromResult(milestone));
+            #endregion
 
+            #region Act
             _milestoneService.CheckForGlobalCompletions(_userId, habitLogs);
+            #endregion
+
+            #region Assertions
             _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
                 1, _userId, _milestones[0].ToString()), Times.Never);
+            #endregion
         }
         #endregion
 
         #region Global Perfect Days
+        [Fact]
+        public void PerfectDaysAchieved1()
+        {
+            #region Setup
+            Milestone nullMilestone = null;
+            var habitLogs = new List<HabitLog>()
+            {
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = _habitId,
+                    UserId = _userId,
+                    Value = 'C'
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.Parse("2021-10-11T22:59:28"),
+                    HabitId = _habitId,
+                    UserId = _userId,
+                    Value = 'F'
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.Parse("2021-10-12T22:59:28"),
+                    HabitId = _habitId,
+                    UserId = _userId,
+                    Value = 'F'
+                }
+            };
+            var milestoneType = new MilestoneType()
+            {
+                Id = 1,
+                Name = "PERFECT",
+                Scope = "GLOBAL"
+            };
+            var milestone = new Milestone()
+            {
+                Habit = null,
+                Id = Guid.NewGuid(),
+                MilestoneType = milestoneType,
+                UserId = Guid.NewGuid(),
+                Value = "1"
+            };
+            #endregion
 
+            #region Setup Mocks
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneType(MileStoneScope.Global, MileStoneSubType.Perfect))
+                .Returns(Task.FromResult(milestoneType));
+
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneByType(MileStoneScope.Global, MileStoneSubType.Perfect, "3"))
+                .Returns(Task.FromResult(nullMilestone));
+
+            _milestoneRepository.Setup(o =>
+               o.CreateGlobalMilestone(milestoneType.Id, _userId, milestone.Value))
+               .Returns(Task.FromResult(milestone));
+            #endregion
+
+            #region Act
+            _milestoneService.GlobalPerfectDays(_userId, habitLogs);
+            #endregion
+
+            #region Assert
+            _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
+                1, _userId, _milestones[0].ToString()), Times.Once);
+            #endregion
+        }
+
+        [Fact]
+        public void PerfectDaysAchieved2()
+        {
+            #region Setup
+            Milestone nullMilestone = null;
+            var habitLogs = new List<HabitLog>()
+            {
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = _habitId,
+                    UserId = _userId,
+                    Value = 'C'
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.Parse("2021-10-11T22:59:28"),
+                    HabitId = _habitId,
+                    UserId = _userId,
+                    Value = 'C'
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.Parse("2021-10-12T22:59:28"),
+                    HabitId = _habitId,
+                    UserId = _userId,
+                    Value = 'F'
+                }
+            };
+            var milestoneType = new MilestoneType()
+            {
+                Id = 1,
+                Name = "PERFECT",
+                Scope = "GLOBAL"
+            };
+            #endregion
+
+            #region Setup Mocks
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneType(MileStoneScope.Global, MileStoneSubType.Perfect))
+                .Returns(Task.FromResult(milestoneType));
+            #endregion
+
+            #region Act
+            _milestoneService.GlobalPerfectDays(_userId, habitLogs);
+            #endregion
+
+            #region Assert
+            _milestoneRepository.Verify(o => o.GetMilestoneByType(
+                MileStoneScope.Global, MileStoneSubType.Perfect, "2"), Times.Never);
+
+            _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
+                1, _userId, _milestones[0].ToString()), Times.Never);
+            #endregion
+        }
         #endregion
     }
 }

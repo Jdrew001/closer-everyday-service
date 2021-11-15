@@ -215,32 +215,13 @@ namespace CED.Services.Core
             else
                 log = await _habitRepository.UpdateHabitLog(status, habitId, date); //save by created date
 
-            GetCheckGlobalMilestone(userId, habitId);
-            GetCheckHabitMilestone(userId, habitId);
+            CheckGlobalMilestone(userId, habitId);
+            CheckHabitMilestone(userId, habitId);
 
             return log;
         }
 
-        /// <summary>
-        /// Check for different status updates and send notification to user if habit is visible to friends
-        /// </summary>
-        private void GetCheckHabitStatusUpdate(char status, Habit habit)
-        {
-            if (habit.VisibleToFriends)
-            {
-                // send notification if completed
-                if (status.Equals('C'))
-                {
-                }
-
-                // send notification in case of failure
-                if (status.Equals('F'))
-                {
-                }
-            }
-        }
-
-        private void GetCheckGlobalMilestone(Guid userId, Guid habitId)
+        private void CheckGlobalMilestone(Guid userId, Guid habitId)
         {
             Task task = Task.Run(() =>
             {
@@ -260,7 +241,7 @@ namespace CED.Services.Core
             });
         }
 
-        private void GetCheckHabitMilestone(Guid userId, Guid habitId)
+        private void CheckHabitMilestone(Guid userId, Guid habitId)
         {
             Task task = Task.Run(() =>
             {
