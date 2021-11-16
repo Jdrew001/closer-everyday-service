@@ -8,6 +8,7 @@ using CED.Models.Core;
 using CED.Services.Core;
 using CED.Services.Interfaces;
 using CED.Services.utils;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -20,6 +21,7 @@ namespace CED.Services.Tests
         private readonly Mock<IUserService> _userService = new();
         private readonly Mock<IMilestoneRepository> _milestoneRepository = new();
         private readonly MilestoneService _milestoneService;
+        private readonly Mock<ILogger<MilestoneService>> _log = new();
 
         private readonly Guid _userId = Guid.NewGuid();
         private readonly Guid _habitId = Guid.NewGuid();
@@ -30,7 +32,26 @@ namespace CED.Services.Tests
         {
             
             _milestoneService = new MilestoneService(
-                _habitService.Object, _notificationService.Object, _userService.Object, _milestoneRepository.Object);
+                _habitService.Object, _notificationService.Object, _userService.Object, _milestoneRepository.Object, _log.Object);
+        }
+
+        [Fact]
+        public async void CreateGlobalMilestoneNegativeCase()
+        {
+            MilestoneType nullType = null;
+            Milestone milestone = null;
+            _milestoneRepository.Setup(o =>
+               o.CreateGlobalMilestone(1, _userId, "1"))
+               .Returns(Task.FromResult(milestone));
+
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneType(MileStoneScope.Global, MileStoneSubType.Completion))
+                .Returns(Task.FromResult(nullType));
+
+            var result = await _milestoneService.CreateGlobalMilestone(MileStoneSubType.Completion, _userId, "1");
+
+            _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
+                1, _userId, "1"), Times.Never);
         }
 
         #region First Global Completed habit
@@ -348,7 +369,7 @@ namespace CED.Services.Tests
             #endregion
 
             #region Act
-            _milestoneService.GlobalPerfectDays(_userId, habitLogs);
+            _milestoneService.CheckForGlobalPerfectDays(_userId, habitLogs);
             #endregion
 
             #region Assert
@@ -404,7 +425,7 @@ namespace CED.Services.Tests
             #endregion
 
             #region Act
-            _milestoneService.GlobalPerfectDays(_userId, habitLogs);
+            _milestoneService.CheckForGlobalPerfectDays(_userId, habitLogs);
             #endregion
 
             #region Assert
@@ -413,6 +434,320 @@ namespace CED.Services.Tests
 
             _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
                 1, _userId, _milestones[0].ToString()), Times.Never);
+            #endregion
+        }
+        #endregion
+
+        #region Global Friends supported
+        [Fact]
+        public void FriendsSupported5()
+        {
+            #region Setup
+            var friendId1 = Guid.NewGuid();
+            var friendId2 = Guid.NewGuid();
+            var habitId = Guid.NewGuid();
+            var habits = new List<Habit>()
+            {
+                new Habit()
+                {
+                    Description = "Description",
+                    Frequencies = null,
+                    friendHabits = new List<FriendHabit>()
+                    {
+                        new FriendHabit()
+                        {
+                            FriendEmail = "dtatkison@gmail.com",
+                            FriendFirstName = "Drew",
+                            FriendId = friendId1,
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        },
+                        new FriendHabit()
+                        {
+                            FriendEmail = "elatkison@gmail.com",
+                            FriendFirstName = "Elizabeth",
+                            FriendId = friendId2,
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        },
+                        new FriendHabit()
+                        {
+                            FriendEmail = "dtatkison@gmail.com",
+                            FriendFirstName = "Drew",
+                            FriendId = friendId1,
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        },
+                        new FriendHabit()
+                        {
+                            FriendEmail = "elatkison@gmail.com",
+                            FriendFirstName = "Elizabeth",
+                            FriendId = friendId2,
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        }
+                    },
+                    habitLog = null
+                },
+                new Habit()
+                {
+                    Description = "Description",
+                    Frequencies = null,
+                    friendHabits = new List<FriendHabit>()
+                    {
+                        new FriendHabit()
+                        {
+                            FriendEmail = "dtatkison@gmail.com",
+                            FriendFirstName = "Drew1",
+                            FriendId = Guid.NewGuid(),
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        },
+                        new FriendHabit()
+                        {
+                            FriendEmail = "elatkison@gmail.com",
+                            FriendFirstName = "Elizabeth2",
+                            FriendId = Guid.NewGuid(),
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        },
+                        new FriendHabit()
+                        {
+                            FriendEmail = "dtatkison@gmail.com",
+                            FriendFirstName = "Drew2",
+                            FriendId = Guid.NewGuid(),
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        }
+                    },
+                    habitLog = null
+                }
+            };
+            var milestoneType = new MilestoneType()
+            {
+                Id = 1,
+                Name = "FRIEND",
+                Scope = "GLOBAL"
+            };
+            Milestone milestone = null;
+            var newMilestone = new Milestone()
+            {
+                Habit = null,
+                Id = Guid.NewGuid(),
+                MilestoneType = milestoneType,
+                UserId = Guid.NewGuid(),
+                Value = "2"
+            };
+            #endregion
+
+            #region Setup Mocks
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneByType(MileStoneScope.Global, MileStoneSubType.FriendsSupported, "5"));
+
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneType(MileStoneScope.Global, MileStoneSubType.FriendsSupported))
+                .Returns(Task.FromResult(milestoneType));
+
+            _milestoneRepository.Setup(o =>
+               o.CreateGlobalMilestone(milestoneType.Id, _userId, "5"))
+               .Returns(Task.FromResult(newMilestone));
+            #endregion
+
+            #region Act
+            _milestoneService.CheckForGlobalFriendsSupported(_userId, habits);
+            #endregion
+
+            #region Assert
+            _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
+                1, _userId, "5"));
+            #endregion
+        }
+
+        [Fact]
+        public void FriendsSupported1()
+        {
+            #region Setup
+            var friendId1 = Guid.NewGuid();
+            var friendId2 = Guid.NewGuid();
+            var habitId = Guid.NewGuid();
+            var habits = new List<Habit>()
+            {
+                new Habit()
+                {
+                    Description = "Description",
+                    Frequencies = null,
+                    friendHabits = new List<FriendHabit>()
+                    {
+                        new FriendHabit()
+                        {
+                            FriendEmail = "dtatkison@gmail.com",
+                            FriendFirstName = "Drew",
+                            FriendId = friendId1,
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        }
+                    },
+                    habitLog = null
+                },
+                new Habit()
+                {
+                    Description = "Description",
+                    Frequencies = null,
+                    friendHabits = new List<FriendHabit>()
+                    {
+                        new FriendHabit()
+                        {
+                            FriendEmail = "dtatkison@gmail.com",
+                            FriendFirstName = "Drew1",
+                            FriendId = friendId1,
+                            FriendLastName = "Atkison",
+                            HabitId = habitId,
+                            Id = new Guid(),
+                            OwnerId = _userId
+                        }
+                    },
+                    habitLog = null
+                }
+            };
+            var milestoneType = new MilestoneType()
+            {
+                Id = 1,
+                Name = "FRIEND",
+                Scope = "GLOBAL"
+            };
+            Milestone milestone = null;
+            var newMilestone = new Milestone()
+            {
+                Habit = null,
+                Id = Guid.NewGuid(),
+                MilestoneType = milestoneType,
+                UserId = Guid.NewGuid(),
+                Value = "2"
+            };
+            #endregion
+
+            #region Setup Mocks
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneByType(MileStoneScope.Global, MileStoneSubType.FriendsSupported, "1"));
+
+            _milestoneRepository.Setup(o =>
+                o.GetMilestoneType(MileStoneScope.Global, MileStoneSubType.FriendsSupported))
+                .Returns(Task.FromResult(milestoneType));
+
+            _milestoneRepository.Setup(o =>
+               o.CreateGlobalMilestone(milestoneType.Id, _userId, "1"))
+               .Returns(Task.FromResult(newMilestone));
+            #endregion
+
+            #region Act
+            _milestoneService.CheckForGlobalFriendsSupported(_userId, habits);
+            #endregion
+
+            #region Assert
+            _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
+                1, _userId, "1"));
+            #endregion
+        }
+
+        [Fact]
+        public void FriendsSupportedNone()
+        {
+            #region Setup
+            var friendId1 = Guid.NewGuid();
+            var friendId2 = Guid.NewGuid();
+            var habitId = Guid.NewGuid();
+            var habits = new List<Habit>()
+            {
+                new Habit()
+                {
+                    Description = "Description",
+                    Frequencies = null,
+                    friendHabits = new List<FriendHabit>(),
+                    habitLog = null
+                },
+                new Habit()
+                {
+                    Description = "Description",
+                    Frequencies = null,
+                    friendHabits = new List<FriendHabit>(),
+                    habitLog = null
+                }
+            };
+            var milestoneType = new MilestoneType()
+            {
+                Id = 1,
+                Name = "FRIEND",
+                Scope = "GLOBAL"
+            };
+            Milestone milestone = null;
+            var newMilestone = new Milestone()
+            {
+                Habit = null,
+                Id = Guid.NewGuid(),
+                MilestoneType = milestoneType,
+                UserId = Guid.NewGuid(),
+                Value = "2"
+            };
+            #endregion
+
+            #region Act
+            _milestoneService.CheckForGlobalFriendsSupported(_userId, habits);
+            #endregion
+
+            #region Assert
+            _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
+                1, _userId, "1"), Times.Never);
+            #endregion
+        }
+
+        [Fact]
+        public void FriendsSupportedHabitNull()
+        {
+            #region Setup
+            var friendId1 = Guid.NewGuid();
+            var friendId2 = Guid.NewGuid();
+            var habitId = Guid.NewGuid();
+            List<Habit> habits = null;
+            var milestoneType = new MilestoneType()
+            {
+                Id = 1,
+                Name = "FRIEND",
+                Scope = "GLOBAL"
+            };
+            Milestone milestone = null;
+            var newMilestone = new Milestone()
+            {
+                Habit = null,
+                Id = Guid.NewGuid(),
+                MilestoneType = milestoneType,
+                UserId = Guid.NewGuid(),
+                Value = "2"
+            };
+            #endregion
+
+            #region Act
+            _milestoneService.CheckForGlobalFriendsSupported(_userId, habits);
+            #endregion
+
+            #region Assert
+            _milestoneRepository.Verify(o => o.CreateGlobalMilestone(
+                1, _userId, "1"), Times.Never);
             #endregion
         }
         #endregion
