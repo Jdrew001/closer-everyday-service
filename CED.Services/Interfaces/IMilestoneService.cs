@@ -20,7 +20,8 @@ namespace CED.Services.Interfaces
         public void CheckForGlobalCompletions(Guid userId, List<HabitLog> logs);
         public void CheckForGlobalPerfectDays(Guid userId, List<HabitLog> logs);
         public void CheckForGlobalFriendsSupported(Guid userId, List<Habit> habits);
-
+        public void CheckForHabitCompletions(Guid userId, Guid habitId, List<HabitLog> logs);
+        public void CheckForHabitPerfect(Guid userId, Guid habitId, List<HabitLog> logs);
         public void CheckForGlobalHabitStreak(Guid userId, List<HabitLog> logs);
     }
 }

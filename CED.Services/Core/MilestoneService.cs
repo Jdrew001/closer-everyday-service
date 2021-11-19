@@ -46,6 +46,13 @@ namespace CED.Services.Core
             return _milestoneRepository.GetMilestoneType(type, subType);
         }
 
+        /// <summary>
+        /// Create a global milestone for all habits
+        /// </summary>
+        /// <param name="subType">Milestone SubType Ex: Completion, Perfect</param>
+        /// <param name="userId">Guid User id</param>
+        /// <param name="value">Value to save</param>
+        /// <returns>Task Milestone</returns>
         public async Task<Milestone> CreateGlobalMilestone(MileStoneSubType subType, Guid userId, string value)
         {
             Milestone milestone = null;
@@ -64,12 +71,24 @@ namespace CED.Services.Core
             return milestone;
         }
 
+        /// <summary>
+        /// Create a new milestone for a habit once a condition is satisfied
+        /// </summary>
+        /// <param name="subType">Milestone Subtype Ex: Completion, Perfect</param>
+        /// <param name="userId">Guid user id</param>
+        /// <param name="habitId">Guid habit id</param>
+        /// <param name="value">The milestone value</param>
+        /// <returns>Task Milestone</returns>
         public async Task<Milestone> CreateHabitMilestone(MileStoneSubType subType, Guid userId, Guid habitId, string value)
         {
             var type = await GetMilestoneType(MileStoneScope.Habit, subType);
             return await _milestoneRepository.CreateHabitMilestone(type.Id, userId, habitId, value);
         }
 
+        /// <summary>
+        /// Check for Global milestones for a user
+        /// </summary>
+        /// <param name="userId">Guid User Id</param>
         public async void CheckForGlobalMilestones(Guid userId)
         {
             var logs = await _habitService.GetUserHabitLogs(userId);
@@ -89,25 +108,22 @@ namespace CED.Services.Core
             CheckMilestoneLength(completedLogsLength, MileStoneScope.Global, MileStoneSubType.Completion, userId);
         }
 
+        /// <summary>
+        /// A perfect day constitutes all logs for a given date are complete
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="logs"></param>
         public void CheckForGlobalPerfectDays(Guid userId, List<HabitLog> logs)
         {
-            int perfectDays = 0;
-            // Get all distinct dates for a user's logs
-            var dates = logs.Select(o => o.CreatedAt).Distinct().ToList();
-            
-            foreach (var date in dates)
-            {
-                var logsForDate = logs.FindAll(o => o.CreatedAt == date).Distinct().ToList();
-                var completedLogCountForDate = logsForDate.FindAll(o => o.Value.ToString().ToLower() == "c");
-
-                if (completedLogCountForDate.Count == logsForDate.Count)
-                {
-                    perfectDays++;
-                }
-            }
+            var perfectDays = ComputePerfectDays(logs);
             CheckMilestoneLength(perfectDays, MileStoneScope.Global, MileStoneSubType.Perfect, userId);       
         }
 
+        /// <summary>
+        /// For all habits, atleast one completed habit will increase the streak for the user
+        /// </summary>
+        /// <param name="userId">Guid id for user</param>
+        /// <param name="logs">Habit logs for a given user habits</param>
         public void CheckForGlobalHabitStreak(Guid userId, List<HabitLog> logs)
         {
             int streak = 0;
@@ -130,6 +146,11 @@ namespace CED.Services.Core
             CheckMilestoneLength(streak, MileStoneScope.Global, MileStoneSubType.Streak, userId);
         }
 
+        /// <summary>
+        /// For a given user, check all the friends that is being supported
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="habits"></param>
         public void CheckForGlobalFriendsSupported(Guid userId, List<Habit> habits)
         {
             try
@@ -158,9 +179,36 @@ namespace CED.Services.Core
         }
         #endregion
 
-        private async void CheckMilestoneLength(int value, MileStoneScope scope, MileStoneSubType type, Guid userId)
+        #region Habit Milestones
+        /// <summary>
+        /// For a given habit, check for completions
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="habitId"></param>
+        /// <param name="logs"></param>
+        public void CheckForHabitCompletions(Guid userId, Guid habitId, List<HabitLog> logs)
         {
+            var completedLogsLength = logs.FindAll(o => o.Value.ToString().ToLower() == "c").Count;
             var lengths = MilestoneConstants.VALUES;
+            CheckMilestoneLength(completedLogsLength, MileStoneScope.Habit, MileStoneSubType.Completion, userId, habitId);
+        }
+
+        /// <summary>
+        /// For a given habit, check for dates that have perfect days
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="habitId"></param>
+        /// <param name="logs"></param>
+        public void CheckForHabitPerfect(Guid userId, Guid habitId, List<HabitLog> logs)
+        {
+            var perfectDays = ComputePerfectDays(logs);
+            CheckMilestoneLength(perfectDays, MileStoneScope.Habit, MileStoneSubType.Perfect, userId);
+        }
+        #endregion
+
+        private async void CheckMilestoneLength(int value, MileStoneScope scope, MileStoneSubType type, Guid userId, Guid habitId = new Guid())
+        {
+            var lengths = type == MileStoneSubType.FriendsSupported ? MilestoneConstants.FRIEND_VALUE: MilestoneConstants.VALUES;
             foreach (int entry in lengths)
             {
                 if (value == entry)
@@ -168,11 +216,38 @@ namespace CED.Services.Core
                     var milestone = await GetMilestoneByType(scope, type, value.ToString());
                     if (milestone == null)
                     {
-                        await CreateGlobalMilestone(type, userId, value.ToString());
+                        if (scope == MileStoneScope.Global)
+                        {
+                            await CreateGlobalMilestone(type, userId, value.ToString());
+                        }
+                        else
+                        {
+                            await CreateHabitMilestone(type, userId, habitId, value.ToString());
+                        }
                     }
                     break;
                 }
             }
+        }
+    
+        private int ComputePerfectDays(List<HabitLog> logs)
+        {
+            int perfectDays = 0;
+            // Get all distinct dates for a user's logs
+            var dates = logs.Select(o => o.CreatedAt).Distinct().ToList();
+
+            foreach (var date in dates)
+            {
+                var logsForDate = logs.FindAll(o => o.CreatedAt == date).Distinct().ToList();
+                var completedLogCountForDate = logsForDate.FindAll(o => o.Value.ToString().ToLower() == "c");
+
+                if (completedLogCountForDate.Count == logsForDate.Count)
+                {
+                    perfectDays++;
+                }
+            }
+
+            return perfectDays;
         }
     }
 }

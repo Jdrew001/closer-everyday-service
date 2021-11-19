@@ -173,7 +173,7 @@ namespace CED.Services.Tests
         }
 
         [Fact]
-        public void FirstCompletedHabitMilestoneDoesnotExists5CompletedLogs()
+        public void FirstCompletedHabitMilestoneDoesnotExists7CompletedLogs()
         {
             #region Setup Data
             var habitLogs = new List<HabitLog>()
@@ -193,6 +193,22 @@ namespace CED.Services.Tests
                     HabitId = _habitId,
                     UserId = _userId,
                     Value = 'F'
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = _habitId,
+                    UserId = _userId,
+                    Value = 'C'
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    CreatedAt = DateTime.Parse("2021-10-10T22:59:28"),
+                    HabitId = _habitId,
+                    UserId = _userId,
+                    Value = 'C'
                 },
                 new()
                 {
