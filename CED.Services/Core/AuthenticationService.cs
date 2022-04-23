@@ -18,6 +18,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Data;
 using CED.Data.Interfaces;
+using AutoMapper;
+using CED.Services.utils;
 
 namespace CED.Services.Core
 {
@@ -29,19 +31,23 @@ namespace CED.Services.Core
         private readonly IUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
 
+        private readonly IMapper _mapper;
+
         public AuthenticationService(
             ILogger<AuthenticationService> log,
             IOptions<JwtToken> jwtToken,
             IOptions<ConnectionStrings> connectionStrings,
             IDeviceService deviceService,
             IUserRepository userRepository,
-            IRefreshTokenRepository refreshTokenRepository)
+            IRefreshTokenRepository refreshTokenRepository,
+            IMapper mapper)
         {
             _log = log;
             _jwtToken = jwtToken.Value;
             _deviceService = deviceService;
             _userRepository = userRepository;
             _refreshTokenRepository = refreshTokenRepository;
+            _mapper = mapper;
         }
 
         #region authentication methods
@@ -51,12 +57,12 @@ namespace CED.Services.Core
             var authenticationDTO = new AuthenticationDTO();
             if (user == null)
             {
-                return RegistrationError();
+                return AuthenticationError();
             }
 
             if (Hash.GetHash(loginRequestDto.Password, user.PasswordSalt).Hash != user.Password)
             {
-                return RegistrationError();
+                return AuthenticationError();
             }
 
             var devices = await _deviceService.GetUserDevices(user.Id);
@@ -102,7 +108,7 @@ namespace CED.Services.Core
             return authenticationDTO;
         }
 
-        public async Task<AuthenticationDTO> Register(RegistrationDTO registrationDto)
+        public async Task<RegistrationUserDTO> Register(RegistrationDTO registrationDto)
         {
             var user = await _userRepository.GetUserByEmail(registrationDto.email);
 
@@ -113,13 +119,24 @@ namespace CED.Services.Core
             }
 
             await _userRepository.CreateNewUser(registrationDto);
+            var loginUser = await _userRepository.GetUserByEmail(registrationDto.email);
+            
+            if (loginUser == null)
+                return RegistrationError();
 
-            return await Login(new LoginRequestDTO()
+            // create a new code in the database for this user
+            var authCodeDTO = await CreateUserAuthCode(loginUser.Id, Utils.GenerateRandomNo().ToString());
+
+            if (authCodeDTO == null)
+                return RegistrationError();
+
+            return new RegistrationUserDTO()
             {
-                Email = registrationDto.email,
-                Password = registrationDto.password,
-                IpAddress = registrationDto.IpAddress
-            }, registrationDto.deviceGuid);
+                IsUserCreated = true,
+                Message = null,
+                ShouldRedirectToLogin = false,
+                UserId = loginUser.Id
+            };
         }
 
         public async Task Logout(string token)
@@ -239,6 +256,25 @@ namespace CED.Services.Core
                 return refreshToken;
             });
         }
+
+        public async Task<AuthCodeDTO> GetAuthCode(Guid userId)
+        {
+            AuthCode code = await _userRepository.GetUserAuthCode(userId);
+            return _mapper.Map<AuthCode, AuthCodeDTO>(code);
+        }
+
+        public async Task<AuthCodeDTO> CreateUserAuthCode(Guid userId, string code)
+        {
+            AuthCode authCode = await _userRepository.CreateUserAuthCode(userId, code);
+            return _mapper.Map<AuthCode, AuthCodeDTO>(authCode);
+        }
+
+        public async Task<AuthCodeDTO> DeleteUserAuthCode(Guid userId)
+        {
+            AuthCode authCode = await _userRepository.DeleteUserAuthCode(userId);
+            return _mapper.Map<AuthCode, AuthCodeDTO>(authCode);
+        }
+
         #endregion
 
         #region private util methods
@@ -261,7 +297,7 @@ namespace CED.Services.Core
             return authenticationDTO;
         }
 
-        private AuthenticationDTO RegistrationError()
+        private AuthenticationDTO AuthenticationError()
         {
             var authenticationDTO = new AuthenticationDTO();
             authenticationDTO.IsAuthenticated = false;
@@ -269,6 +305,19 @@ namespace CED.Services.Core
             authenticationDTO.IsNewDevice = false;
             return authenticationDTO;
         }
-        #endregion
-    }
+
+        private RegistrationUserDTO RegistrationError()
+        {
+            var registrationDTO = new RegistrationUserDTO() 
+            {
+                IsUserCreated = false,
+                Message = "Unable to register user",
+                ShouldRedirectToLogin = true,
+                UserId = Guid.Empty
+            };
+
+            return registrationDTO;
+        }
+    #endregion
+  }
 }

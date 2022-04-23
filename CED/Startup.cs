@@ -58,12 +58,12 @@ namespace CED
                 mc.AddMaps("CED");
                 mc.AddProfile(new HabitProfile());
                 mc.AddProfile(new UserProfile());
+                mc.AddProfile(new AuthCodeProfile());
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
 
             var allowedHost = Configuration.GetSection("AllowedHosts").Get<string>();
-
 
             services.AddCors();
 

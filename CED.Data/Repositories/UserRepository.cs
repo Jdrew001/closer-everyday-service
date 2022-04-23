@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using CED.Models.Core;
 
 namespace CED.Data.Repositories
 {
@@ -145,6 +146,98 @@ namespace CED.Data.Repositories
             }
             
             return result;
+        }
+
+        public async Task<AuthCode> GetUserAuthCode(Guid userId)
+        {
+            _log.LogInformation("UserRepository: Start Get User Auth Code By User Id : {User Id}", userId);
+            AuthCode result = null;
+            try 
+            {
+                using DataConnectionProvider dcp = CreateConnection();
+                await using var command = dcp.CreateCommand("GetAuthCodeByUserId");
+
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("UserId", userId);
+
+                using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+                while (drh.Read())
+                    result = ReadAuthCode(drh);
+            }
+            catch(Exception e)
+            {
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (GetUserAuthCode) User Id : {userId}", userId);
+            }
+
+            return result;
+        }
+
+        public async Task<AuthCode> CreateUserAuthCode(Guid userId, string code)
+        {
+            _log.LogInformation("UserRepository: Start Create User Auth Code : {User Id} {Code}", userId, code);
+            AuthCode result = null;
+            try
+            {
+                string spName = "CreateAuthCode";
+                using DataConnectionProvider dcp = CreateConnection();
+                await using var command = dcp.CreateCommand(spName);
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("AuthCode", code);
+                command.Parameters.AddWithValue("UserId", userId);
+
+                using DataReaderHelper drh = await command.ExecuteReaderAsync();
+                while (drh.Read())
+                    result = ReadAuthCode(drh);
+            }
+            catch(Exception e)
+            {
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (CreateUserAuthCode) User Id : {userId}", userId);
+            }
+
+            return result;
+        }
+
+        public async Task<AuthCode> DeleteUserAuthCode(Guid userId)
+        {
+            _log.LogInformation("UserRepository: Start Delete User Auth Code By User Id : {User Id}", userId);
+            AuthCode result = null;
+            try 
+            {
+                using DataConnectionProvider dcp = CreateConnection();
+                await using var command = dcp.CreateCommand("DeleteAuthCode");
+
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("UserId", userId);
+
+                using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+                while (drh.Read())
+                    result = ReadAuthCode(drh);
+            }
+            catch(Exception e)
+            {
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (DeleteUserAuthCode) User Id : {userId}", userId);
+            }
+
+            return result;
+        }
+
+        private AuthCode ReadAuthCode(DataReaderHelper drh)
+        {
+            Guid guid;
+            Guid userIdGuid;
+            if (Guid.TryParse(drh.Get<string>("idauth_code"), out guid) && Guid.TryParse(drh.Get<string>("user_id"), out userIdGuid))
+            {
+                return new AuthCode()
+                {
+                    Id = guid,
+                    Code = drh.Get<string>("code"),
+                    UserId = userIdGuid
+                };
+            }
+
+            return null;
         }
 
         private User ReadUser(DataReaderHelper drh)
