@@ -54,7 +54,8 @@ BEGIN
 		u.`locked`,
 		u.`dateLocked`,
 		u.`token`,
-		u.`password`
+		u.`password`,
+        u.`confirmed`
 	FROM `ceddb`.`user` u 
     WHERE u.email = Email;
 END //
@@ -63,6 +64,41 @@ DELIMITER ;
 -- End Get User By Email
 -- --------------------------------------
 
+-- Drop stored procedure if exists
+-- Confirm new user
+DROP PROCEDURE IF EXISTS ConfirmNewUser;
+
+DELIMITER //
+
+CREATE PROCEDURE ConfirmNewUser(
+	IN UserId VARCHAR(255)
+)
+BEGIN
+	SET @id = (SELECT u.iduser FROM `ceddb`.`user` u
+		WHERE u.iduser=UserId);
+        
+	UPDATE `ceddb`.`user` u SET
+		u.`confirmed`= true
+	WHERE u.iduser = @id;
+
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ceddb`.`user` u
+    WHERE u.iduser = @id;
+END //
+
+DELIMITER ;
+-- End Confirm User
+-- --------------------------------------
 
 -- Drop stored procedure if exists
 -- Get User By Email

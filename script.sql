@@ -81,3 +81,32 @@ END //
 DELIMITER ;
 -- End Create auth code
 -- --------------------------------------
+
+-- Drop stored procedure if exists
+-- Get User By Email
+DROP PROCEDURE IF EXISTS GetUserByEmail;
+
+DELIMITER //
+
+CREATE PROCEDURE GetUserByEmail(
+	IN Email VARCHAR(256)
+)
+BEGIN
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ceddb`.`user` u 
+    WHERE u.email = Email;
+END //
+
+DELIMITER ;
+-- End Get User By Email
+-- --------------------------------------

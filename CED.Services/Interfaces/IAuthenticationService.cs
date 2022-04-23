@@ -9,6 +9,8 @@ namespace CED.Services.Interfaces
     {
         Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto, string deviceUUID);
         Task<RegistrationUserDTO> Register(RegistrationDTO registrationDto);
+
+        Task<AuthenticationDTO> ConfirmUser(Guid userId, string deviceUUID);
         Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDto);
         Task Logout(string token);
 

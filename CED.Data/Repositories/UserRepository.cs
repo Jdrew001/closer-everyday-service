@@ -59,6 +59,31 @@ namespace CED.Data.Repositories
             }
         }
 
+        public async Task<User> ConfirmNewUser(Guid userId)
+        {
+            _log.LogInformation("UserRepository: Start ConfirmUser : {User Id}", userId);
+            User result = null;
+            try 
+            {
+                string spName = "ConfirmNewUser";
+                using DataConnectionProvider dcp = CreateConnection();
+                await using var command = dcp.CreateCommand(spName);
+
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("UserId", userId);
+                using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+                while (drh.Read())
+                    result = ReadUser(drh);
+            }
+            catch(Exception e)
+            {
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (ConfirmNewUser) User Id : {userId}", userId);
+            }
+
+            return result;
+        }
+
         public async Task<User> GetUserByEmail(string email)
         {
             _log.LogInformation("UserRepository: Start Get User By Email : {Email}", email);
@@ -256,11 +281,12 @@ namespace CED.Data.Repositories
                     Locked = drh.Get<bool>("locked"),
                     DateLocked = drh.Get<DateTime?>("datelocked"),
                     PasswordSalt = drh.Get<string>("passwordSalt"),
-                    Password = drh.Get<string>("password")
+                    Password = drh.Get<string>("password"),
+                    Confirmed = drh.Get<bool>("confirmed")
                 };
             }
 
             return null;
         }
-    }
+  }
 }

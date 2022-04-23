@@ -139,6 +139,52 @@ namespace CED.Services.Core
             };
         }
 
+        public async Task<AuthenticationDTO> ConfirmUser(Guid userId, string deviceUUID)
+        {
+            var authenticationDTO = new AuthenticationDTO();
+            try 
+            {
+                var confirmedUser = await _userRepository.ConfirmNewUser(userId);
+
+                if (confirmedUser == null)
+                    return AuthenticationError();
+
+                if (!confirmedUser.Confirmed)
+                    return AuthenticationError();
+
+                var devices = await _deviceService.GetUserDevices(confirmedUser.Id);
+                var userDevice = devices.Find(d => (d.UUID.Equals(deviceUUID)));
+
+                if (userDevice == null)
+                {
+                    // TODO: Send an email to user asking if the phone logging in is correct
+                    // if click on ALLOW, then call an end point updating the system
+                    // eventually I want to use texting 
+                    //_log.LogError(e, "test: {devices}", devices);
+
+                    return AddNewDevice();
+                }
+                
+                
+                authenticationDTO.IsAuthenticated = true;
+                authenticationDTO.Token = await CreateJwtToken(confirmedUser);
+                authenticationDTO.UserId = confirmedUser.Id;
+
+                var refreshToken = await CreateRefreshToken(userDevice);
+                authenticationDTO.RefreshToken = refreshToken.Token;
+                authenticationDTO.RefreshTokenExpiration = refreshToken.Expires;
+                confirmedUser.RefreshTokens ??= new List<RefreshToken>();
+                confirmedUser.RefreshTokens.Add(refreshToken);
+                await _refreshTokenRepository.SaveRefreshToken(refreshToken, confirmedUser.Id);
+            }
+            catch(Exception e)
+            {
+                return AuthenticationError();
+            }
+            
+            return authenticationDTO;
+        }
+
         public async Task Logout(string token)
         {
             await _userRepository.Logout(token);

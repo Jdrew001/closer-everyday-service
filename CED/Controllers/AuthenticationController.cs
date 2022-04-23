@@ -1,5 +1,6 @@
 ﻿using CED.Models.DTO;
 using CED.Services.Interfaces;
+using CED.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,10 +13,11 @@ namespace CED.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
-    public class AuthenticationController : ControllerBase
+    public class AuthenticationController : CEDBaseController
     {
         private readonly IAuthenticationService _authenticationService;
-        public AuthenticationController(IAuthenticationService authenticationService)
+        public AuthenticationController(IAuthenticationService authenticationService, ITokenService tokenService)
+            :base(tokenService)
         {
             _authenticationService = authenticationService;
         }
@@ -41,6 +43,29 @@ namespace CED.Controllers
 
             var response = await _authenticationService.Login(request, deviceUUID);
             return response.IsAuthenticated ? Ok(response): BadRequest(response);
+        }
+
+        [HttpGet("validateCode/{code}/{userId}/{deviceUUID}")]
+        public async Task<IActionResult> ValidateCode(string code, Guid userId, string deviceUUID) 
+        {
+            var result = await _authenticationService.GetAuthCode(userId);
+            if (result == null) 
+            {
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
+            }
+
+            if (!result.Code.Equals(code))
+            {
+                return BadRequest(GenerateErrorResponse("The code provided did not match.", null));
+            }
+
+            var deletionCode = await _authenticationService.DeleteUserAuthCode(userId);
+            if (deletionCode != null)
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
+
+            // Update user's verified status
+            var response = await _authenticationService.ConfirmUser(userId, deviceUUID);
+            return response.IsAuthenticated ? Ok(response): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 
         [HttpPost("refreshToken")]

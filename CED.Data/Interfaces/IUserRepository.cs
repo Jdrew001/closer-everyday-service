@@ -14,6 +14,7 @@ namespace CED.Data.Interfaces
         Task<User> GetUserByEmail(string email);
         Task<User> GetUserById(Guid userId);
         Task CreateNewUser(RegistrationDTO registrationDTO);
+        Task<User> ConfirmNewUser(Guid userId);
         Task<User> GetUserByRefreshToken(RefreshTokenDTO refreshTokenDTO);
 
         Task<AuthCode> GetUserAuthCode(Guid userId);
