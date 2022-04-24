@@ -14,12 +14,12 @@ namespace CED.Data.Interfaces
         Task<User> GetUserByEmail(string email);
         Task<User> GetUserById(Guid userId);
         Task CreateNewUser(RegistrationDTO registrationDTO);
-        Task<User> ConfirmNewUser(Guid userId);
+        Task<User> ConfirmNewUser(string email);
         Task<User> GetUserByRefreshToken(RefreshTokenDTO refreshTokenDTO);
 
-        Task<AuthCode> GetUserAuthCode(Guid userId);
+        Task<AuthCode> GetUserAuthCode(string email);
         Task<AuthCode> CreateUserAuthCode(Guid userId, string code);
-        Task<AuthCode> DeleteUserAuthCode(Guid userId);
+        Task<AuthCode> DeleteUserAuthCode(string email);
 
         Task Logout(string token);
         Task<List<User>> SearchForUser(string param);

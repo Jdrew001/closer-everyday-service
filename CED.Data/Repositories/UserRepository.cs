@@ -59,9 +59,9 @@ namespace CED.Data.Repositories
             }
         }
 
-        public async Task<User> ConfirmNewUser(Guid userId)
+        public async Task<User> ConfirmNewUser(string email)
         {
-            _log.LogInformation("UserRepository: Start ConfirmUser : {User Id}", userId);
+            _log.LogInformation("UserRepository: Start ConfirmUser : {email}", email);
             User result = null;
             try 
             {
@@ -70,7 +70,7 @@ namespace CED.Data.Repositories
                 await using var command = dcp.CreateCommand(spName);
 
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("UserId", userId);
+                command.Parameters.AddWithValue("Email", email);
                 using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
                 while (drh.Read())
@@ -78,7 +78,7 @@ namespace CED.Data.Repositories
             }
             catch(Exception e)
             {
-                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (ConfirmNewUser) User Id : {userId}", userId);
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (ConfirmNewUser) email : {email}", email);
             }
 
             return result;
@@ -173,17 +173,17 @@ namespace CED.Data.Repositories
             return result;
         }
 
-        public async Task<AuthCode> GetUserAuthCode(Guid userId)
+        public async Task<AuthCode> GetUserAuthCode(string email)
         {
-            _log.LogInformation("UserRepository: Start Get User Auth Code By User Id : {User Id}", userId);
+            _log.LogInformation("UserRepository: Start Get User Auth Code By email : {email}", email);
             AuthCode result = null;
             try 
             {
                 using DataConnectionProvider dcp = CreateConnection();
-                await using var command = dcp.CreateCommand("GetAuthCodeByUserId");
+                await using var command = dcp.CreateCommand("GetAuthCodeByEmail");
 
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("UserId", userId);
+                command.Parameters.AddWithValue("Email", email);
 
                 using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
@@ -192,7 +192,7 @@ namespace CED.Data.Repositories
             }
             catch(Exception e)
             {
-                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (GetUserAuthCode) User Id : {userId}", userId);
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (GetUserAuthCode) email : {email}", email);
             }
 
             return result;
@@ -223,9 +223,9 @@ namespace CED.Data.Repositories
             return result;
         }
 
-        public async Task<AuthCode> DeleteUserAuthCode(Guid userId)
+        public async Task<AuthCode> DeleteUserAuthCode(string email)
         {
-            _log.LogInformation("UserRepository: Start Delete User Auth Code By User Id : {User Id}", userId);
+            _log.LogInformation("UserRepository: Start Delete User Auth Code By email : {email}", email);
             AuthCode result = null;
             try 
             {
@@ -233,7 +233,7 @@ namespace CED.Data.Repositories
                 await using var command = dcp.CreateCommand("DeleteAuthCode");
 
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("UserId", userId);
+                command.Parameters.AddWithValue("Email", email);
 
                 using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
@@ -242,7 +242,7 @@ namespace CED.Data.Repositories
             }
             catch(Exception e)
             {
-                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (DeleteUserAuthCode) User Id : {userId}", userId);
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (DeleteUserAuthCode) email : {email}", email);
             }
 
             return result;

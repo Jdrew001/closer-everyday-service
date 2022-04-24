@@ -20,6 +20,7 @@ using System.Data;
 using CED.Data.Interfaces;
 using AutoMapper;
 using CED.Services.utils;
+using MimeKit;
 
 namespace CED.Services.Core
 {
@@ -31,6 +32,9 @@ namespace CED.Services.Core
         private readonly IUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
 
+        private readonly IEmailService _emailService;
+        private readonly IEmailTemplateService _emailTemplateService;
+
         private readonly IMapper _mapper;
 
         public AuthenticationService(
@@ -40,6 +44,8 @@ namespace CED.Services.Core
             IDeviceService deviceService,
             IUserRepository userRepository,
             IRefreshTokenRepository refreshTokenRepository,
+            IEmailService emailService,
+            IEmailTemplateService emailTemplateService,
             IMapper mapper)
         {
             _log = log;
@@ -48,6 +54,8 @@ namespace CED.Services.Core
             _userRepository = userRepository;
             _refreshTokenRepository = refreshTokenRepository;
             _mapper = mapper;
+            _emailService = emailService;
+            _emailTemplateService = emailTemplateService;
         }
 
         #region authentication methods
@@ -130,6 +138,18 @@ namespace CED.Services.Core
             if (authCodeDTO == null)
                 return RegistrationError();
 
+            try 
+            {
+                // send auth code to user email
+                var to = new List<MailboxAddress>() { new MailboxAddress(loginUser.Email, loginUser.Email) };
+                var template = await _emailTemplateService.RegisterCode(loginUser.Email, authCodeDTO.Code);
+                await _emailService.SendEmailTemplate(to, "Verify Account", template.ToMessageBody());
+            }
+            catch (Exception e)
+            {
+                return RegistrationError();
+            }
+
             return new RegistrationUserDTO()
             {
                 IsUserCreated = true,
@@ -139,12 +159,12 @@ namespace CED.Services.Core
             };
         }
 
-        public async Task<AuthenticationDTO> ConfirmUser(Guid userId, string deviceUUID)
+        public async Task<AuthenticationDTO> ConfirmUser(string email, string deviceUUID)
         {
             var authenticationDTO = new AuthenticationDTO();
             try 
             {
-                var confirmedUser = await _userRepository.ConfirmNewUser(userId);
+                var confirmedUser = await _userRepository.ConfirmNewUser(email);
 
                 if (confirmedUser == null)
                     return AuthenticationError();
@@ -303,9 +323,9 @@ namespace CED.Services.Core
             });
         }
 
-        public async Task<AuthCodeDTO> GetAuthCode(Guid userId)
+        public async Task<AuthCodeDTO> GetAuthCode(string email)
         {
-            AuthCode code = await _userRepository.GetUserAuthCode(userId);
+            AuthCode code = await _userRepository.GetUserAuthCode(email);
             return _mapper.Map<AuthCode, AuthCodeDTO>(code);
         }
 
@@ -315,9 +335,9 @@ namespace CED.Services.Core
             return _mapper.Map<AuthCode, AuthCodeDTO>(authCode);
         }
 
-        public async Task<AuthCodeDTO> DeleteUserAuthCode(Guid userId)
+        public async Task<AuthCodeDTO> DeleteUserAuthCode(string email)
         {
-            AuthCode authCode = await _userRepository.DeleteUserAuthCode(userId);
+            AuthCode authCode = await _userRepository.DeleteUserAuthCode(email);
             return _mapper.Map<AuthCode, AuthCodeDTO>(authCode);
         }
 

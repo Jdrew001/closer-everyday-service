@@ -16,7 +16,9 @@ namespace CED.Controllers
     public class AuthenticationController : CEDBaseController
     {
         private readonly IAuthenticationService _authenticationService;
-        public AuthenticationController(IAuthenticationService authenticationService, ITokenService tokenService)
+        public AuthenticationController(
+            IAuthenticationService authenticationService,
+            ITokenService tokenService)
             :base(tokenService)
         {
             _authenticationService = authenticationService;
@@ -45,10 +47,13 @@ namespace CED.Controllers
             return response.IsAuthenticated ? Ok(response): BadRequest(response);
         }
 
-        [HttpGet("validateCode/{code}/{userId}/{deviceUUID}")]
-        public async Task<IActionResult> ValidateCode(string code, Guid userId, string deviceUUID) 
+        [HttpGet("validateCode/{code}/{email}/{deviceUUID}")]
+        public async Task<IActionResult> ValidateCode(string code, string email, string deviceUUID) 
         {
-            var result = await _authenticationService.GetAuthCode(userId);
+            if (email == null || code == null || deviceUUID == null)
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
+
+            var result = await _authenticationService.GetAuthCode(email);
             if (result == null) 
             {
                 return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
@@ -59,12 +64,12 @@ namespace CED.Controllers
                 return BadRequest(GenerateErrorResponse("The code provided did not match.", null));
             }
 
-            var deletionCode = await _authenticationService.DeleteUserAuthCode(userId);
+            var deletionCode = await _authenticationService.DeleteUserAuthCode(email);
             if (deletionCode != null)
                 return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
 
             // Update user's verified status
-            var response = await _authenticationService.ConfirmUser(userId, deviceUUID);
+            var response = await _authenticationService.ConfirmUser(email, deviceUUID);
             return response.IsAuthenticated ? Ok(response): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 

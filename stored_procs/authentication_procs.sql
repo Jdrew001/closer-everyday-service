@@ -227,18 +227,19 @@ DELIMITER ;
 -- End Get User By Email
 
 -- Drop stored procedure if exists
--- GetAuthCodeByUserId
-DROP PROCEDURE IF EXISTS GetAuthCodeByUserId;
+-- GetAuthCodeByEmail
+DROP PROCEDURE IF EXISTS GetAuthCodeByEmail;
 
 DELIMITER //
 
-CREATE PROCEDURE GetAuthCodeByUserId(
-	IN UserId VARCHAR(255)
+CREATE PROCEDURE GetAuthCodeByEmail(
+	IN Email VARCHAR(255)
 )
 BEGIN
+	set @id = (select u.iduser from user u where u.email=Email);
 
-  SELECT * FROM `CEDDB`.`auth_code` ac
-	WHERE ac.`user_id`=UserId;
+	SELECT * FROM `CEDDB`.`auth_code` ac
+	WHERE ac.`user_id`=@id;
     
 END //
 
@@ -277,18 +278,56 @@ DELIMITER //
 
 CREATE PROCEDURE DeleteAuthCode(
 	IN
-    UserId VARCHAR(255)
+    Email VARCHAR(255)
 )
 BEGIN
 
+set @id = (select u.iduser from user u where u.email=Email);
+
 DELETE FROM `ceddb`.`auth_code` ac
-WHERE ac.`user_id` = UserId;
+WHERE ac.`user_id` = @id;
 
 SELECT * from `ceddb`.`auth_code` authcode
-WHERE authcode.`user_id` = UserId;
+WHERE authcode.`user_id` = @id;
 
 END //
 
 DELIMITER ;
--- End Create auth code
+-- End Delete Auth Code
+-- --------------------------------------
+
+-- Drop stored procedure if exists
+-- Confirm new user
+DROP PROCEDURE IF EXISTS ConfirmNewUser;
+
+DELIMITER //
+
+CREATE PROCEDURE ConfirmNewUser(
+	IN Email VARCHAR(255)
+)
+BEGIN
+	SET @id = (SELECT u.iduser FROM `ceddb`.`user` u
+		WHERE u.email=Email);
+        
+	UPDATE `ceddb`.`user` u SET
+		u.`confirmed`= true
+	WHERE u.i = @id;
+
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ceddb`.`user` u
+    WHERE u.iduser = @id;
+END //
+
+DELIMITER ;
+-- End Confirm User
 -- --------------------------------------

@@ -10,12 +10,12 @@ namespace CED.Services.Interfaces
         Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto, string deviceUUID);
         Task<RegistrationUserDTO> Register(RegistrationDTO registrationDto);
 
-        Task<AuthenticationDTO> ConfirmUser(Guid userId, string deviceUUID);
+        Task<AuthenticationDTO> ConfirmUser(string email, string deviceUUID);
         Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDto);
         Task Logout(string token);
 
-        Task<AuthCodeDTO> GetAuthCode(Guid userId);
+        Task<AuthCodeDTO> GetAuthCode(string email);
         Task<AuthCodeDTO> CreateUserAuthCode(Guid userId, string code);
-        Task<AuthCodeDTO> DeleteUserAuthCode(Guid userId);
+        Task<AuthCodeDTO> DeleteUserAuthCode(string email);
     }
 }
