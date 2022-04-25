@@ -82,7 +82,7 @@ WHERE authcode.`user_id` = @id;
 END //
 
 DELIMITER ;
--- End Create auth code
+-- End Delete Auth Code
 -- --------------------------------------
 
 -- Drop stored procedure if exists
@@ -129,7 +129,7 @@ BEGIN
         
 	UPDATE `ceddb`.`user` u SET
 		u.`confirmed`= true
-	WHERE u.i = @id;
+	WHERE u.iduser = @id;
 
 	SELECT u.`iduser`,
 		u.`firstname`,
