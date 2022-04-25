@@ -73,6 +73,16 @@ namespace CED.Controllers
             return response.IsAuthenticated ? Ok(response): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 
+        [HttpGet("resendCode/{email}")]
+        public async Task<IActionResult> ResendCode(string email) 
+        {
+            if (email == null)
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
+
+            var result = await _authenticationService.ResendValidationCode(email);
+            return result ? Ok(GenerateSuccessResponse("Successful Code Resend")): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
+        }
+
         [HttpPost("refreshToken")]
         public async Task<IActionResult> RefreshToken(RefreshTokenDTO refreshTokenDTO)
         {

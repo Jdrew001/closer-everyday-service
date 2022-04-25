@@ -1,4 +1,4 @@
-﻿using CED.Data;
+using CED.Data;
 using CED.Models;
 using CED.Models.Core;
 using CED.Models.DTO;
@@ -138,17 +138,8 @@ namespace CED.Services.Core
             if (authCodeDTO == null)
                 return RegistrationError();
 
-            try 
-            {
-                // send auth code to user email
-                var to = new List<MailboxAddress>() { new MailboxAddress(loginUser.Email, loginUser.Email) };
-                var template = await _emailTemplateService.RegisterCode(loginUser.Email, authCodeDTO.Code);
-                await _emailService.SendEmailTemplate(to, "Verify Account", template.ToMessageBody());
-            }
-            catch (Exception e)
-            {
+            if (!(await SendValidationCode(loginUser.Email, authCodeDTO.Code)))
                 return RegistrationError();
-            }
 
             return new RegistrationUserDTO()
             {
@@ -157,6 +148,23 @@ namespace CED.Services.Core
                 ShouldRedirectToLogin = false,
                 UserId = loginUser.Id
             };
+        }
+
+        public async Task<bool> SendValidationCode(string email, string code)
+        {
+            try 
+            {
+                // send auth code to user email
+                var to = new List<MailboxAddress>() { new MailboxAddress(email, email) };
+                var template = await _emailTemplateService.RegisterCode(email, code);
+                await _emailService.SendEmailTemplate(to, "Verify Account", template.ToMessageBody());
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public async Task<AuthenticationDTO> ConfirmUser(string email, string deviceUUID)
@@ -339,6 +347,24 @@ namespace CED.Services.Core
         {
             AuthCode authCode = await _userRepository.DeleteUserAuthCode(email);
             return _mapper.Map<AuthCode, AuthCodeDTO>(authCode);
+        }
+
+        public async Task<bool> ResendValidationCode(string email)
+        {
+            var user = await _userRepository.GetUserByEmail(email);
+            if (user == null)
+                return false;
+
+            var deletionCode = await DeleteUserAuthCode(user.Email);
+            if (deletionCode != null)
+                return false;
+
+            var authCodeDTO = await CreateUserAuthCode(user.Id, Utils.GenerateRandomNo().ToString());
+
+            if (!(await SendValidationCode(email, authCodeDTO.Code)))
+                return false;
+
+            return true;
         }
 
         #endregion
