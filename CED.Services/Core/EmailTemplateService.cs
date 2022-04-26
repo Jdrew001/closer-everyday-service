@@ -28,6 +28,23 @@ namespace CED.Services.Core
         });
     }
 
+    public async Task<BodyBuilder> ResetCode(string email, string code)
+    {
+      return await Task.Run(() =>
+        {
+            var baseDir = Directory.GetCurrentDirectory();
+            var builder = new BodyBuilder();
+
+            var pathToFile = $"{baseDir}\\Templates\\ResetCode.html";
+
+            using StreamReader sourceReader = new StreamReader(pathToFile);
+            string mailText = sourceReader.ReadToEnd();
+            mailText = mailText.Replace("[email]", email).Replace("[code]", code);
+            builder.HtmlBody = mailText;
+            return builder;
+        });
+    }
+
     public async Task<BodyBuilder> WelcomeRequest(string name)
     {
       return await Task.Run(() =>

@@ -11,5 +11,6 @@ namespace CED.Services.Interfaces
     {
         Task<BodyBuilder> WelcomeRequest(string name);
         Task<BodyBuilder> RegisterCode(string email, string code);
+        Task<BodyBuilder> ResetCode(string email, string code);
     }
 }

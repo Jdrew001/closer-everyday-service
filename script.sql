@@ -149,3 +149,74 @@ END //
 DELIMITER ;
 -- End Confirm User
 -- --------------------------------------
+
+-- Drop stored procedure if exists
+-- UpdateUserPassword
+DROP PROCEDURE IF EXISTS UpdateUserPassword;
+
+DELIMITER //
+
+CREATE PROCEDURE UpdateUserPassword(
+	IN 
+		UserId VARCHAR(255), 
+		UserHash BLOB,
+		Salt BLOB
+)
+BEGIN
+        
+	UPDATE `ceddb`.`user` u SET
+		u.`passwordSalt`= Salt,
+		u.`password`= UserHash
+	WHERE u.iduser = UserId;
+
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ceddb`.`user` u
+    WHERE u.iduser = userId;
+
+END //
+
+DELIMITER ;
+-- End UpdateUserPassword
+-- --------------------------------------
+
+-- Drop stored procedure if exists
+-- GetUserById
+DROP PROCEDURE IF EXISTS GetUserById;
+
+DELIMITER //
+
+CREATE PROCEDURE GetUserById(
+	IN 
+		UserId VARCHAR(255)
+)
+BEGIN
+
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ceddb`.`user` u
+    WHERE u.iduser = userId;
+
+END //
+
+DELIMITER ;
+-- End GetUserById
+-- --------------------------------------

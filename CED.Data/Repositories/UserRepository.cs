@@ -28,7 +28,29 @@ namespace CED.Data.Repositories
 
         public async Task<User> GetUserById(Guid userId)
         {
-            throw new NotImplementedException();
+            _log.LogInformation("UserRepository: Start GetUserById : {userId}", userId);
+            User result = null;
+            try 
+            {
+                string spName = "GetUserById";
+                using DataConnectionProvider dcp = CreateConnection();
+                await using var command = dcp.CreateCommand(spName);
+
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("UserId", userId);
+
+                using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+                while (drh.Read())
+                    result = ReadUser(drh);
+            
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (GetUserById) userId : {userId}", userId);
+            }
+
+            return result;
         }
 
         public async Task CreateNewUser(RegistrationDTO registrationDTO)
@@ -57,6 +79,35 @@ namespace CED.Data.Repositories
             {
                 _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (CreateNewUser) Registration : {registrationDTO}", registrationDTO);
             }
+        }
+
+        public async Task<User> UpdateUserPassword(Guid userId, string password)
+        {
+            _log.LogInformation("UserRepository: Start UpdateUserPassword : {userId}", userId);
+            var hashAndSalt = Hash.GetHash(password);
+            User result = null;
+            try 
+            {
+                string spName = "UpdateUserPassword";
+                using DataConnectionProvider dcp = CreateConnection();
+                await using var command = dcp.CreateCommand(spName);
+
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("UserId", userId);
+                command.Parameters.AddWithValue("UserHash", hashAndSalt.Hash);
+                command.Parameters.AddWithValue("Salt", hashAndSalt.Salt);
+
+                using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+                while (drh.Read())
+                    result = ReadUser(drh);
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (UpdateUserPassword) userId : {userId}", userId);
+            }
+
+            return result;
         }
 
         public async Task<User> ConfirmNewUser(string email)

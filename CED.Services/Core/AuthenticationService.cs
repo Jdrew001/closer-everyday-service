@@ -164,10 +164,26 @@ namespace CED.Services.Core
                 return false;
             }
 
+            return false;
+        }
+
+        public async Task<bool> SendValidationCodeForReset(string email, string code)
+        {
+            try 
+            {
+                 var to = new List<MailboxAddress>() { new MailboxAddress(email, email) };
+                 var template = await _emailTemplateService.ResetCode(email, code);
+                 await _emailService.SendEmailTemplate(to, "Verify Account", template.ToMessageBody());
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
             return true;
         }
 
-        public async Task<AuthenticationDTO> ConfirmUser(string email, string deviceUUID)
+        public async Task<AuthenticationDTO> ConfirmUser(string email, string deviceUUID, bool forReset)
         {
             var authenticationDTO = new AuthenticationDTO();
             try 
@@ -193,17 +209,19 @@ namespace CED.Services.Core
                     return AddNewDevice();
                 }
                 
-                
                 authenticationDTO.IsAuthenticated = true;
-                authenticationDTO.Token = await CreateJwtToken(confirmedUser);
                 authenticationDTO.UserId = confirmedUser.Id;
 
-                var refreshToken = await CreateRefreshToken(userDevice);
-                authenticationDTO.RefreshToken = refreshToken.Token;
-                authenticationDTO.RefreshTokenExpiration = refreshToken.Expires;
-                confirmedUser.RefreshTokens ??= new List<RefreshToken>();
-                confirmedUser.RefreshTokens.Add(refreshToken);
-                await _refreshTokenRepository.SaveRefreshToken(refreshToken, confirmedUser.Id);
+                if (!forReset) 
+                {
+                    authenticationDTO.Token = await CreateJwtToken(confirmedUser);
+                    var refreshToken = await CreateRefreshToken(userDevice);
+                    authenticationDTO.RefreshToken = refreshToken.Token;
+                    authenticationDTO.RefreshTokenExpiration = refreshToken.Expires;
+                    confirmedUser.RefreshTokens ??= new List<RefreshToken>();
+                    confirmedUser.RefreshTokens.Add(refreshToken);
+                    await _refreshTokenRepository.SaveRefreshToken(refreshToken, confirmedUser.Id);
+                }
             }
             catch(Exception e)
             {
@@ -218,6 +236,26 @@ namespace CED.Services.Core
             await _userRepository.Logout(token);
         }
 
+        public async Task<EmailForReset> EmailForReset(string email)
+        {
+            var failedDTO = new EmailForReset() { IsUser = false, Message = "User not available for Reset", UserId = Guid.Empty};
+            var user = await _userRepository.GetUserByEmail(email);
+            
+            if (user == null)
+                return failedDTO;
+
+            var authCodeDTO = await CreateUserAuthCode(user.Id, Utils.GenerateRandomNo().ToString());
+
+            if (authCodeDTO == null)
+                return failedDTO;
+
+            // send email to user
+            if (!(await SendValidationCodeForReset(user.Email, authCodeDTO.Code)))
+                return failedDTO;
+
+            return new EmailForReset() { IsUser = true, Message = null, UserId = user.Id };
+        }
+
         public async Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDTO)
         {
             var authenticationDTO = new AuthenticationDTO();
@@ -225,6 +263,7 @@ namespace CED.Services.Core
             {
                 authenticationDTO.IsAuthenticated = false;
                 authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
                 authenticationDTO.Message = "Token invalid.";
                 return authenticationDTO;
             }
@@ -234,6 +273,7 @@ namespace CED.Services.Core
             {
                 authenticationDTO.IsAuthenticated = false;
                 authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
                 authenticationDTO.Message = "Token did not match any users.";
                 return authenticationDTO;
             }
@@ -246,6 +286,7 @@ namespace CED.Services.Core
             {
                 authenticationDTO.IsAuthenticated = false;
                 authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
                 authenticationDTO.Message = "Device not matching.";
 
                 return authenticationDTO;
@@ -256,6 +297,7 @@ namespace CED.Services.Core
             {
                 authenticationDTO.IsAuthenticated = false;
                 authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
                 authenticationDTO.Message = "Unable to process request";
 
                 return authenticationDTO;
@@ -367,6 +409,36 @@ namespace CED.Services.Core
             return true;
         }
 
+        public async Task<AuthenticationDTO> ResetPassword(Guid userId, string password)
+        {
+            var authenticationDTO = new AuthenticationDTO();
+            var user = await _userRepository.GetUserById(userId);
+            if (user == null) 
+            {
+                authenticationDTO.IsAuthenticated = false;
+                authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
+                authenticationDTO.Message = "Unable to reset password.";
+                return authenticationDTO;
+            }
+
+            var requestUser = await _userRepository.UpdateUserPassword(userId, password);
+            if (requestUser == null)
+            {
+                authenticationDTO.IsAuthenticated = false;
+                authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
+                authenticationDTO.Message = "Unable to reset password.";
+                return authenticationDTO;
+            }
+
+            authenticationDTO.IsAuthenticated = true;
+            authenticationDTO.Message = "Password Successfully Changed";
+            authenticationDTO.ShouldRedirectoToLogin = true;
+
+            return authenticationDTO;
+        }
+
         #endregion
 
         #region private util methods
@@ -377,6 +449,7 @@ namespace CED.Services.Core
             authenticationDTO.IsAuthenticated = false;
             authenticationDTO.Message = $"Device not Authorized";
             authenticationDTO.IsNewDevice = false;
+            authenticationDTO.Error = true;
             return authenticationDTO;
         }
 
@@ -395,6 +468,7 @@ namespace CED.Services.Core
             authenticationDTO.IsAuthenticated = false;
             authenticationDTO.Message = $"Email or password incorrect";
             authenticationDTO.IsNewDevice = false;
+            authenticationDTO.Error = true;
             return authenticationDTO;
         }
 
