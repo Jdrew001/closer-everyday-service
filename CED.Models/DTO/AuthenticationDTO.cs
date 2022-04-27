@@ -12,5 +12,6 @@ namespace CED.Models.Core
         public string Message { get; set; }
         public bool IsNewDevice { get; set; }
         public bool ShouldRedirectoToLogin { get; set; }
+        public bool Error { get; set; }
     }
 }

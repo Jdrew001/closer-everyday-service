@@ -17,6 +17,8 @@ using AutoMapper;
 using CED.Profiles;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
+using CED.Models.Utils;
+using Microsoft.Extensions.Options;
 
 namespace CED
 {
@@ -36,6 +38,10 @@ namespace CED
                 options => Configuration.GetSection("ConnectionStrings").Bind(options));
             services.Configure<AppSettings>(options => Configuration.GetSection("AppSettings").Bind(options));
             services.Configure<JwtToken>(options => Configuration.GetSection("JwtToken").Bind(options));
+            services.Configure<MailServerConfig>(options => Configuration.GetSection("MailServerConfig").Bind(options));
+
+            services.AddSingleton<MailServerConfig>(
+                x => x.GetRequiredService<IOptions<MailServerConfig>>().Value);
 
             var connectionStrings = Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
             var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
@@ -52,12 +58,12 @@ namespace CED
                 mc.AddMaps("CED");
                 mc.AddProfile(new HabitProfile());
                 mc.AddProfile(new UserProfile());
+                mc.AddProfile(new AuthCodeProfile());
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
 
             var allowedHost = Configuration.GetSection("AllowedHosts").Get<string>();
-
 
             services.AddCors();
 
@@ -102,7 +108,7 @@ namespace CED
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CED v1"));
             } else
             {
-                //app.UseHsts();
+                app.UseHsts();
             }
 
             app.UseExceptionHandlerMiddleware();

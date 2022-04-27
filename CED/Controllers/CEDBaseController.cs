@@ -34,7 +34,7 @@ namespace CED.Controllers
             return Guid.Parse(token.Claims.First(x => x.Type == "uid").Value);
         }
 
-        protected GenericResponseDTO GenerateErrorResponse(string message, object data)
+        protected GenericResponseDTO GenerateErrorResponse(string message, object data = null)
         {
             return new GenericResponseDTO()
             {
@@ -44,7 +44,7 @@ namespace CED.Controllers
             };
         }
 
-        protected GenericResponseDTO GenerateSuccessResponse(string message, object data)
+        protected GenericResponseDTO GenerateSuccessResponse(string message, object data = null)
         {
             return new GenericResponseDTO()
             {

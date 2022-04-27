@@ -1,5 +1,6 @@
 ﻿using CED.Models.DTO;
 using CED.Services.Interfaces;
+using CED.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,10 +13,13 @@ namespace CED.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
-    public class AuthenticationController : ControllerBase
+    public class AuthenticationController : CEDBaseController
     {
         private readonly IAuthenticationService _authenticationService;
-        public AuthenticationController(IAuthenticationService authenticationService)
+        public AuthenticationController(
+            IAuthenticationService authenticationService,
+            ITokenService tokenService)
+            :base(tokenService)
         {
             _authenticationService = authenticationService;
         }
@@ -25,7 +29,7 @@ namespace CED.Controllers
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var response = await _authenticationService.Register(request);
-            return response.IsAuthenticated ? Ok(response): Unauthorized(response);
+            return response.IsUserCreated ? Ok(response): Unauthorized(response);
         }
 
         [HttpPost("login")]
@@ -43,6 +47,42 @@ namespace CED.Controllers
             return response.IsAuthenticated ? Ok(response): BadRequest(response);
         }
 
+        [HttpGet("validateCode/{code}/{email}/{deviceUUID}/{forReset}")]
+        public async Task<IActionResult> ValidateCode(string code, string email, string deviceUUID, bool forReset) 
+        {
+            if (email == null || code == null || deviceUUID == null)
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
+
+            var result = await _authenticationService.GetAuthCode(email);
+            if (result == null) 
+            {
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
+            }
+
+            if (!result.Code.Equals(code))
+            {
+                return BadRequest(GenerateErrorResponse("The code provided did not match."));
+            }
+
+            var deletionCode = await _authenticationService.DeleteUserAuthCode(email);
+            if (deletionCode != null)
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
+
+            // Update user's verified status
+            var response = await _authenticationService.ConfirmUser(email, deviceUUID, forReset);
+            return response.IsAuthenticated ? Ok(response): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
+        }
+
+        [HttpGet("resendCode/{email}")]
+        public async Task<IActionResult> ResendCode(string email) 
+        {
+            if (email == null)
+                return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
+
+            var result = await _authenticationService.ResendValidationCode(email);
+            return result ? Ok(GenerateSuccessResponse("Successful Code Resend")): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
+        }
+
         [HttpPost("refreshToken")]
         public async Task<IActionResult> RefreshToken(RefreshTokenDTO refreshTokenDTO)
         {
@@ -56,6 +96,20 @@ namespace CED.Controllers
             refreshTokenDTO.DeviceUUID = deviceUUID;
             var response = await _authenticationService.RefreshToken(refreshTokenDTO);
             return response.IsAuthenticated ? Ok(response): BadRequest(response);
+        }
+    
+        [HttpGet("sendEmailForReset/{email}")]
+        public async Task<IActionResult> EmailForReset(string email)
+        {
+            var response = await _authenticationService.EmailForReset(email);
+            return response.IsUser ? Ok(response): BadRequest(GenerateErrorResponse(response.Message));
+        }
+
+        [HttpPost("sendPasswordForReset")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDTO request)
+        {
+            var response = await _authenticationService.ResetPassword(request.UserId, request.Password);
+            return response.IsAuthenticated ? Ok(response): BadRequest(GenerateErrorResponse(response.Message, response));
         }
     }
 }

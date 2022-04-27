@@ -18,6 +18,8 @@ namespace CED.Services.Infrastructure
             services.AddScoped<IFriendService, FriendService>();
             services.AddScoped<IScheduleService, ScheduleService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddSingleton<IEmailService, EmailService>();
+            services.AddSingleton<IEmailTemplateService, EmailTemplateService>();
 
             return services;
         }
