@@ -1,4 +1,4 @@
-CREATE TABLE `ceddb`.`auth_code` (
+CREATE TABLE `ced_dev`.`auth_code` (
   `idauth_code` VARCHAR(255) NOT NULL,
   `code` VARCHAR(45) NOT NULL,
   `user_id` VARCHAR(255) NULL,
@@ -7,12 +7,12 @@ CREATE TABLE `ceddb`.`auth_code` (
   INDEX `user_id_idx` (`user_id` ASC) VISIBLE,
   CONSTRAINT `user_id_fk`
     FOREIGN KEY (`user_id`)
-    REFERENCES `ceddb`.`user` (`iduser`)
+    REFERENCES `ced_dev`.`user` (`iduser`)
     ON DELETE CASCADE
     ON UPDATE CASCADE);
 
 
-ALTER TABLE `ceddb`.`user` 
+ALTER TABLE `ced_dev`.`user` 
   ADD COLUMN `confirmed` TINYINT NOT NULL DEFAULT 0 AFTER `password`;
 
 -- Drop stored procedure if exists
@@ -27,7 +27,7 @@ CREATE PROCEDURE GetAuthCodeByEmail(
 BEGIN
 	set @id = (select u.iduser from user u where u.email=Email);
 
-	SELECT * FROM `CEDDB`.`auth_code` ac
+	SELECT * FROM `ced_dev`.`auth_code` ac
 	WHERE ac.`user_id`=@id;
     
 END //
@@ -48,11 +48,11 @@ CREATE PROCEDURE CreateAuthCode(
 BEGIN
 SET @id = UUID();
 
-INSERT INTO `ceddb`.`auth_code`
+INSERT INTO `ced_dev`.`auth_code`
 (`idauth_code`, `code`,`user_id`)
 	VALUES(@id, AuthCode, UserId);
     
-SELECT * from `ceddb`.`auth_code` ac
+SELECT * from `ced_dev`.`auth_code` ac
 WHERE ac.`idauth_code` = @id;
 END //
 
@@ -73,10 +73,10 @@ BEGIN
 
 set @id = (select u.iduser from user u where u.email=Email);
 
-DELETE FROM `ceddb`.`auth_code` ac
+DELETE FROM `ced_dev`.`auth_code` ac
 WHERE ac.`user_id` = @id;
 
-SELECT * from `ceddb`.`auth_code` authcode
+SELECT * from `ced_dev`.`auth_code` authcode
 WHERE authcode.`user_id` = @id;
 
 END //
@@ -106,7 +106,7 @@ BEGIN
 		u.`token`,
 		u.`password`,
         u.`confirmed`
-	FROM `ceddb`.`user` u 
+	FROM `ced_dev`.`user` u 
     WHERE u.email = Email;
 END //
 
@@ -124,10 +124,10 @@ CREATE PROCEDURE ConfirmNewUser(
 	IN Email VARCHAR(255)
 )
 BEGIN
-	SET @id = (SELECT u.iduser FROM `ceddb`.`user` u
+	SET @id = (SELECT u.iduser FROM `ced_dev`.`user` u
 		WHERE u.email=Email);
         
-	UPDATE `ceddb`.`user` u SET
+	UPDATE `ced_dev`.`user` u SET
 		u.`confirmed`= true
 	WHERE u.iduser = @id;
 
@@ -142,7 +142,7 @@ BEGIN
 		u.`token`,
 		u.`password`,
         u.`confirmed`
-	FROM `ceddb`.`user` u
+	FROM `ced_dev`.`user` u
     WHERE u.iduser = @id;
 END //
 
@@ -164,7 +164,7 @@ CREATE PROCEDURE UpdateUserPassword(
 )
 BEGIN
         
-	UPDATE `ceddb`.`user` u SET
+	UPDATE `ced_dev`.`user` u SET
 		u.`passwordSalt`= Salt,
 		u.`password`= UserHash
 	WHERE u.iduser = UserId;
@@ -180,7 +180,7 @@ BEGIN
 		u.`token`,
 		u.`password`,
         u.`confirmed`
-	FROM `ceddb`.`user` u
+	FROM `ced_dev`.`user` u
     WHERE u.iduser = userId;
 
 END //
@@ -212,7 +212,7 @@ BEGIN
 		u.`token`,
 		u.`password`,
         u.`confirmed`
-	FROM `ceddb`.`user` u
+	FROM `ced_dev`.`user` u
     WHERE u.iduser = userId;
 
 END //
