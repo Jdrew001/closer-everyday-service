@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 using CED.Models.Utils;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace CED
 {
@@ -116,9 +118,14 @@ namespace CED
            // app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(
+                        Path.Combine(env.ContentRootPath, "Templates")),
+                    RequestPath = "/Templates"
+                });
             
-
+            Console.WriteLine("file env path", env.ContentRootPath);
             // global cors policy
             app.UseCors(x => x
                 .AllowAnyMethod()

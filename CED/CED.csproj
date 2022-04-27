@@ -45,9 +45,4 @@
     <ProjectReference Include="..\CED.Services\CED.Services.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Templates\**\*" Exclude="Templates\**\bin\**;Templates\**\obj\**" />
-    <Compile Remove="**\*" />
-  </ItemGroup>
-
 </Project>
