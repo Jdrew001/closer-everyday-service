@@ -129,7 +129,7 @@ namespace CED.Services.Core
             // user found in db, unable to register error thrown
             if (user != null)
             {
-                _log.LogError("AuthenticationService: Error - user not found (Register) : RegistrationDTO {registrationDto}", registrationDto);
+                _log.LogError("AuthenticationService: Error - user already exists (Register) : RegistrationDTO {registrationDto}", registrationDto);
                 return RegistrationError();
             }
 
