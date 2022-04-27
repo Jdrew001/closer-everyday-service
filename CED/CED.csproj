@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
+  
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
@@ -42,6 +43,11 @@
     <ProjectReference Include="..\CED.Models\CED.Models.csproj" />
     <ProjectReference Include="..\CED.Security\CED.Security.csproj" />
     <ProjectReference Include="..\CED.Services\CED.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Templates\**\*" Exclude="Templates\**\bin\**;Templates\**\obj\**" />
+    <Compile Remove="**\*" />
   </ItemGroup>
 
 </Project>
