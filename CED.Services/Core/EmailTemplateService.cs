@@ -18,7 +18,7 @@ namespace CED.Services.Core
             var baseDir = Directory.GetCurrentDirectory();
             var builder = new BodyBuilder();
 
-            var pathToFile = $"{baseDir}\\Templates\\RegisterCode.html";
+            var pathToFile = $"{baseDir}/Templates/RegisterCode.html";
 
             using StreamReader sourceReader = new StreamReader(pathToFile);
             string mailText = sourceReader.ReadToEnd();
@@ -35,7 +35,7 @@ namespace CED.Services.Core
             var baseDir = Directory.GetCurrentDirectory();
             var builder = new BodyBuilder();
 
-            var pathToFile = $"{baseDir}\\Templates\\ResetCode.html";
+            var pathToFile = $"{baseDir}/Templates/ResetCode.html";
 
             using StreamReader sourceReader = new StreamReader(pathToFile);
             string mailText = sourceReader.ReadToEnd();
@@ -52,7 +52,7 @@ namespace CED.Services.Core
             var baseDir = Directory.GetCurrentDirectory();
             var builder = new BodyBuilder();
 
-            var pathToFile = $"{baseDir}\\Templates\\WelcomeTemplate.html";
+            var pathToFile = $"{baseDir}/Templates/WelcomeTemplate.html";
 
             using StreamReader sourceReader = new StreamReader(pathToFile);
             string mailText = sourceReader.ReadToEnd();
