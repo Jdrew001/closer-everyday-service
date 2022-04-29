@@ -40,7 +40,8 @@ namespace CED.Controllers
             {
                 message = message,
                 status = "FAILURE",
-                data = data
+                data = data,
+                Error = true
             };
         }
 
@@ -50,7 +51,8 @@ namespace CED.Controllers
             {
                 message = message,
                 status = "SUCCESS",
-                data = data
+                data = data,
+                Error = false
             };
         }
     }

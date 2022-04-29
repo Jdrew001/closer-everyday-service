@@ -11,5 +11,6 @@ namespace CED.Models.DTO
         public string message { get; set; }
         public string status { get; set; }
         public Object data { get; set; }
+        public bool Error { get; set; }
     }
 }
