@@ -44,7 +44,7 @@ namespace CED.Controllers
             }
 
             var response = await _authenticationService.Login(request, deviceUUID);
-            return response.IsAuthenticated ? Ok(response): BadRequest(response);
+            return Ok(response);
         }
 
         [HttpGet("validateCode/{code}/{email}/{deviceUUID}/{forReset}")]
@@ -61,7 +61,7 @@ namespace CED.Controllers
 
             if (!result.Code.Equals(code))
             {
-                return BadRequest(GenerateErrorResponse("The code provided did not match."));
+                return Ok(GenerateErrorResponse("The code provided did not match."));
             }
 
             var deletionCode = await _authenticationService.DeleteUserAuthCode(email);
@@ -70,7 +70,7 @@ namespace CED.Controllers
 
             // Update user's verified status
             var response = await _authenticationService.ConfirmUser(email, deviceUUID, forReset);
-            return response.IsAuthenticated ? Ok(response): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
+            return Ok(response);
         }
 
         [HttpGet("resendCode/{email}")]
@@ -95,21 +95,21 @@ namespace CED.Controllers
 
             refreshTokenDTO.DeviceUUID = deviceUUID;
             var response = await _authenticationService.RefreshToken(refreshTokenDTO);
-            return response.IsAuthenticated ? Ok(response): BadRequest(response);
+            return Ok(response);
         }
     
         [HttpGet("sendEmailForReset/{email}")]
         public async Task<IActionResult> EmailForReset(string email)
         {
             var response = await _authenticationService.EmailForReset(email);
-            return response.IsUser ? Ok(response): BadRequest(GenerateErrorResponse(response.Message));
+            return Ok(response);
         }
 
         [HttpPost("sendPasswordForReset")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO request)
         {
             var response = await _authenticationService.ResetPassword(request.UserId, request.Password);
-            return response.IsAuthenticated ? Ok(response): BadRequest(GenerateErrorResponse(response.Message, response));
+            return Ok(response);
         }
     }
 }
