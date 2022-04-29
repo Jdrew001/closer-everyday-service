@@ -98,6 +98,10 @@ namespace CED.Services.Core
                 return DeviceNotRecognized();
             }
 
+            // user is not confirmed, so resend validation code
+            if (!user.Confirmed)
+                return await ResendCodeForUnconfirmedLoginAsync(user, loginRequestDto, deviceUUID);
+
             authenticationDTO.IsAuthenticated = true;
             authenticationDTO.Token = await CreateJwtToken(user);
             authenticationDTO.UserId = user.Id;
@@ -512,6 +516,28 @@ namespace CED.Services.Core
             };
 
             return registrationDTO;
+        }
+
+        private async Task<AuthenticationDTO> ResendCodeForUnconfirmedLoginAsync(User user, LoginRequestDTO loginRequestDTO, string deviceUUID)
+        {
+            // if user not confirmed, then reissue a new code to email account
+                var result = await ResendValidationCode(user.Email);
+                
+                if (result)
+                {
+                    _log.LogInformation("AuthenticationService: Resent new validation code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDTO, deviceUUID);
+                    var authenticationDTO = new AuthenticationDTO();
+                    authenticationDTO.Confirmed = false;
+                    authenticationDTO.Error = false;
+                    authenticationDTO.IsAuthenticated = true;
+                    authenticationDTO.Email = user.Email;
+                    return authenticationDTO;
+                } 
+                else 
+                {
+                    _log.LogError("AuthenticationService: Error - Failed to send new validation code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDTO, deviceUUID);
+                    return AuthenticationError();
+                }
         }
     #endregion
   }
