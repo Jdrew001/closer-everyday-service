@@ -111,7 +111,6 @@ namespace CED
             } else
             {
                 app.UseHsts();
-                app.UseHttpsRedirection();
             }
 
             app.UseExceptionHandlerMiddleware();
