@@ -114,6 +114,7 @@ namespace CED
             }
 
             app.UseExceptionHandlerMiddleware();
+            app.UseHttpsRedirection();
 
             app.UseRouting();
             
