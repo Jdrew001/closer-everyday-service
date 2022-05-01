@@ -39,7 +39,7 @@ namespace CED.Services.Core
         message.Body = body;
 
         using var client = new MailKit.Net.Smtp.SmtpClient();
-        await client.ConnectAsync(_mailServerConfig.Host, _mailServerConfig.Port, false);
+        await client.ConnectAsync(_mailServerConfig.Host, _mailServerConfig.Port, true);
         await client.AuthenticateAsync(_mailServerConfig.Username, _mailServerConfig.Password);
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
