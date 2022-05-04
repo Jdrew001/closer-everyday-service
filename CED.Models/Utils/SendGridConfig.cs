@@ -9,7 +9,6 @@ namespace CED.Models.Utils
     {
         public string ApiToken { get; set; }
         public string Name { get; set; }
-        public string DevEmail { get; set; }
-        public string ProdEmail { get; set; }
+        public string Email { get; set; }
     }
 }

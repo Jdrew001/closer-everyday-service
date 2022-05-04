@@ -38,16 +38,7 @@ namespace CED.Services.Core
 
     public async Task SendEmailTemplate(string key, List<EmailAddress> to, string subject, object data = null)
     {
-        string fromEmail = null;
-        if (_hostingEnv.EnvironmentName.Equals("Local") || _hostingEnv.EnvironmentName.Equals("Development")) 
-        {
-            fromEmail =  _sendGridConfig.DevEmail;
-        }
-        else 
-        {
-            fromEmail = _sendGridConfig.ProdEmail;
-        }
-
+        string fromEmail = _sendGridConfig.Email;
         var templateId = await _templateRepository.GetTemplateByKey(key);
         if (templateId == null)
             return;
