@@ -10,5 +10,6 @@ namespace CED.Models.DTO
         public bool IsUser { get; set; }
         public string Message { get; set; }
         public Guid UserId { get; set; }
+        public string Email { get; set; }
     }
 }
