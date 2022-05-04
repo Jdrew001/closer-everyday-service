@@ -21,6 +21,7 @@ using CED.Data.Interfaces;
 using AutoMapper;
 using CED.Services.utils;
 using MimeKit;
+using SendGrid.Helpers.Mail;
 
 namespace CED.Services.Core
 {
@@ -179,9 +180,8 @@ namespace CED.Services.Core
             try 
             {
                 // send auth code to user email
-                var to = new List<MailboxAddress>() { new MailboxAddress(email, email) };
-                var template = await _emailTemplateService.RegisterCode(email, code);
-                await _emailService.SendEmailTemplate(to, "Verify Account", template.ToMessageBody());
+                var to = new List<EmailAddress>() { new EmailAddress(email, email) };
+                await _emailService.SendEmailTemplate(ServiceConstants.VALIDATION_EMAIL_KEY, to, "Verify Account", new {code = code});
             }
             catch (Exception ex)
             {
@@ -198,9 +198,8 @@ namespace CED.Services.Core
             _log.LogInformation("AuthenticationService: Start (SendValidationCodeForReset) : Email {email}, Code: code", email, code);
             try 
             {
-                 var to = new List<MailboxAddress>() { new MailboxAddress(email, email) };
-                 var template = await _emailTemplateService.ResetCode(email, code);
-                 await _emailService.SendEmailTemplate(to, "Verify Account", template.ToMessageBody());
+                var to = new List<EmailAddress>() { new EmailAddress(email, email) };
+                await _emailService.SendEmailTemplate(ServiceConstants.VALIDATION_EMAIL_KEY, to, "Verify Account", new {code = code});
             }
             catch (Exception ex)
             {
@@ -286,7 +285,7 @@ namespace CED.Services.Core
             if (!(await SendValidationCodeForReset(user.Email, authCodeDTO.Code)))
                 return failedDTO;
 
-            return new EmailForReset() { IsUser = true, Message = null, UserId = user.Id };
+            return new EmailForReset() { IsUser = true, Message = null, UserId = user.Id, Email = user.Email };
         }
 
         public async Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDTO)

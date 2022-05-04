@@ -17,7 +17,7 @@ namespace CED.Data.Repositories
         public async Task<string> GetTemplateByKey(string key)
         {
             string result = null;
-            string spName = "GetEmailTemplate";
+            string spName = "GetTemplateByKey";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;

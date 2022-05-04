@@ -46,6 +46,9 @@ namespace CED
             services.AddSingleton<MailServerConfig>(
                 x => x.GetRequiredService<IOptions<MailServerConfig>>().Value);
 
+            services.AddSingleton<SendGridConfig>(
+                x => x.GetRequiredService<IOptions<SendGridConfig>>().Value);
+
             var connectionStrings = Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
             var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
             services.AddControllers();

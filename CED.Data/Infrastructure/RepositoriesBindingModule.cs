@@ -18,6 +18,7 @@ namespace CED.Data.Infrastructure
             services.AddTransient<IScheduleRepository, ScheduleRepository>();
             services.AddTransient<IScheduleTypeRepository, ScheduleTypeRepository>();
             services.AddTransient<IFriendRepository, FriendRepository>();
+            services.AddTransient<ITemplateRepository, TemplateRepository>();
             return services;
         }
     }

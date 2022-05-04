@@ -23,5 +23,7 @@ namespace CED.Services.utils
             {11, "NOVEMBER"},
             {12, "DECEMBER"}
         };
+
+        public static readonly string VALIDATION_EMAIL_KEY = "VALIDATION_EMAIL";
     }
 }
