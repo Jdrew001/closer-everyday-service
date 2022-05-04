@@ -41,6 +41,7 @@ namespace CED
             services.Configure<AppSettings>(options => Configuration.GetSection("AppSettings").Bind(options));
             services.Configure<JwtToken>(options => Configuration.GetSection("JwtToken").Bind(options));
             services.Configure<MailServerConfig>(options => Configuration.GetSection("MailServerConfig").Bind(options));
+            services.Configure<SendGridConfig>(options => Configuration.GetSection("SendGridConfig").Bind(options));
 
             services.AddSingleton<MailServerConfig>(
                 x => x.GetRequiredService<IOptions<MailServerConfig>>().Value);
