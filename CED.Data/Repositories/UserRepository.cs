@@ -183,22 +183,27 @@ namespace CED.Data.Repositories
             return result;
         }
 
-        public async Task Logout(string token)
+        public async Task<bool> Logout(string appToken, DateTime appTokenExpiry, string refreshToken)
         {
-            _log.LogInformation("UserRepository: Start Logout : {Token}", token);
+            _log.LogInformation("UserRepository: Start Logout : App Token {App Token}, Refresh Token {refreshToken}", appToken, refreshToken);
             try
             {
                 string spName = "RevokeToken";
                 using DataConnectionProvider dcp = CreateConnection();
                 await using var command = dcp.CreateCommand(spName);
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("token", token);
+                command.Parameters.AddWithValue("appToken", appToken);
+                command.Parameters.AddWithValue("appTokenExpiry", appTokenExpiry);
+                command.Parameters.AddWithValue("refreshToken", refreshToken);
                 await command.ExecuteNonQueryAsync();
             }
             catch (Exception e)
             {
-                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (Logout) Token : {token}", token);
+                _log.LogCritical(e, "UserRepository ERROR: Exception occurred in (Logout) : App Token {App Token}, Refresh Token {refreshToken}", appToken, refreshToken);
+                return false;
             }
+
+            return true;
         }
 
         public async Task<List<User>> SearchForUser(string param)

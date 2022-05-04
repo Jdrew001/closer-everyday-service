@@ -1,6 +1,7 @@
 ﻿using CED.Models.Core;
 using CED.Models.DTO;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CED.Services.Interfaces
@@ -12,13 +13,13 @@ namespace CED.Services.Interfaces
         Task<bool> ResendValidationCode(string email);
         Task<AuthenticationDTO> ConfirmUser(string email, string deviceUUID, bool forReset);
         Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDto);
-        Task Logout(string token);
+        Task<List<RefreshToken>> GetUserRefreshTokens(Guid userId);
+        Task<bool> Logout(string appToken, string refreshToken);
         Task<AuthCodeDTO> GetAuthCode(string email);
         Task<AuthCodeDTO> CreateUserAuthCode(Guid userId, string code);
         Task<AuthCodeDTO> DeleteUserAuthCode(string email);
         Task<bool> SendValidationCode(string email, string code);
         Task<EmailForReset> EmailForReset(string email);
-
         Task<AuthenticationDTO> ResetPassword(Guid userId, string password);
     }
 }

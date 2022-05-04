@@ -35,8 +35,8 @@ namespace CED.Services.Core
 
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
-
         private readonly IMapper _mapper;
+        private readonly ITokenService _tokenService;
 
         public AuthenticationService(
             ILogger<AuthenticationService> log,
@@ -47,6 +47,7 @@ namespace CED.Services.Core
             IRefreshTokenRepository refreshTokenRepository,
             IEmailService emailService,
             IEmailTemplateService emailTemplateService,
+            ITokenService tokenService,
             IMapper mapper)
         {
             _log = log;
@@ -57,6 +58,7 @@ namespace CED.Services.Core
             _mapper = mapper;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
+            _tokenService = tokenService;
         }
 
         #region authentication methods
@@ -263,9 +265,27 @@ namespace CED.Services.Core
             return authenticationDTO;
         }
 
-        public async Task Logout(string token)
+        public async Task<bool> Logout(string appToken, string refreshToken)
         {
-            await _userRepository.Logout(token);
+            _log.LogInformation("AuthenticationService: Start (Logout) : App Token: {appToken}, Refresh Token: {refreshToken}", appToken, refreshToken);
+            bool result = false;
+            try {
+                var validatedAppToken = await _tokenService.ReadJwtToken(appToken);
+                result = await _userRepository.Logout(appToken, validatedAppToken.ValidTo.ToUniversalTime(), refreshToken);
+            } 
+            catch (Exception ex)
+            {
+                _log.LogCritical(ex, "AuthenticationService ERROR: Exception occurred in (Logout) : App Token: {appToken}, Refresh Token: {refreshToken}", appToken, refreshToken);
+                return false;
+            }
+
+            _log.LogInformation("AuthenticationService: End (Logout) : App Token: {appToken}, Refresh Token: {refreshToken}", appToken, refreshToken);
+            return result;
+        }
+
+        public async Task<List<RefreshToken>> GetUserRefreshTokens(Guid userId)
+        {
+            return await _refreshTokenRepository.GetUserRefreshTokens(userId);
         }
 
         public async Task<EmailForReset> EmailForReset(string email)
@@ -374,7 +394,7 @@ namespace CED.Services.Core
                     expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtToken.TokenExpiry)),
                     notBefore: DateTime.Now.Subtract(TimeSpan.FromMinutes(30)),
                     signingCredentials: credentials);
-                
+
                 return new JwtSecurityTokenHandler().WriteToken(token);
             });
         }
@@ -520,23 +540,23 @@ namespace CED.Services.Core
         private async Task<AuthenticationDTO> ResendCodeForUnconfirmedLoginAsync(User user, LoginRequestDTO loginRequestDTO, string deviceUUID)
         {
             // if user not confirmed, then reissue a new code to email account
-                var result = await ResendValidationCode(user.Email);
-                
-                if (result)
-                {
-                    _log.LogInformation("AuthenticationService: Resent new validation code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDTO, deviceUUID);
-                    var authenticationDTO = new AuthenticationDTO();
-                    authenticationDTO.Confirmed = false;
-                    authenticationDTO.Error = false;
-                    authenticationDTO.IsAuthenticated = true;
-                    authenticationDTO.Email = user.Email;
-                    return authenticationDTO;
-                } 
-                else 
-                {
-                    _log.LogError("AuthenticationService: Error - Failed to send new validation code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDTO, deviceUUID);
-                    return AuthenticationError();
-                }
+            var result = await ResendValidationCode(user.Email);
+            
+            if (result)
+            {
+                _log.LogInformation("AuthenticationService: Resent new validation code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDTO, deviceUUID);
+                var authenticationDTO = new AuthenticationDTO();
+                authenticationDTO.Confirmed = false;
+                authenticationDTO.Error = false;
+                authenticationDTO.IsAuthenticated = true;
+                authenticationDTO.Email = user.Email;
+                return authenticationDTO;
+            } 
+            else 
+            {
+                _log.LogError("AuthenticationService: Error - Failed to send new validation code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDTO, deviceUUID);
+                return AuthenticationError();
+            }
         }
     #endregion
   }

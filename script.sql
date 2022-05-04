@@ -1,36 +1,55 @@
--- CREATE TABLE `ced_dev`.`email_template` (
---   `id` INT NOT NULL,
---   `key` VARCHAR(45) NOT NULL,
---   `templateId` VARCHAR(255) NOT NULL,
---   PRIMARY KEY (`id`));
+CREATE TABLE `ceddb`.`blacklisted_token` (
+  `id` VARCHAR(255) NOT NULL,
+  `token` blob NOT NULL,
+  `expiry` DATETIME NOT NULL,
+  PRIMARY KEY (`id`));
+
   
--- ALTER TABLE `ced_dev`.`email_template` 
--- CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+-- Drop stored procedure if exists
+-- Revoke token
+DROP PROCEDURE IF EXISTS RevokeToken;
 
+DELIMITER //
 
+CREATE PROCEDURE RevokeToken(
+	IN 
+		appToken VARCHAR(255),
+        appTokenExpiry datetime,
+        refreshToken VARCHAR(255)
+)
+BEGIN
+	SET @id = UUID();
+    
+	DELETE FROM `CEDDB`.`refresh_token` re
+	WHERE re.`token` = refreshToken;
+    
+    INSERT INTO `ceddb`.`blacklisted_token`
+	(`id`, `token`, `expiry`) 
+	VALUES (id, appToken, appTokenExpiry);
 
--- -- Drop stored procedure if exists
--- -- GetTemplateByKey
--- DROP PROCEDURE IF EXISTS GetTemplateByKey;
+END //
 
--- DELIMITER //
+DELIMITER ;
+-- End RevokeToken
+-- --------------------------------------
 
--- CREATE PROCEDURE GetTemplateByKey(
--- 	IN
---     `Key` VARCHAR(255)
--- )
--- BEGIN
--- 	SELECT t.templateId FROM `ced_dev`.`email_template` t
---     WHERE t.`key` = `Key`;
--- END //
+-- Drop stored procedure if exists
+-- CheckForTokenInBlacklist
+DROP PROCEDURE IF EXISTS CheckForTokenInBlacklist;
 
--- DELIMITER ;
--- -- End GetTemplateByKey
--- -- --------------------------------------
+DELIMITER //
 
--- INSERT INTO `ced_dev`.`email_template`
--- (`key`,
--- `templateId`)
--- VALUES
--- ("VALIDATION_EMAIL",
--- "d-d336182397714541874da8d70a480139");
+CREATE PROCEDURE CheckForTokenInBlacklist(
+	IN 
+		appToken BLOB
+)
+BEGIN
+
+	select * from `blacklisted_token` bt
+    where bt.token = appToken;
+
+END //
+
+DELIMITER ;
+-- End RevokeToken
+-- --------------------------------------

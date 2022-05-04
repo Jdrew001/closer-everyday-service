@@ -402,3 +402,53 @@ END //
 DELIMITER ;
 -- End GetUserById
 -- --------------------------------------
+
+  
+-- Drop stored procedure if exists
+-- Revoke token
+DROP PROCEDURE IF EXISTS RevokeToken;
+
+DELIMITER //
+
+CREATE PROCEDURE RevokeToken(
+	IN 
+		appToken VARCHAR(255),
+        appTokenExpiry datetime,
+        refreshToken VARCHAR(255)
+)
+BEGIN
+	SET @id = UUID();
+    
+	DELETE FROM `CEDDB`.`refresh_token` re
+	WHERE re.`token` = refreshToken;
+    
+    INSERT INTO `ceddb`.`blacklisted_token`
+	(`id`, `token`, `expiry`) 
+	VALUES (id, appToken, appTokenExpiry);
+
+END //
+
+DELIMITER ;
+-- End RevokeToken
+-- --------------------------------------
+
+-- Drop stored procedure if exists
+-- CheckForTokenInBlacklist
+DROP PROCEDURE IF EXISTS CheckForTokenInBlacklist;
+
+DELIMITER //
+
+CREATE PROCEDURE CheckForTokenInBlacklist(
+	IN 
+		appToken BLOB
+)
+BEGIN
+
+	select * from `blacklisted_token` bt
+    where bt.token = appToken;
+
+END //
+
+DELIMITER ;
+-- End RevokeToken
+-- --------------------------------------

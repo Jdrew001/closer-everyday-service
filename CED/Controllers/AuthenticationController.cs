@@ -4,8 +4,6 @@ using CED.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CED.Controllers
@@ -110,6 +108,16 @@ namespace CED.Controllers
         {
             var response = await _authenticationService.ResetPassword(request.UserId, request.Password);
             return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("logout/{userId}")]
+        public async Task<IActionResult> LogoutUser(Guid userId) 
+        {
+            var refreshToken = (await _authenticationService.GetUserRefreshTokens(userId))[0];
+            var response = await _authenticationService.Logout(RetrieveToken(), refreshToken.Token);
+
+            return response ?  Ok(GenerateSuccessResponse("You have logged out")): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
         }
     }
 }

@@ -22,7 +22,7 @@ namespace CED.Data.Interfaces
         Task<AuthCode> CreateUserAuthCode(Guid userId, string code);
         Task<AuthCode> DeleteUserAuthCode(string email);
 
-        Task Logout(string token);
+        Task<bool> Logout(string appToken, DateTime appTokenExpiry, string refreshToken);
         Task<List<User>> SearchForUser(string param);
     }
 }
