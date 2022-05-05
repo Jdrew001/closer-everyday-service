@@ -412,7 +412,7 @@ DELIMITER //
 
 CREATE PROCEDURE RevokeToken(
 	IN 
-		appToken VARCHAR(255),
+		appToken longtext,
         appTokenExpiry datetime,
         refreshToken VARCHAR(255)
 )
@@ -424,13 +424,15 @@ BEGIN
     
     INSERT INTO `ceddb`.`blacklisted_token`
 	(`id`, `token`, `expiry`) 
-	VALUES (id, appToken, appTokenExpiry);
+	VALUES (UUID(), appToken, appTokenExpiry);
 
 END //
 
 DELIMITER ;
 -- End RevokeToken
 -- --------------------------------------
+
+call RevokeToken("tplem", "2022-05-04 21:17:33", "token");
 
 -- Drop stored procedure if exists
 -- CheckForTokenInBlacklist

@@ -12,7 +12,7 @@ namespace CED.Data.Repositories
 {
   public class BlackListTokenRepository : DataProvider, IBlacklistTokenRepository
   {
-    protected BlackListTokenRepository(IOptions<ConnectionStrings> connectionStrings)
+    public BlackListTokenRepository(IOptions<ConnectionStrings> connectionStrings)
         : base(connectionStrings.Value.CEDDB)
     {
     }

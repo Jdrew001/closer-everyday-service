@@ -1,37 +1,37 @@
-CREATE TABLE `ced_dev`.`blacklisted_token` (
-  `id` VARCHAR(255) NOT NULL,
-  `token` blob NOT NULL,
-  `expiry` DATETIME NOT NULL,
-  PRIMARY KEY (`id`));
+-- CREATE TABLE `ced_dev`.`blacklisted_token` (
+--   `id` VARCHAR(255) NOT NULL,
+--   `token` blob NOT NULL,
+--   `expiry` DATETIME NOT NULL,
+--   PRIMARY KEY (`id`));
 
   
--- Drop stored procedure if exists
--- Revoke token
-DROP PROCEDURE IF EXISTS RevokeToken;
+-- -- Drop stored procedure if exists
+-- -- Revoke token
+-- DROP PROCEDURE IF EXISTS RevokeToken;
 
-DELIMITER //
+-- DELIMITER //
 
-CREATE PROCEDURE RevokeToken(
-	IN 
-		appToken VARCHAR(255),
-        appTokenExpiry datetime,
-        refreshToken VARCHAR(255)
-)
-BEGIN
-	SET @id = UUID();
+-- CREATE PROCEDURE RevokeToken(
+-- 	IN 
+-- 		appToken VARCHAR(255),
+--         appTokenExpiry datetime,
+--         refreshToken VARCHAR(255)
+-- )
+-- BEGIN
+-- 	SET @id = UUID();
     
-	DELETE FROM `ced_dev`.`refresh_token` re
-	WHERE re.`token` = refreshToken;
+-- 	DELETE FROM `ced_dev`.`refresh_token` re
+-- 	WHERE re.`token` = refreshToken;
     
-    INSERT INTO `ced_dev`.`blacklisted_token`
-	(`id`, `token`, `expiry`) 
-	VALUES (id, appToken, appTokenExpiry);
+--     INSERT INTO `ced_dev`.`blacklisted_token`
+-- 	(`id`, `token`, `expiry`) 
+-- 	VALUES (id, appToken, appTokenExpiry);
 
-END //
+-- END //
 
-DELIMITER ;
--- End RevokeToken
--- --------------------------------------
+-- DELIMITER ;
+-- -- End RevokeToken
+-- -- --------------------------------------
 
 -- Drop stored procedure if exists
 -- CheckForTokenInBlacklist
@@ -41,7 +41,7 @@ DELIMITER //
 
 CREATE PROCEDURE CheckForTokenInBlacklist(
 	IN 
-		appToken BLOB
+		appToken LONGTEXT
 )
 BEGIN
 
@@ -53,3 +53,6 @@ END //
 DELIMITER ;
 -- End RevokeToken
 -- --------------------------------------
+
+ALTER TABLE `ceddb`.`blacklisted_token` 
+CHANGE COLUMN `token` `token` LONGTEXT NOT NULL ;

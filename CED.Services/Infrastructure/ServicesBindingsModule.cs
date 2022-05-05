@@ -11,7 +11,6 @@ namespace CED.Services.Infrastructure
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IDeviceService, DeviceService>();
             services.AddScoped<IHabitService, HabitService>();
-            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IReferenceService, ReferenceService>();
             services.AddScoped<IHabitStatService, HabitStatService>();
             services.AddScoped<IFrequencyService, FrequencyService>();
@@ -20,6 +19,8 @@ namespace CED.Services.Infrastructure
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IEmailService, EmailService>();
             services.AddSingleton<IEmailTemplateService, EmailTemplateService>();
+
+            services.AddTransient<ITokenService, TokenService>();
 
             return services;
         }

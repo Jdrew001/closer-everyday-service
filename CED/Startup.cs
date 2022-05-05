@@ -134,6 +134,7 @@ namespace CED
             app.UseAuthorization();
 
             app.UseSerilogRequestLogging();
+            app.UseBlackListTokenMiddleware();
 
             app.UseEndpoints(endpoints =>
             {

@@ -10,5 +10,6 @@ namespace CED.Services.Interfaces
         Task<string> CreateJwtToken(User user);
         Task<JwtSecurityToken> ReadJwtToken(string token);
         Task<RefreshToken> CreateRefreshToken(Device device);
+        Task<BlackListToken> FetchBlacklistedToken(string token);
     }
 }
