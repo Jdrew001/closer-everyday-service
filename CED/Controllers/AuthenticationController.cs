@@ -117,7 +117,7 @@ namespace CED.Controllers
             var refreshToken = (await _authenticationService.GetUserRefreshTokens(userId))[0];
             var response = await _authenticationService.Logout(RetrieveToken(), refreshToken.Token);
 
-            return response ?  Ok(GenerateSuccessResponse("You have logged out")): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
+            return response ?  Ok(GenerateSuccessResponse("You have logged out")): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
         }
     }
 }
