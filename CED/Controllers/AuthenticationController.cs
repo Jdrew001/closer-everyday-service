@@ -27,7 +27,7 @@ namespace CED.Controllers
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var response = await _authenticationService.Register(request);
-            return response.IsUserCreated ? Ok(response): Unauthorized(response);
+            return response.IsUserCreated ? Ok(GenerateSuccessResponse("Successfully registered account", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 
         [HttpPost("login")]
@@ -42,7 +42,7 @@ namespace CED.Controllers
             }
 
             var response = await _authenticationService.Login(request, deviceUUID);
-            return Ok(response);
+            return !response.Error ? Ok(GenerateSuccessResponse("Successfully logged in", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 
         [HttpGet("validateCode/{code}/{email}/{deviceUUID}/{forReset}")]
@@ -68,7 +68,7 @@ namespace CED.Controllers
 
             // Update user's verified status
             var response = await _authenticationService.ConfirmUser(email, deviceUUID, forReset);
-            return Ok(response);
+            return !response.Error ? Ok(GenerateSuccessResponse("Code Validated", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 
         [HttpGet("resendCode/{email}")]
@@ -93,21 +93,21 @@ namespace CED.Controllers
 
             refreshTokenDTO.DeviceUUID = deviceUUID;
             var response = await _authenticationService.RefreshToken(refreshTokenDTO);
-            return Ok(response);
+            return !response.Error ? Ok(GenerateSuccessResponse(null, response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
     
         [HttpGet("sendEmailForReset/{email}")]
         public async Task<IActionResult> EmailForReset(string email)
         {
             var response = await _authenticationService.EmailForReset(email);
-            return Ok(response);
+            return response.IsUser ? Ok(GenerateSuccessResponse("Email successfully sent", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 
         [HttpPost("sendPasswordForReset")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO request)
         {
             var response = await _authenticationService.ResetPassword(request.UserId, request.Password);
-            return Ok(response);
+            return !response.Error ? Ok(GenerateSuccessResponse("Password successfully reset", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 
         [Authorize]

@@ -15,5 +15,7 @@ namespace CED.Models.Core
         public bool ShouldRedirectoToLogin { get; set; }
         public bool Error { get; set; }
         public bool Confirmed { get; set; } = true;
+        public string Firstname { get; set; }
+        public string Lastname {get; set; }
     }
 }

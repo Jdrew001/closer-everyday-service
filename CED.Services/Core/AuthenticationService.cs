@@ -108,6 +108,9 @@ namespace CED.Services.Core
             authenticationDTO.IsAuthenticated = true;
             authenticationDTO.Token = await CreateJwtToken(user);
             authenticationDTO.UserId = user.Id;
+            authenticationDTO.Email = user.Email;
+            authenticationDTO.Firstname = user.FirstName;
+            authenticationDTO.Lastname = user.LastName;
 
             if (activeRefreshToken != null)
             {
@@ -250,6 +253,9 @@ namespace CED.Services.Core
                     var refreshToken = await CreateRefreshToken(userDevice);
                     authenticationDTO.RefreshToken = refreshToken.Token;
                     authenticationDTO.RefreshTokenExpiration = refreshToken.Expires;
+                    authenticationDTO.Email = confirmedUser.Email;
+                    authenticationDTO.Firstname = confirmedUser.FirstName;
+                    authenticationDTO.Lastname = confirmedUser.LastName;
                     confirmedUser.RefreshTokens ??= new List<RefreshToken>();
                     confirmedUser.RefreshTokens.Add(refreshToken);
                     await _refreshTokenRepository.SaveRefreshToken(refreshToken, confirmedUser.Id);
