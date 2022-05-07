@@ -13,10 +13,10 @@ CREATE PROCEDURE RevokeToken(
 BEGIN
 	SET @id = UUID();
     
-	DELETE FROM `CEDDB`.`refresh_token` re
+	DELETE FROM `ced_dev`.`refresh_token` re
 	WHERE re.`token` = refreshToken;
     
-    INSERT INTO `ceddb`.`blacklisted_token`
+    INSERT INTO `ced_dev`.`blacklisted_token`
 	(`id`, `token`, `expiry`) 
 	VALUES (UUID(), appToken, appTokenExpiry);
 
