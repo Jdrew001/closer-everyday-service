@@ -100,7 +100,7 @@ namespace CED.Controllers
         public async Task<IActionResult> EmailForReset(string email)
         {
             var response = await _authenticationService.EmailForReset(email);
-            return response.IsUser ? Ok(GenerateSuccessResponse("Email successfully sent", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
+            return response.IsUser ? Ok(GenerateSuccessResponse("Email successfully sent", response)): Ok(GenerateErrorResponse("An issue occurred. Please contact support", response));
         }
 
         [HttpPost("sendPasswordForReset")]
@@ -117,7 +117,7 @@ namespace CED.Controllers
             var refreshToken = (await _authenticationService.GetUserRefreshTokens(userId))[0];
             var response = await _authenticationService.Logout(RetrieveToken(), refreshToken.Token);
 
-            return response ?  Ok(GenerateSuccessResponse("You have logged out")): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
+            return response ?  Ok(GenerateSuccessResponse("You have logged out")): Ok(GenerateErrorResponse("Unable to log you out"));
         }
     }
 }
