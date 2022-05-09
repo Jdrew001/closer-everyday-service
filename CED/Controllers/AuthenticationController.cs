@@ -27,7 +27,7 @@ namespace CED.Controllers
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var response = await _authenticationService.Register(request);
-            return response.IsUserCreated ? Ok(GenerateSuccessResponse("Successfully registered account", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
+            return response.IsUserCreated ? Ok(GenerateSuccessResponse("Successfully registered account", response)): Ok(GenerateErrorResponse("Unable to register new user", response));
         }
 
         [HttpPost("login")]
@@ -42,7 +42,7 @@ namespace CED.Controllers
             }
 
             var response = await _authenticationService.Login(request, deviceUUID);
-            return !response.Error ? Ok(GenerateSuccessResponse("Successfully logged in", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
+            return !response.Error ? Ok(GenerateSuccessResponse("Successfully logged in", response)): Ok(GenerateErrorResponse("Email or password incorrect", response));
         }
 
         [HttpGet("validateCode/{code}/{email}/{deviceUUID}/{forReset}")]
@@ -68,7 +68,7 @@ namespace CED.Controllers
 
             // Update user's verified status
             var response = await _authenticationService.ConfirmUser(email, deviceUUID, forReset);
-            return !response.Error ? Ok(GenerateSuccessResponse("Code Validated", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
+            return !response.Error ? Ok(GenerateSuccessResponse("Code Validated", response)): Ok(GenerateErrorResponse("Unable to validate using that code", response));
         }
 
         [HttpGet("resendCode/{email}")]
@@ -78,7 +78,7 @@ namespace CED.Controllers
                 return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
 
             var result = await _authenticationService.ResendValidationCode(email);
-            return result ? Ok(GenerateSuccessResponse("Successful Code Resend")): BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
+            return result ? Ok(GenerateSuccessResponse("Successful Code Resend")): BadRequest(GenerateErrorResponse("Unable to resend reset code. Please try again"));
         }
 
         [HttpPost("refreshToken")]
@@ -100,7 +100,7 @@ namespace CED.Controllers
         public async Task<IActionResult> EmailForReset(string email)
         {
             var response = await _authenticationService.EmailForReset(email);
-            return response.IsUser ? Ok(GenerateSuccessResponse("Email successfully sent", response)): Ok(GenerateErrorResponse("An issue occurred. Please contact support", response));
+            return response.IsUser ? Ok(GenerateSuccessResponse("Email successfully sent", response)): Ok(GenerateErrorResponse("Unable to reset with that email", response));
         }
 
         [HttpPost("sendPasswordForReset")]
