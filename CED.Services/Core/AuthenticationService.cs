@@ -83,12 +83,27 @@ namespace CED.Services.Core
             var userDevice = devices.Find(d => (d.UUID.Equals(deviceUUID)));
             if (userDevice == null)
             {
-                // TODO: Send an email to user asking if the phone logging in is correct
-                // if click on ALLOW, then call an end point updating the system
-                // eventually I want to use texting 
-                //_log.LogError(e, "test: {devices}", devices);
-                 _log.LogInformation("AuthenticationService: New Device Detected (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
-                return AddNewDevice();
+                _log.LogInformation("AuthenticationService: New Device Detected (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
+
+                // create a new code in the database for this user
+                var authCodeDTO = await CreateUserAuthCode(user.Id, Utils.GenerateRandomNo().ToString());
+                if (authCodeDTO == null)
+                {
+                     _log.LogError("AuthenticationService: Error - Unable to save auth code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
+                    return AuthenticationError();
+                }
+                
+                try {
+                    var to = new List<EmailAddress>() { new EmailAddress(user.Email, user.Email) };
+                    await _emailService.SendEmailTemplate(ServiceConstants.VALIDATION_EMAIL_DEVICE_KEY, to, "Verify New Device", new {code = authCodeDTO.Code});
+                }
+                catch(Exception e) 
+                {
+                    _log.LogCritical(e, "AuthenticationService ERROR: Exception sending email occurred in (Login");
+                    return AuthenticationError();
+                }
+
+                return AddNewDevice(user.Email);
             }
 
             user.RefreshTokens = await _refreshTokenRepository.GetUserRefreshTokens(user.Id);
@@ -239,6 +254,8 @@ namespace CED.Services.Core
                 if (userDevice == null && dto.ValidationType.Equals(valType))
                 {
                     //TODO: add new device on confirmation
+                    device.UserId = confirmedUser.Id;
+                    userDevice = await _deviceService.CreateNewUserDevice(device);
                     _log.LogInformation("AuthenticationService: New Device (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
                 }
                 
@@ -513,12 +530,13 @@ namespace CED.Services.Core
             return authenticationDTO;
         }
 
-        private AuthenticationDTO AddNewDevice()
+        private AuthenticationDTO AddNewDevice(string email)
         {
             var authenticationDTO = new AuthenticationDTO();
             authenticationDTO.IsAuthenticated = false;
-            authenticationDTO.Message = $"New Device Detected";
+            authenticationDTO.Message = $"New Device Detected. Please confirm ownership of the account";
             authenticationDTO.IsNewDevice = true;
+            authenticationDTO.Email = email;
             return authenticationDTO;
         }
 

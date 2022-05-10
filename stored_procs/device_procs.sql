@@ -7,17 +7,18 @@ DELIMITER //
 
 CREATE PROCEDURE CreateUserDevice(
 	IN
-    DeviceGUID VARCHAR(100),
-    DeviceModel VARCHAR(100),
-    DevicePlatform VARCHAR(100),
+    UUID VARCHAR(100),
+    Model VARCHAR(100),
+    Platform VARCHAR(100),
     Manufacturer VARCHAR(100),
     UserId VARCHAR(255)
 )
 BEGIN
 	SET @id = UUID();
+    SET @userId = (SELECT `ceddb`.`user`.`iduser` FROM `ceddb`.`user` WHERE `ceddb`.`user`.`iduser`=UserId);
 	INSERT INTO `ceddb`.`device`
 	(`iddevice`, `model`,`platform`,`uuid`,`manufacturer`, `user_id`, `active`)
-		VALUES(@id, DeviceModel, DevicePlatform, DeviceGUID, Manufacturer, UserId, true);
+		VALUES(@id, Model, Platform, UUID, Manufacturer, @userId, true);
         
 	SELECT * FROM `ceddb`.`device` d WHERE d.`iddevice`=@id;
 END //
@@ -34,11 +35,11 @@ DELIMITER //
 
 CREATE PROCEDURE GetDeviceByUUID(
 	IN
-    DeviceUUID VARCHAR(100)
+    UUID VARCHAR(100)
 )
 BEGIN
 	SELECT * FROM `ceddb`.`device` d
-    WHERE d.uuid = DeviceUUID;
+    WHERE d.uuid = UUID;
 END //
 
 DELIMITER ;
@@ -72,11 +73,11 @@ DELIMITER //
 
 CREATE PROCEDURE GetDeviceIdByUUID(
 	IN
-    DeviceUUID VARCHAR(100)
+    UUID VARCHAR(100)
 )
 BEGIN
     SELECT de.iddevice FROM `ceddb`.`device` de
-    WHERE de.uuid = DeviceUUID;
+    WHERE de.uuid = UUID;
 END //
 
 DELIMITER ;
@@ -91,11 +92,11 @@ DELIMITER //
 
 CREATE PROCEDURE DeactiveateDevice(
 	IN
-    DeviceUUID VARCHAR(100)
+    UUID VARCHAR(100)
 )
 BEGIN
 	SET @id = (SELECT de.iddevice FROM `ceddb`.`device` de
-				WHERE de.uuid = DeviceUUID);
+				WHERE de.uuid = UUID);
                 
 	UPDATE `ceddb`.`device` SET `active` = false WHERE @id = `ceddb`.`device`.`iddevice`;  
     
@@ -116,16 +117,16 @@ DELIMITER //
 
 CREATE PROCEDURE ActivateDevice(
 	IN
-    DeviceUUID VARCHAR(100)
+    UUID VARCHAR(100)
 )
 BEGIN
 	SET @id = (SELECT de.iddevice FROM `ceddb`.`device` de
-				WHERE de.uuid = DeviceUUID);
+				WHERE de.uuid = UUID);
                 
 	UPDATE `ceddb`.`device` SET `active` = true WHERE @id = `ceddb`.`device`.`iddevice`;  
     
     SELECT * FROM `ceddb`.`device` de
-    WHERE de.uuid = DeviceUUID;
+    WHERE de.uuid = UUID;
 END //
 
 DELIMITER ;

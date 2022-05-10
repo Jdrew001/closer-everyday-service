@@ -25,9 +25,9 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("UUID", dto.UUID);
             command.Parameters.AddWithValue("Model", dto.Model);
             command.Parameters.AddWithValue("Platform", dto.Platform);
-            command.Parameters.AddWithValue("UUID", dto.UUID);
             command.Parameters.AddWithValue("Manufacturer", dto.Manufacturer);
             command.Parameters.AddWithValue("UserId", dto.UserId.ToString());
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
@@ -44,7 +44,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("DeviceUUID", UUID);
+            command.Parameters.AddWithValue("UUID", UUID);
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -74,7 +74,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("DeviceUUID", UUID);
+            command.Parameters.AddWithValue("UUID", UUID);
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
@@ -89,7 +89,7 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("DeviceUUID", uuid);
+            command.Parameters.AddWithValue("UUID", uuid);
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())

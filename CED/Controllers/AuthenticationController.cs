@@ -46,7 +46,7 @@ namespace CED.Controllers
             return !response.Error ? Ok(GenerateSuccessResponse("Successfully logged in", response)): Ok(GenerateErrorResponse("Email or password incorrect", response));
         }
 
-        [HttpGet("validateCode")]
+        [HttpPost("validateCode")]
         public async Task<IActionResult> ValidateCode(ValidateCodeDTO validationCodeDto) 
         {
             DeviceDTO device = RetrieveDevice();
@@ -64,13 +64,16 @@ namespace CED.Controllers
                 return Ok(GenerateErrorResponse("The code provided did not match."));
             }
 
+            // Update user's verified status
+            var response = await _authenticationService.ConfirmUser(validationCodeDto, device);
+            if (response.Error)
+                return Ok(GenerateErrorResponse("Unable to validate using that code", response));
+
             var deletionCode = await _authenticationService.DeleteUserAuthCode(validationCodeDto.Email);
             if (deletionCode != null)
                 return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
 
-            // Update user's verified status
-            var response = await _authenticationService.ConfirmUser(validationCodeDto, device);
-            return !response.Error ? Ok(GenerateSuccessResponse("Code Validated", response)): Ok(GenerateErrorResponse("Unable to validate using that code", response));
+            return Ok(GenerateSuccessResponse("Code Validated", response));
         }
 
         [HttpGet("resendCode/{email}")]

@@ -32,5 +32,6 @@ namespace CED.Services.utils
         };
 
         public static readonly string VALIDATION_EMAIL_KEY = "VALIDATION_EMAIL";
+        public static readonly string VALIDATION_EMAIL_DEVICE_KEY = "VALIDATION_EMAIL_DEVICE";
     }
 }
