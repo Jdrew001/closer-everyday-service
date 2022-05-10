@@ -9,10 +9,10 @@ namespace CED.Services.Interfaces
     public interface IAuthenticationService
     {
         Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto, string deviceUUID);
-        Task<RegistrationUserDTO> Register(RegistrationDTO registrationDto);
+        Task<RegistrationUserDTO> Register(RegistrationDTO registrationDto, DeviceDTO device);
         Task<bool> ResendValidationCode(string email);
-        Task<AuthenticationDTO> ConfirmUser(string email, string deviceUUID, bool forReset);
-        Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDto);
+        Task<AuthenticationDTO> ConfirmUser(ValidateCodeDTO dto, DeviceDTO device);
+        Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDto, string deviceUUID);
         Task<List<RefreshToken>> GetUserRefreshTokens(Guid userId);
         Task<bool> Logout(string appToken, string refreshToken);
         Task<AuthCodeDTO> GetAuthCode(string email);

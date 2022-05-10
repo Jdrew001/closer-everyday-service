@@ -26,15 +26,16 @@ namespace CED.Controllers
         public async Task<IActionResult> Register(RegistrationDTO request)
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            var response = await _authenticationService.Register(request);
-            return response.IsUserCreated ? Ok(GenerateSuccessResponse("Successfully registered account", response)): Ok(GenerateErrorResponse("Unable to register new user", response));
+            DeviceDTO device = RetrieveDevice();
+            var response = await _authenticationService.Register(request, device);
+            return response.IsUserCreated ? Ok(GenerateSuccessResponse("Successfully registered account", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDTO request)
         {
             request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            string deviceUUID = request.DeviceUUID;
+            string deviceUUID = RetrieveDevice().UUID;
 
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
@@ -45,30 +46,34 @@ namespace CED.Controllers
             return !response.Error ? Ok(GenerateSuccessResponse("Successfully logged in", response)): Ok(GenerateErrorResponse("Email or password incorrect", response));
         }
 
-        [HttpGet("validateCode/{code}/{email}/{deviceUUID}/{forReset}")]
-        public async Task<IActionResult> ValidateCode(string code, string email, string deviceUUID, bool forReset) 
+        [HttpPost("validateCode")]
+        public async Task<IActionResult> ValidateCode(ValidateCodeDTO validationCodeDto) 
         {
-            if (email == null || code == null || deviceUUID == null)
+            DeviceDTO device = RetrieveDevice();
+            if (validationCodeDto.Email == null || validationCodeDto.Code == null || device.UUID == null)
                 return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
 
-            var result = await _authenticationService.GetAuthCode(email);
+            var result = await _authenticationService.GetAuthCode(validationCodeDto.Email);
             if (result == null) 
             {
                 return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
             }
 
-            if (!result.Code.Equals(code))
+            if (!result.Code.Equals(validationCodeDto.Code))
             {
                 return Ok(GenerateErrorResponse("The code provided did not match."));
             }
 
-            var deletionCode = await _authenticationService.DeleteUserAuthCode(email);
+            // Update user's verified status
+            var response = await _authenticationService.ConfirmUser(validationCodeDto, device);
+            if (response.Error)
+                return Ok(GenerateErrorResponse("Unable to validate using that code", response));
+
+            var deletionCode = await _authenticationService.DeleteUserAuthCode(validationCodeDto.Email);
             if (deletionCode != null)
                 return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
 
-            // Update user's verified status
-            var response = await _authenticationService.ConfirmUser(email, deviceUUID, forReset);
-            return !response.Error ? Ok(GenerateSuccessResponse("Code Validated", response)): Ok(GenerateErrorResponse("Unable to validate using that code", response));
+            return Ok(GenerateSuccessResponse("Code Validated", response));
         }
 
         [HttpGet("resendCode/{email}")]
@@ -85,14 +90,13 @@ namespace CED.Controllers
         public async Task<IActionResult> RefreshToken(RefreshTokenDTO refreshTokenDTO)
         {
             refreshTokenDTO.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            string deviceUUID = refreshTokenDTO.DeviceUUID;
+            string deviceUUID = RetrieveDevice().UUID;
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
                 return BadRequest("DEVICE NOT FOUND");
             }
 
-            refreshTokenDTO.DeviceUUID = deviceUUID;
-            var response = await _authenticationService.RefreshToken(refreshTokenDTO);
+            var response = await _authenticationService.RefreshToken(refreshTokenDTO, deviceUUID);
             return !response.Error ? Ok(GenerateSuccessResponse(null, response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }
     

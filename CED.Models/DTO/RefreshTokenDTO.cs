@@ -15,10 +15,6 @@ namespace CED.Models.DTO
         [JsonProperty("token")]
         public string Token { get; set; }
 
-        [Required]
-        [JsonProperty("deviceUUID")]
-        public string DeviceUUID { get; set; }
-
         [JsonIgnore]
         public string IpAddress { get; set; }
     }
