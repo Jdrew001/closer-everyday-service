@@ -8,6 +8,13 @@ namespace CED.Services.utils
 {
     public static class ServiceConstants
     {
+        public static readonly Dictionary<string, string> VALIDATION_TYPE = new Dictionary<string, string>()
+        {
+            {"NEW_ACCOUNT", "NEW_ACCOUNT"},
+            {"RESET_PASSWORD", "RESET_PASSWORD"},
+            {"NEW_DEVICE_LOGIN", "NEW_DEVICE_LOGIN"}
+        };
+        
         public static readonly Dictionary<int, string> MONTHS_OF_YEAR = new Dictionary<int, string>()
         {
             {1, "JANUARY"},

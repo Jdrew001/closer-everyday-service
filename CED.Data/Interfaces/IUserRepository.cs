@@ -13,7 +13,7 @@ namespace CED.Data.Interfaces
     {
         Task<User> GetUserByEmail(string email);
         Task<User> GetUserById(Guid userId);
-        Task CreateNewUser(RegistrationDTO registrationDTO);
+        Task CreateNewUser(RegistrationDTO registrationDTO, DeviceDTO device);
         Task<User> UpdateUserPassword(Guid userId, string password);
         Task<User> ConfirmNewUser(string email);
         Task<User> GetUserByRefreshToken(RefreshTokenDTO refreshTokenDTO);

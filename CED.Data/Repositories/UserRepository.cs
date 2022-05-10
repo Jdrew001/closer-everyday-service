@@ -53,7 +53,7 @@ namespace CED.Data.Repositories
             return result;
         }
 
-        public async Task CreateNewUser(RegistrationDTO registrationDTO)
+        public async Task CreateNewUser(RegistrationDTO registrationDTO, DeviceDTO device)
         {
             _log.LogInformation("UserRepository: Start CreateNewUser : {Registration DTO}", registrationDTO);
             try
@@ -69,10 +69,10 @@ namespace CED.Data.Repositories
                 command.Parameters.AddWithValue("Email", registrationDTO.email);
                 command.Parameters.AddWithValue("UserHash", hashAndSalt.Hash);
                 command.Parameters.AddWithValue("Salt", hashAndSalt.Salt);
-                command.Parameters.AddWithValue("DeviceGUID", registrationDTO.deviceGuid);
-                command.Parameters.AddWithValue("DeviceModel", registrationDTO.deviceModel);
-                command.Parameters.AddWithValue("DevicePlatform", registrationDTO.devicePlatform);
-                command.Parameters.AddWithValue("Manufacturer", registrationDTO.deviceManufacture);
+                command.Parameters.AddWithValue("DeviceGUID", device.UUID);
+                command.Parameters.AddWithValue("DeviceModel", device.Model);
+                command.Parameters.AddWithValue("DevicePlatform", device.Platform);
+                command.Parameters.AddWithValue("Manufacturer", device.Manufacturer);
                 await command.ExecuteNonQueryAsync();
             }
             catch (Exception e)

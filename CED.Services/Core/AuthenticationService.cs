@@ -131,7 +131,7 @@ namespace CED.Services.Core
             return authenticationDTO;
         }
 
-        public async Task<RegistrationUserDTO> Register(RegistrationDTO registrationDto)
+        public async Task<RegistrationUserDTO> Register(RegistrationDTO registrationDto, DeviceDTO device)
         {
             _log.LogInformation("AuthenticationService: Start (Register) : RegistrationDTO {registrationDto}", registrationDto);
             var user = await _userRepository.GetUserByEmail(registrationDto.email);
@@ -143,7 +143,7 @@ namespace CED.Services.Core
                 return RegistrationError();
             }
 
-            await _userRepository.CreateNewUser(registrationDto);
+            await _userRepository.CreateNewUser(registrationDto, device);
             var loginUser = await _userRepository.GetUserByEmail(registrationDto.email);
             
             if (loginUser == null)
@@ -216,13 +216,14 @@ namespace CED.Services.Core
             return true;
         }
 
-        public async Task<AuthenticationDTO> ConfirmUser(string email, string deviceUUID, bool forReset)
+        public async Task<AuthenticationDTO> ConfirmUser(ValidateCodeDTO dto, DeviceDTO device)
         {
-            _log.LogInformation("AuthenticationService: Start (ConfirmUser) : Email {email}, Device: {deviceUUID}, For Reset: {forReset}", email, deviceUUID, forReset);
+            _log.LogInformation("AuthenticationService: Start (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
             var authenticationDTO = new AuthenticationDTO();
+            string valType;
             try 
             {
-                var confirmedUser = await _userRepository.ConfirmNewUser(email);
+                var confirmedUser = await _userRepository.ConfirmNewUser(dto.Email);
 
                 if (confirmedUser == null)
                     return AuthenticationError();
@@ -231,24 +232,25 @@ namespace CED.Services.Core
                     return AuthenticationError();
 
                 var devices = await _deviceService.GetUserDevices(confirmedUser.Id);
-                var userDevice = devices.Find(d => (d.UUID.Equals(deviceUUID)));
+                var userDevice = devices.Find(d => (d.UUID.Equals(device.UUID)));
 
-                if (userDevice == null)
+                // only if the user is logging in to validate their account due to new device
+                ServiceConstants.VALIDATION_TYPE.TryGetValue("NEW_DEVICE_LOGIN", out valType);
+                if (userDevice == null && dto.ValidationType.Equals(valType))
                 {
-                    // TODO: Send an email to user asking if the phone logging in is correct
-                    // if click on ALLOW, then call an end point updating the system
-                    // eventually I want to use texting 
-                    //_log.LogError(e, "test: {devices}", devices);
-                    _log.LogInformation("AuthenticationService: New Device (ConfirmUser) : Email {email}, Device: {deviceUUID}, For Reset: {forReset}", email, deviceUUID, forReset);
-                    return AddNewDevice();
+                    //TODO: add new device on confirmation
+                    _log.LogInformation("AuthenticationService: New Device (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
                 }
                 
                 authenticationDTO.IsAuthenticated = true;
                 authenticationDTO.UserId = confirmedUser.Id;
 
-                if (!forReset) 
+                ServiceConstants.VALIDATION_TYPE.TryGetValue("RESET_PASSWORD", out valType);
+
+                // If the user requests, does not equal the request to reset password
+                if (!dto.ValidationType.Equals(valType))
                 {
-                    _log.LogInformation("AuthenticationService: Reset False (ConfirmUser) : Email {email}, Device: {deviceUUID}, For Reset: {forReset}", email, deviceUUID, forReset);
+                    _log.LogInformation("AuthenticationService: Reset False (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
                     authenticationDTO.Token = await CreateJwtToken(confirmedUser);
                     var refreshToken = await CreateRefreshToken(userDevice);
                     authenticationDTO.RefreshToken = refreshToken.Token;
@@ -263,11 +265,11 @@ namespace CED.Services.Core
             }
             catch(Exception e)
             {
-                _log.LogCritical(e, "AuthenticationService ERROR: Exception occurred in (ConfirmUser): Email {email}, Device: {deviceUUID}, For Reset: {forReset}", email, deviceUUID, forReset);
+                _log.LogCritical(e, "AuthenticationService ERROR: Exception occurred in (ConfirmUser): Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
                 return AuthenticationError();
             }
             
-            _log.LogInformation("AuthenticationService: Completed (ConfirmUser) : Email {email}, Device: {deviceUUID}, For Reset: {forReset}", email, deviceUUID, forReset);
+            _log.LogInformation("AuthenticationService: Completed (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
             return authenticationDTO;
         }
 
@@ -314,7 +316,7 @@ namespace CED.Services.Core
             return new EmailForReset() { IsUser = true, Message = null, UserId = user.Id, Email = user.Email };
         }
 
-        public async Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDTO)
+        public async Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDTO, string uuid)
         {
             var authenticationDTO = new AuthenticationDTO();
             if (string.IsNullOrEmpty(refreshTokenDTO.Token))
@@ -338,7 +340,7 @@ namespace CED.Services.Core
 
             var refreshToken = await _refreshTokenRepository.GetRefreshToken(refreshTokenDTO.Token);
             var devices = await _deviceService.GetUserDevices(user.Id);
-            var userDevice = devices.Find(d => (d.UUID.Equals(refreshTokenDTO.DeviceUUID)));
+            var userDevice = devices.Find(d => (d.UUID.Equals(uuid)));
 
             if (userDevice == null)
             {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using CED.Services.Interfaces;
+using Newtonsoft.Json;
 
 namespace CED.Controllers
 {
@@ -19,6 +20,11 @@ namespace CED.Controllers
         {
             return HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Authorization")
                 .Value.FirstOrDefault().Remove(0, 7);
+        }
+
+        protected DeviceDTO RetrieveDevice()
+        {
+            return JsonConvert.DeserializeObject<DeviceDTO>(HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Device").Value);
         }
 
         protected async Task<Guid> GetUserId()
