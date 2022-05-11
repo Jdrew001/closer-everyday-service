@@ -33,7 +33,8 @@ namespace CED.Controllers
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var info = HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Device");
-            _log.LogInformation("AuthenticationController: Info on device (Register) : Device info non formatted {info}, Device: {info.Value}", info, info.Value);
+            var stringInfo = info.Value;
+            _log.LogInformation("AuthenticationController: Info on device (Register) : Device info non formatted {info}, Device: {stringInfo}", info, stringInfo);
             DeviceDTO device = RetrieveDevice();
             
 
