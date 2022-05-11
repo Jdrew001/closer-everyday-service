@@ -76,7 +76,10 @@ namespace CED
                      options.AddDefaultPolicy(
                                     policy =>
                                     {
-                                        policy.WithHeaders("Device");
+                                        policy.AllowAnyMethod()
+                                                .AllowAnyHeader()
+                                                .SetIsOriginAllowed(origin => true) // allow any origin
+                                                .AllowCredentials(); // allow credentials;
                                     });
                 });
 
@@ -121,7 +124,7 @@ namespace CED
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CED v1"));
             } else
             {
-                app.UseHsts();
+                
             }
 
             app.UseExceptionHandlerMiddleware();
