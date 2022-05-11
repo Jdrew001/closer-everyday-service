@@ -71,17 +71,7 @@ namespace CED
 
             var allowedHost = Configuration.GetSection("AllowedHosts").Get<string>();
 
-            services.AddCors(options =>
-                {
-                     options.AddDefaultPolicy(
-                                    policy =>
-                                    {
-                                        policy.AllowAnyMethod()
-                                                .AllowAnyHeader()
-                                                .SetIsOriginAllowed(origin => true) // allow any origin
-                                                .AllowCredentials(); // allow credentials;
-                                    });
-                });
+            
 
             services.AddAuthentication(option =>
             {
@@ -106,6 +96,7 @@ namespace CED
                     };
                 });
 
+            services.AddCors();
             services.AddControllers();
         }
 
@@ -117,21 +108,6 @@ namespace CED
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-            if (env.IsEnvironment("Local"))
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CED v1"));
-            } else
-            {
-                
-            }
-
-            app.UseExceptionHandlerMiddleware();
-
-            app.UseRouting();
-            
-            Console.WriteLine("file env path", env.ContentRootPath);
             // global cors policy
             app.UseCors(x => x
                 .AllowAnyMethod()
@@ -139,6 +115,19 @@ namespace CED
                 .SetIsOriginAllowed(origin => true) // allow any origin
                 .AllowCredentials()); // allow credentials
 
+            if (env.IsEnvironment("Local"))
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CED v1"));
+            } else
+            {
+                app.UseHsts();
+            }
+
+
+            app.UseExceptionHandlerMiddleware();
+            app.UseRouting();
             app.UseAuthentication();
 
             app.UseAuthorization();
