@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CED.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
@@ -20,12 +20,6 @@ namespace CED.Controllers
         {
             return HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Authorization")
                 .Value.FirstOrDefault().Remove(0, 7);
-        }
-
-        protected DeviceDTO RetrieveDevice()
-        {
-            var deviceString = HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Device").Value;
-            return JsonConvert.DeserializeObject<DeviceDTO>(deviceString);
         }
 
         protected async Task<Guid> GetUserId()

@@ -29,13 +29,12 @@ namespace CED.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegistrationDTO request)
+        public async Task<IActionResult> Register(RegistrationDTO request, [FromHeader] DeviceDTO device)
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var info = HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Device");
             var stringInfo = info.Value;
             _log.LogInformation("AuthenticationController: Info on device (Register) : Device info non formatted {info}, Device: {stringInfo}", info, stringInfo);
-            DeviceDTO device = RetrieveDevice();
             
 
             var response = await _authenticationService.Register(request, device);
@@ -43,10 +42,10 @@ namespace CED.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequestDTO request)
+        public async Task<IActionResult> Login(LoginRequestDTO request, [FromHeader] DeviceDTO device)
         {
             request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            string deviceUUID = RetrieveDevice().UUID;
+            string deviceUUID = device.UUID;
 
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
@@ -58,9 +57,8 @@ namespace CED.Controllers
         }
 
         [HttpPost("validateCode")]
-        public async Task<IActionResult> ValidateCode(ValidateCodeDTO validationCodeDto) 
+        public async Task<IActionResult> ValidateCode(ValidateCodeDTO validationCodeDto, [FromHeader] DeviceDTO device) 
         {
-            DeviceDTO device = RetrieveDevice();
             if (validationCodeDto.Email == null || validationCodeDto.Code == null || device.UUID == null)
                 return BadRequest(GenerateErrorResponse(AppConstants.GENERIC_ERROR));
 
@@ -98,10 +96,10 @@ namespace CED.Controllers
         }
 
         [HttpPost("refreshToken")]
-        public async Task<IActionResult> RefreshToken(RefreshTokenDTO refreshTokenDTO)
+        public async Task<IActionResult> RefreshToken(RefreshTokenDTO refreshTokenDTO, [FromHeader] DeviceDTO device)
         {
             refreshTokenDTO.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            string deviceUUID = RetrieveDevice().UUID;
+            string deviceUUID = device.UUID;
             if (deviceUUID == null || deviceUUID.Equals(""))
             {
                 return BadRequest("DEVICE NOT FOUND");
