@@ -3,7 +3,9 @@ using CED.Services.Interfaces;
 using CED.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CED.Controllers
@@ -14,12 +16,16 @@ namespace CED.Controllers
     public class AuthenticationController : CEDBaseController
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly ILogger<AuthenticationController> _log;
+
         public AuthenticationController(
             IAuthenticationService authenticationService,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            ILogger<AuthenticationController> log)
             :base(tokenService)
         {
             _authenticationService = authenticationService;
+            _log = log;
         }
 
         [HttpPost("register")]
@@ -27,6 +33,9 @@ namespace CED.Controllers
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             DeviceDTO device = RetrieveDevice();
+            var info = HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Device");
+            _log.LogInformation("AuthenticationController: Info on device (Register) : Device info non formatted {info}, Device: {info.Value}", info, info.Value);
+
             var response = await _authenticationService.Register(request, device);
             return response.IsUserCreated ? Ok(GenerateSuccessResponse("Successfully registered account", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
         }

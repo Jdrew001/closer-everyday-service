@@ -555,7 +555,7 @@ namespace CED.Services.Core
             var registrationDTO = new RegistrationUserDTO() 
             {
                 IsUserCreated = false,
-                Message = "Unable to register user",
+                Message = "Unable to register the new user",
                 ShouldRedirectToLogin = true,
                 UserId = Guid.Empty
             };

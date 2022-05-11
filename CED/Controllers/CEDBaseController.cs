@@ -24,7 +24,8 @@ namespace CED.Controllers
 
         protected DeviceDTO RetrieveDevice()
         {
-            return JsonConvert.DeserializeObject<DeviceDTO>(HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Device").Value);
+            var deviceString = HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Device").Value;
+            return JsonConvert.DeserializeObject<DeviceDTO>(deviceString);
         }
 
         protected async Task<Guid> GetUserId()
