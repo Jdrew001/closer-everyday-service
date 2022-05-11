@@ -32,9 +32,10 @@ namespace CED.Controllers
         public async Task<IActionResult> Register(RegistrationDTO request)
         {
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            DeviceDTO device = RetrieveDevice();
             var info = HttpContext?.Request?.Headers?.FirstOrDefault(a => a.Key == "Device");
             _log.LogInformation("AuthenticationController: Info on device (Register) : Device info non formatted {info}, Device: {info.Value}", info, info.Value);
+            DeviceDTO device = RetrieveDevice();
+            
 
             var response = await _authenticationService.Register(request, device);
             return response.IsUserCreated ? Ok(GenerateSuccessResponse("Successfully registered account", response)): Ok(GenerateErrorResponse(AppConstants.GENERIC_ERROR, response));
