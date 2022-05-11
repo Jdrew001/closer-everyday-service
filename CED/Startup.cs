@@ -71,7 +71,14 @@ namespace CED
 
             var allowedHost = Configuration.GetSection("AllowedHosts").Get<string>();
 
-            services.AddCors();
+            services.AddCors(options =>
+                {
+                     options.AddDefaultPolicy(
+                                    policy =>
+                                    {
+                                        policy.WithHeaders("Device");
+                                    });
+                });
 
             services.AddAuthentication(option =>
             {
