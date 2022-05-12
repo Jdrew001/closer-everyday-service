@@ -259,11 +259,14 @@ CREATE PROCEDURE CreateAuthCode(
 BEGIN
 SET @id = UUID();
 
-INSERT INTO `ceddb`.`auth_code`
+-- delete the user's auth code incase another one exists
+DELETE from `ced_dev`.`auth_code` WHERE `user_id` = UserId;
+
+INSERT INTO `ced_dev`.`auth_code`
 (`idauth_code`, `code`,`user_id`)
 	VALUES(@id, AuthCode, UserId);
     
-SELECT * from `ceddb`.`auth_code` ac
+SELECT * from `ced_dev`.`auth_code` ac
 WHERE ac.`idauth_code` = @id;
 END //
 

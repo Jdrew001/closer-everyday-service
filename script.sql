@@ -1,133 +1,27 @@
--- Drop stored procedure if exists
--- Create new user device
--- should create a new device and then select and return it
-DROP PROCEDURE IF EXISTS CreateUserDevice;
+-- Create auth code
+DROP PROCEDURE IF EXISTS CreateAuthCode;
 
 DELIMITER //
 
-CREATE PROCEDURE CreateUserDevice(
+CREATE PROCEDURE CreateAuthCode(
 	IN
-    UUID VARCHAR(100),
-    Model VARCHAR(100),
-    Platform VARCHAR(100),
-    Manufacturer VARCHAR(100),
+    AuthCode VARCHAR(45),
     UserId VARCHAR(255)
 )
 BEGIN
-	SET @id = UUID();
-	INSERT INTO `ced_dev`.`device`
-	(`iddevice`, `model`,`platform`,`uuid`,`manufacturer`, `user_id`, `active`)
-		VALUES(@id, Model, Platform, UUID, Manufacturer, UserId, true);
-        
-	SELECT * FROM `ced_dev`.`device` d WHERE d.`iddevice`=@id;
-END //
+SET @id = UUID();
 
-DELIMITER ;
--- End Create User Device
--- --------------------------------------
+-- delete the user's auth code incase another one exists
+DELETE from `ced_dev`.`auth_code` WHERE `user_id` = UserId;
 
--- Drop stored procedure if exists
--- Get a device by UUID
-DROP PROCEDURE IF EXISTS GetDeviceByUUID;
-
-DELIMITER //
-
-CREATE PROCEDURE GetDeviceByUUID(
-	IN
-    UUID VARCHAR(100)
-)
-BEGIN
-	SELECT * FROM `ced_dev`.`device` d
-    WHERE d.uuid = UUID;
-END //
-
-DELIMITER ;
--- End Get device by UUID
--- --------------------------------------
-
--- Drop stored procedure if exists
--- Get user device
-DROP PROCEDURE IF EXISTS GetUsersDevices;
-
-DELIMITER //
-
-CREATE PROCEDURE GetUsersDevices(
-	IN
-    UserId VARCHAR(255)
-)
-BEGIN
-	SELECT * FROM `ced_dev`.`device` d
-    WHERE d.user_id = UserId;
-END //
-
-DELIMITER ;
--- End Get user device
--- --------------------------------------
-
--- Drop stored procedure if exists
--- Deactivate user device
-DROP PROCEDURE IF EXISTS GetDeviceIdByUUID;
-
-DELIMITER //
-
-CREATE PROCEDURE GetDeviceIdByUUID(
-	IN
-    UUID VARCHAR(100)
-)
-BEGIN
-    SELECT de.iddevice FROM `ced_dev`.`device` de
-    WHERE de.uuid = UUID;
-END //
-
-DELIMITER ;
--- End Get user device
--- --------------------------------------
-
--- Drop stored procedure if exists
--- Deactivate user device
-DROP PROCEDURE IF EXISTS DeactiveateDevice;
-
-DELIMITER //
-
-CREATE PROCEDURE DeactiveateDevice(
-	IN
-    UUID VARCHAR(100)
-)
-BEGIN
-	SET @id = (SELECT de.iddevice FROM `ced_dev`.`device` de
-				WHERE de.uuid = UUID);
-                
-	UPDATE `ced_dev`.`device` SET `active` = false WHERE @id = `ced_dev`.`device`.`iddevice`;  
+INSERT INTO `ced_dev`.`auth_code`
+(`idauth_code`, `code`,`user_id`)
+	VALUES(@id, AuthCode, UserId);
     
-    SELECT * FROM `ced_dev`.`device` de
-    WHERE de.uuid = DeviceUUID;
+SELECT * from `ced_dev`.`auth_code` ac
+WHERE ac.`idauth_code` = @id;
 END //
 
 DELIMITER ;
--- End Get user device
--- --------------------------------------
-
-
--- Drop stored procedure if exists
--- Activate user device
-DROP PROCEDURE IF EXISTS ActivateDevice;
-
-DELIMITER //
-
-CREATE PROCEDURE ActivateDevice(
-	IN
-    UUID VARCHAR(100)
-)
-BEGIN
-	SET @id = (SELECT de.iddevice FROM `ced_dev`.`device` de
-				WHERE de.uuid = UUID);
-                
-	UPDATE `ced_dev`.`device` SET `active` = true WHERE @id = `ced_dev`.`device`.`iddevice`;  
-    
-    SELECT * FROM `ced_dev`.`device` de
-    WHERE de.uuid = UUID;
-END //
-
-DELIMITER ;
--- End Get Activate device
+-- End Create auth code
 -- --------------------------------------
