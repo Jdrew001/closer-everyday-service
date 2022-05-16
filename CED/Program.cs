@@ -16,8 +16,9 @@ namespace CED
         public static void Main(string[] args)
         {
             var baseDir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile($@"{baseDir}/appsettings.json")
+                .AddJsonFile($@"{baseDir}/appsettings.{env}.json")
                 .Build();
 
             var levelSwitch = new LoggingLevelSwitch();

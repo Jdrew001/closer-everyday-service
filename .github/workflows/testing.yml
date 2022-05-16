@@ -112,24 +112,6 @@ jobs:
           DATABASE_USERNAME: ${{ secrets.MYSQL_USER }}
           DATABASE_PASSWORD: ${{ secrets.MYSQL_PASS }}
           DATABASE_SCRIPT: 'script.sql'
-  notification_failure:
-    name: Failure Notification Email
-    runs-on: ubuntu-latest
-    if: ${{ failure() }}
-    needs: [build,publish_upload,deploy,db_deploy]
-    steps:
-      - name: Send Email Failure Notification
-        uses: dawidd6/action-send-mail@v3
-        with: 
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{secrets.MAIL_USERNAME}}
-          password: ${{secrets.MAIL_PASSWORD}}
-          subject: ${{ github.repository }} develop build failure
-          to: dtatkison@gmail.com
-          from: CED Pipeline Failure
-          body: Github pipeline has failed to run
-          priority: high
   discord_failure:
     name: Failure Notification Discord
     runs-on: ubuntu-latest
@@ -141,25 +123,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'BRANCH: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} app has failed to deploy.'
-  notification_success:
-    name: Success Notification Email
-    runs-on: ubuntu-latest
-    if: ${{ success() }}
-    needs: [build,publish_upload,deploy,db_deploy]
-    steps:
-      - name: Send Email Success Notification
-        uses: dawidd6/action-send-mail@v3
-        with: 
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{secrets.MAIL_USERNAME}}
-          password: ${{secrets.MAIL_PASSWORD}}
-          subject: ${{ github.repository }} develop build succeeded
-          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
-          from: CED Pipeline Success
-          body: Github pipeline has succeeded
-          priority: high
+          args: 'BRANCH: TESTING - {{ EVENT_PAYLOAD.repository.full_name }} app has failed to deploy.'
   discord_success:
     name: Success Notification Discord
     runs-on: ubuntu-latest
@@ -171,4 +135,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'BRANCH: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} app has been deployed.'
+          args: 'BRANCH: TESTING - {{ EVENT_PAYLOAD.repository.full_name }} app has been deployed.'
