@@ -29,6 +29,16 @@
       "dotnetRunMessages": "true",
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
+    "Testing": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Testing"
+      },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "https://localhost:5051;http://localhost:5050"
+    },
     "Staging": {
       "commandName": "Project",
       "launchBrowser": true,
