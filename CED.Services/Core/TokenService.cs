@@ -1,4 +1,5 @@
-﻿using CED.Models;
+﻿using CED.Data.Interfaces;
+using CED.Models;
 using CED.Models.Core;
 using CED.Services.Interfaces;
 using Microsoft.Extensions.Options;
@@ -16,10 +17,13 @@ namespace CED.Services.Core
     public class TokenService : ITokenService
     {
         private JwtToken _jwtToken;
+        private readonly IBlacklistTokenRepository _blacklistTokenRepo;
         public TokenService(
-            IOptions<JwtToken> jwtToken)
+            IOptions<JwtToken> jwtToken,
+            IBlacklistTokenRepository blacklistTokenRepository)
         {
             _jwtToken = jwtToken.Value;
+            _blacklistTokenRepo = blacklistTokenRepository;
         }
         public async Task<string> CreateJwtToken(User user)
         {
@@ -59,6 +63,11 @@ namespace CED.Services.Core
             {
                 return new JwtSecurityTokenHandler().ReadJwtToken(token);
             });
+        }
+
+        public async Task<BlackListToken> FetchBlacklistedToken(string token)
+        {
+            return await _blacklistTokenRepo.GetToken(token);
         }
     }
 }

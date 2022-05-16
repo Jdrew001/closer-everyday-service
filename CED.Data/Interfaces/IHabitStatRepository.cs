@@ -8,5 +8,7 @@ namespace CED.Data.Interfaces
 {
     public interface IHabitStatRepository
     {
+        public Task<double> GetGlobalSuccessRate(Guid userId);
+        public Task<int> GetFriendStat(Guid userId);
     }
 }

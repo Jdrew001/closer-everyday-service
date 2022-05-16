@@ -1,20 +1,34 @@
+using System;
 using CED.Data.Interfaces;
 using CED.Models.Core;
 using CED.Services.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CED.Models.DTO;
+using Microsoft.Extensions.Logging;
 
 namespace CED.Services.Core
 {
     public class HabitService : IHabitService
     {
-
+        private readonly ILogger<HabitService> _log;
         private readonly IHabitRepository _habitRepository;
+        private readonly IFrequencyService _frequencyService;
+        private readonly IScheduleService _scheduleService;
+        private readonly IFriendService _friendService;
 
         public HabitService(
-            IHabitRepository habitRepository)
+            ILogger<HabitService> log,
+            IHabitRepository habitRepository,
+            IFrequencyService frequencyService,
+            IScheduleService scheduleService,
+            IFriendService friendService)
         {
             _habitRepository = habitRepository;
+            _frequencyService = frequencyService;
+            _friendService = friendService;
+            _scheduleService = scheduleService;
+            _log = log;
         }
 
         public Task<List<Habit>> GetAllHabits()
@@ -22,47 +36,164 @@ namespace CED.Services.Core
             return _habitRepository.GetAllHabits();
         }
 
-        public Task<List<Habit>> GetAllUserHabits(int userId, string date)
+        public async Task<List<Habit>> GetAllUserHabits(Guid userId, string date)
         {
-            return _habitRepository.GetAllUserHabits(userId, date);
+            var habits = await _habitRepository.GetAllUserHabits(userId, date);
+            habits.ForEach(async o =>
+            {
+                o.Frequencies = await _frequencyService.GetHabitFrequencies(o.Id);
+                o.friendHabits = await _friendService.GetFriendsForHabit(o.Id);
+                o.habitLog = await GetHabitLogByIdDate(o.Id, date);
+            });
+            return habits;
         }
 
-        public Task<Habit> GetHabitById(int id)
+        public Task<Habit> GetHabitById(Guid id)
         {
             return _habitRepository.GetHabitById(id);
         }
 
-        public Task<HabitLog> GetHabitLogByIdDate(int id, string date)
+        public Task<HabitLog> GetHabitLogByIdDate(Guid id, string date)
         {
             return _habitRepository.GetHabitLogByIdAndDate(id, date);
         }
 
-        public Task<HabitLog> GetHabitLog(int id)
+        public Task<HabitLog> GetHabitLog(Guid id)
         {
             return _habitRepository.GetHabitLogById(id);
         }
 
-        public Task<List<HabitLog>> GetAllHabitLogsForUser(int userId)
+        public Task<List<HabitLog>> GetAllCompletedLogsForUser(Guid userId)
         {
             return _habitRepository.GetAllCompletedLogsForUser(userId);
         }
 
-        public bool MarkHabitInactive(int id)
+        public async Task<List<HabitLog>> GetAllCompletedLogsForHabit(Guid habitId)
+        {
+            return await _habitRepository.GetAllCompletedLogsForHabit(habitId);
+        }
+
+        public async Task<List<HabitLog>> GetUserHabitLogs(Guid userId)
+        {
+            return await _habitRepository.GetAllLogsForUser(userId);
+        }
+
+        public bool MarkHabitInactive(Guid id)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<Habit> SaveHabit(Habit habit)
+        public async Task<List<HabitLog>> GetLogsForHabit(Guid habitId)
         {
-            return _habitRepository.SaveHabit(habit);
+            return await _habitRepository.GetLogsForHabit(habitId);
         }
 
-        public Task<Habit> UpdateHabit(Habit habit)
+        public async Task<Habit> SaveHabit(Habit habit)
         {
-            return _habitRepository.UpdateHabit(habit);
+            Habit savedHabit = null;
+            _log.LogInformation("BEGIN SaveHabit - {Habit}", habit);
+            try
+            {
+                _log.LogInformation("Saving schedule : {Schedule}", habit.Schedule);
+                Schedule schedule = await _scheduleService.SaveSchedule(habit.Schedule);
+                _log.LogInformation("Saved schedule : {Schedule}", habit.Schedule);
+
+                
+                habit.Schedule = schedule;
+
+                //Save Habit
+                _log.LogInformation("Saving habit : {Habit}", habit);
+                savedHabit = await _habitRepository.SaveHabit(habit);
+                _log.LogInformation("Saved habit : {Habit}", habit);
+
+                // Save frequencies
+                _log.LogInformation("Saving Frequencies : {Frequencies}", habit.Frequencies);
+                var frequencies = await _frequencyService.SaveHabitFrequencies(habit.Frequencies, savedHabit.Id);
+                savedHabit.Frequencies = frequencies;
+                _log.LogInformation("Saved Frequencies : {Frequencies}", habit.Frequencies);
+
+                var habitFriends = new List<FriendHabit>();
+                _log.LogInformation("Saving Habit Friends : {Habit Friends}", habit.friendHabits);
+                // save friend habits
+                habit.friendHabits.ForEach(async o =>
+                {
+                    var habitFriend = await _friendService.SaveFriendToHabit(o.FriendId, habit.Id, habit.UserId);
+                    if (habitFriend != null)
+                        habitFriends.Add(habitFriend);
+                });
+
+                savedHabit.friendHabits = habitFriends;
+                _log.LogInformation("Saved Habit Friends : {Habit Friends}", habit.friendHabits);
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "ERROR: Exception occurred in (SaveHabit) Habit : {habit}, User : {user}", habit, habit.UserId);
+                return null;
+            }
+
+            _log.LogInformation("END SaveHabit - {Habit}", savedHabit);
+            return savedHabit;
         }
 
-        public async Task<HabitLog> SaveHabitLog(char status, int userId, int habitId, string date)
+        public async Task<Habit> UpdateHabit(Habit habit)
+        {
+            Habit updatedHabit = null;
+            _log.LogInformation("BEGIN SaveHabit - {Habit}", habit);
+            try
+            {
+                // Update schedule
+                _log.LogInformation("Updating schedule : {Schedule}", habit.Schedule);
+                Schedule schedule = await _scheduleService.UpdateSchedule(habit.Schedule);
+                _log.LogInformation("Updated schedule : {Schedule}", habit.Schedule);
+
+                habit.Schedule = schedule;
+
+                //Update Habit
+                _log.LogInformation("Updating habit : {Habit}", habit);
+                updatedHabit = await _habitRepository.UpdateHabit(habit);
+                _log.LogInformation("Updated habit : {Habit}", habit);
+
+                // Update frequencies
+                _log.LogInformation("Saving Frequencies : {Frequencies}", habit.Frequencies);
+                var cleared = await _frequencyService.ClearHabitFrequencies(habit.Id);
+                if (cleared.Count > 0)
+                    return null;
+
+                var frequencies = await _frequencyService.SaveHabitFrequencies(habit.Frequencies, updatedHabit.Id);
+                updatedHabit.Frequencies = frequencies;
+                _log.LogInformation("Saved Frequencies : {Frequencies}", habit.Frequencies);
+
+
+                // TODO: Need to complete below
+                var habitFriends = new List<FriendHabit>();
+                _log.LogInformation("Updating Habit Friends : {Habit Friends}", habit.friendHabits);
+                // Update friend habits
+                habit.friendHabits.ForEach(async o =>
+                {
+                    await _friendService.ClearFriendToHabit(o.FriendId, habit.Id, habit.UserId);
+                });
+
+                habit.friendHabits.ForEach(async o =>
+                {
+                    var habitFriend = await _friendService.SaveFriendToHabit(o.FriendId, habit.Id, habit.UserId);
+                    if (habitFriend != null)
+                        habitFriends.Add(habitFriend);
+                });
+
+                updatedHabit.friendHabits = habitFriends;
+                _log.LogInformation("Updated Habit Friends : {Habit Friends}", habit.friendHabits);
+            }
+            catch (Exception e)
+            {
+                _log.LogCritical(e, "ERROR: Exception occurred in (UpdateHabit) Habit : {habit}, User : {user}", habit, habit.UserId);
+                return null;
+            }
+
+            _log.LogInformation("END Update Habit - {Habit}", updatedHabit);
+            return updatedHabit;
+        }
+
+        public async Task<HabitLog> SaveHabitLog(char status, Guid userId, Guid habitId, string date)
         {
             if (!status.Equals('C') && !status.Equals('F') && !status.Equals('P'))
                 return null;
@@ -87,18 +218,14 @@ namespace CED.Services.Core
         {
             if (habit.VisibleToFriends)
             {
-                // we need to retrieve the habit friends
-
                 // send notification if completed
                 if (status.Equals('C'))
                 {
-
                 }
 
                 // send notification in case of failure
                 if (status.Equals('F'))
                 {
-
                 }
             }
         }

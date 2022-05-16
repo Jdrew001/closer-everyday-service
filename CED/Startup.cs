@@ -13,7 +13,14 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
+using AutoMapper;
+using CED.Profiles;
 using Microsoft.AspNetCore.HttpOverrides;
+using Serilog;
+using CED.Models.Utils;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace CED
 {
@@ -33,6 +40,14 @@ namespace CED
                 options => Configuration.GetSection("ConnectionStrings").Bind(options));
             services.Configure<AppSettings>(options => Configuration.GetSection("AppSettings").Bind(options));
             services.Configure<JwtToken>(options => Configuration.GetSection("JwtToken").Bind(options));
+            services.Configure<MailServerConfig>(options => Configuration.GetSection("MailServerConfig").Bind(options));
+            services.Configure<SendGridConfig>(options => Configuration.GetSection("SendGridConfig").Bind(options));
+
+            services.AddSingleton<MailServerConfig>(
+                x => x.GetRequiredService<IOptions<MailServerConfig>>().Value);
+
+            services.AddSingleton<SendGridConfig>(
+                x => x.GetRequiredService<IOptions<SendGridConfig>>().Value);
 
             var connectionStrings = Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
             var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
@@ -44,11 +59,19 @@ namespace CED
 
             services.AddServices();
             services.AddRepositories();
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddMaps("CED");
+                mc.AddProfile(new HabitProfile());
+                mc.AddProfile(new UserProfile());
+                mc.AddProfile(new AuthCodeProfile());
+            });
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
 
             var allowedHost = Configuration.GetSection("AllowedHosts").Get<string>();
 
-
-            services.AddCors();
+            
 
             services.AddAuthentication(option =>
             {
@@ -73,13 +96,21 @@ namespace CED
                     };
                 });
 
+            services.AddCors();
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
+
+            if (env.IsEnvironment("Local"))
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
@@ -89,27 +120,20 @@ namespace CED
                 app.UseHsts();
             }
 
+
             app.UseExceptionHandlerMiddleware();
-
-            app.UseHttpsRedirection();
-
             app.UseRouting();
-
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });
-
-            // global cors policy
-            app.UseCors(x => x
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .SetIsOriginAllowed(origin => true) // allow any origin
-                .AllowCredentials()); // allow credentials
-
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            app.UseSerilogRequestLogging();
+            app.UseBlackListTokenMiddleware();
+
+            // app.UseForwardedHeaders(new ForwardedHeadersOptions
+            // {
+            //     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            // });
 
             app.UseEndpoints(endpoints =>
             {

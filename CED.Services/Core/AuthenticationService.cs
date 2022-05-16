@@ -1,4 +1,4 @@
-﻿using CED.Data;
+using CED.Data;
 using CED.Models;
 using CED.Models.Core;
 using CED.Models.DTO;
@@ -18,6 +18,10 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Data;
 using CED.Data.Interfaces;
+using AutoMapper;
+using CED.Services.utils;
+using MimeKit;
+using SendGrid.Helpers.Mail;
 
 namespace CED.Services.Core
 {
@@ -29,44 +33,77 @@ namespace CED.Services.Core
         private readonly IUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
 
+        private readonly IEmailService _emailService;
+        private readonly IEmailTemplateService _emailTemplateService;
+        private readonly IMapper _mapper;
+        private readonly ITokenService _tokenService;
+
         public AuthenticationService(
             ILogger<AuthenticationService> log,
             IOptions<JwtToken> jwtToken,
             IOptions<ConnectionStrings> connectionStrings,
             IDeviceService deviceService,
             IUserRepository userRepository,
-            IRefreshTokenRepository refreshTokenRepository)
+            IRefreshTokenRepository refreshTokenRepository,
+            IEmailService emailService,
+            IEmailTemplateService emailTemplateService,
+            ITokenService tokenService,
+            IMapper mapper)
         {
             _log = log;
             _jwtToken = jwtToken.Value;
             _deviceService = deviceService;
             _userRepository = userRepository;
             _refreshTokenRepository = refreshTokenRepository;
+            _mapper = mapper;
+            _emailService = emailService;
+            _emailTemplateService = emailTemplateService;
+            _tokenService = tokenService;
         }
 
         #region authentication methods
         public async Task<AuthenticationDTO> Login(LoginRequestDTO loginRequestDto, string deviceUUID)
         {
+            _log.LogInformation("AuthenticationService: Start (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
             var user = await _userRepository.GetUserByEmail(loginRequestDto.Email);
             var authenticationDTO = new AuthenticationDTO();
             if (user == null)
             {
-                return RegistrationError();
+                _log.LogError("AuthenticationService: Error - user not found (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
+                return AuthenticationError();
             }
 
             if (Hash.GetHash(loginRequestDto.Password, user.PasswordSalt).Hash != user.Password)
             {
-                return RegistrationError();
+                _log.LogError("AuthenticationService: Error - Password doesn't match (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
+                return AuthenticationError();
             }
 
             var devices = await _deviceService.GetUserDevices(user.Id);
             var userDevice = devices.Find(d => (d.UUID.Equals(deviceUUID)));
             if (userDevice == null)
             {
-                // TODO: Send an email to user asking if the phone logging in is correct
-                // if click on ALLOW, then call an end point updating the system
-                // eventually I want to use texting 
-                return AddNewDevice();
+                _log.LogInformation("AuthenticationService: New Device Detected (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
+
+                // create a new code in the database for this user
+                var authCodeDTO = await CreateUserAuthCode(user.Id, Utils.GenerateRandomNo().ToString());
+                if (authCodeDTO == null)
+                {
+                     _log.LogError("AuthenticationService: Error - Unable to save auth code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
+                    return AuthenticationError();
+                }
+                
+                try {
+                    var to = new List<EmailAddress>() { new EmailAddress(user.Email, user.Email) };
+                    await _emailService.SendEmailTemplate(ServiceConstants.VALIDATION_EMAIL_DEVICE_KEY, to, "Verify New Device", new {code = authCodeDTO.Code});
+                }
+                catch(Exception e) 
+                {
+                    _log.LogCritical(e, "AuthenticationService ERROR: Exception sending email occurred in (Login");
+                    return AuthenticationError();
+                }
+
+                return AddNewDevice(user.Email);
             }
 
             user.RefreshTokens = await _refreshTokenRepository.GetUserRefreshTokens(user.Id);
@@ -75,12 +112,20 @@ namespace CED.Services.Core
             // users request device uuid in use doesn't match the refresh token -- throw an error
             if (activeRefreshToken != null && activeRefreshToken.DeviceId != userDevice.DeviceId)
             {
+                _log.LogError("AuthenticationService: Error - Device not recognized (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
                 return DeviceNotRecognized();
             }
+
+            // user is not confirmed, so resend validation code
+            if (!user.Confirmed)
+                return await ResendCodeForUnconfirmedLoginAsync(user, loginRequestDto, deviceUUID);
 
             authenticationDTO.IsAuthenticated = true;
             authenticationDTO.Token = await CreateJwtToken(user);
             authenticationDTO.UserId = user.Id;
+            authenticationDTO.Email = user.Email;
+            authenticationDTO.Firstname = user.FirstName;
+            authenticationDTO.Lastname = user.LastName;
 
             if (activeRefreshToken != null)
             {
@@ -97,41 +142,205 @@ namespace CED.Services.Core
                 await _refreshTokenRepository.SaveRefreshToken(refreshToken, user.Id);
             }
 
+            _log.LogInformation("AuthenticationService: Completed Successfully (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDto, deviceUUID);
             return authenticationDTO;
         }
 
-        public async Task<AuthenticationDTO> Register(RegistrationDTO registrationDto)
+        public async Task<RegistrationUserDTO> Register(RegistrationDTO registrationDto, DeviceDTO device)
         {
+            _log.LogInformation("AuthenticationService: Start (Register) : RegistrationDTO {registrationDto}", registrationDto);
             var user = await _userRepository.GetUserByEmail(registrationDto.email);
 
             // user found in db, unable to register error thrown
             if (user != null)
             {
+                _log.LogError("AuthenticationService: Error - user already exists (Register) : RegistrationDTO {registrationDto}", registrationDto);
                 return RegistrationError();
             }
 
-            await _userRepository.CreateNewUser(registrationDto);
-
-            return await Login(new LoginRequestDTO()
+            await _userRepository.CreateNewUser(registrationDto, device);
+            var loginUser = await _userRepository.GetUserByEmail(registrationDto.email);
+            
+            if (loginUser == null)
             {
-                Email = registrationDto.email,
-                Password = registrationDto.password,
-                IpAddress = registrationDto.IpAddress
-            }, registrationDto.deviceGuid);
+                _log.LogError("AuthenticationService: Error - Created new user not found in db (Register) : RegistrationDTO {registrationDto}", registrationDto);
+                return RegistrationError();
+            }
+                
+
+            // create a new code in the database for this user
+            var authCodeDTO = await CreateUserAuthCode(loginUser.Id, Utils.GenerateRandomNo().ToString());
+
+            if (authCodeDTO == null)
+            {
+                _log.LogError("AuthenticationService: Error - Created auth code not found in db (Register) : RegistrationDTO {registrationDto}", registrationDto);
+                return RegistrationError();
+            }
+                
+            if (!(await SendValidationCode(loginUser.Email, authCodeDTO.Code)))
+            {
+                 _log.LogError("AuthenticationService: Error - Validation code email failed (Register) : RegistrationDTO {registrationDto}", registrationDto);
+                return RegistrationError();
+            }
+            
+            var registrationUserDTO = new RegistrationUserDTO()
+            {
+                IsUserCreated = true,
+                Message = null,
+                ShouldRedirectToLogin = false,
+                UserId = loginUser.Id
+            };
+            _log.LogInformation("AuthenticationService: Completed Successfully (Register) : RegistrationUserDTO {registrationUserDTO}", registrationUserDTO);
+            return registrationUserDTO;
         }
 
-        public async Task Logout(string token)
+        public async Task<bool> SendValidationCode(string email, string code)
         {
-            await _userRepository.Logout(token);
+            _log.LogInformation("AuthenticationService: Start (SendValidationCode) : Email {email}, Code: {code}", email, code);
+            try 
+            {
+                // send auth code to user email
+                var to = new List<EmailAddress>() { new EmailAddress(email, email) };
+                await _emailService.SendEmailTemplate(ServiceConstants.VALIDATION_EMAIL_KEY, to, "Verify Account", new {code = code});
+            }
+            catch (Exception ex)
+            {
+                _log.LogCritical(ex, "AuthenticationService ERROR: Exception occurred in (SendValidationCode) email : {email}, code: {code}", email, code);
+                return false;
+            }
+
+            _log.LogInformation("AuthenticationService: Completed (SendValidationCode) : Email {email}, Code: {code}", email, code);
+            return true;
         }
 
-        public async Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDTO)
+        public async Task<bool> SendValidationCodeForReset(string email, string code)
+        {
+            _log.LogInformation("AuthenticationService: Start (SendValidationCodeForReset) : Email {email}, Code: code", email, code);
+            try 
+            {
+                var to = new List<EmailAddress>() { new EmailAddress(email, email) };
+                await _emailService.SendEmailTemplate(ServiceConstants.VALIDATION_EMAIL_KEY, to, "Verify Account", new {code = code});
+            }
+            catch (Exception ex)
+            {
+                _log.LogCritical(ex, "AuthenticationService ERROR: Exception occurred in (SendValidationCodeForReset) email : {email}, code: {code}", email, code);
+                return false;
+            }
+
+            _log.LogInformation("AuthenticationService: Completed (SendValidationCodeForReset) : Email {email}, Code: code", email, code);
+            return true;
+        }
+
+        public async Task<AuthenticationDTO> ConfirmUser(ValidateCodeDTO dto, DeviceDTO device)
+        {
+            _log.LogInformation("AuthenticationService: Start (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
+            var authenticationDTO = new AuthenticationDTO();
+            string valType;
+            try 
+            {
+                var confirmedUser = await _userRepository.ConfirmNewUser(dto.Email);
+
+                if (confirmedUser == null)
+                    return AuthenticationError();
+
+                if (!confirmedUser.Confirmed)
+                    return AuthenticationError();
+
+                var devices = await _deviceService.GetUserDevices(confirmedUser.Id);
+                var userDevice = devices.Find(d => (d.UUID.Equals(device.UUID)));
+
+                // only if the user is logging in to validate their account due to new device
+                ServiceConstants.VALIDATION_TYPE.TryGetValue("NEW_DEVICE_LOGIN", out valType);
+                if (userDevice == null && dto.ValidationType.Equals(valType))
+                {
+                    //TODO: add new device on confirmation
+                    device.UserId = confirmedUser.Id;
+                    userDevice = await _deviceService.CreateNewUserDevice(device);
+                    _log.LogInformation("AuthenticationService: New Device (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
+                }
+                
+                authenticationDTO.IsAuthenticated = true;
+                authenticationDTO.UserId = confirmedUser.Id;
+
+                ServiceConstants.VALIDATION_TYPE.TryGetValue("RESET_PASSWORD", out valType);
+
+                // If the user requests, does not equal the request to reset password
+                if (!dto.ValidationType.Equals(valType))
+                {
+                    _log.LogInformation("AuthenticationService: Reset False (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
+                    authenticationDTO.Token = await CreateJwtToken(confirmedUser);
+                    var refreshToken = await CreateRefreshToken(userDevice);
+                    authenticationDTO.RefreshToken = refreshToken.Token;
+                    authenticationDTO.RefreshTokenExpiration = refreshToken.Expires;
+                    authenticationDTO.Email = confirmedUser.Email;
+                    authenticationDTO.Firstname = confirmedUser.FirstName;
+                    authenticationDTO.Lastname = confirmedUser.LastName;
+                    confirmedUser.RefreshTokens ??= new List<RefreshToken>();
+                    confirmedUser.RefreshTokens.Add(refreshToken);
+                    await _refreshTokenRepository.SaveRefreshToken(refreshToken, confirmedUser.Id);
+                }
+            }
+            catch(Exception e)
+            {
+                _log.LogCritical(e, "AuthenticationService ERROR: Exception occurred in (ConfirmUser): Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
+                return AuthenticationError();
+            }
+            
+            _log.LogInformation("AuthenticationService: Completed (ConfirmUser) : Email {email}, Device: {deviceUUID}", dto.Email, device.UUID);
+            return authenticationDTO;
+        }
+
+        public async Task<bool> Logout(string appToken, string refreshToken)
+        {
+            _log.LogInformation("AuthenticationService: Start (Logout) : App Token: {appToken}, Refresh Token: {refreshToken}", appToken, refreshToken);
+            bool result = false;
+            try {
+                var validatedAppToken = await _tokenService.ReadJwtToken(appToken);
+                result = await _userRepository.Logout(appToken, validatedAppToken.ValidTo.ToUniversalTime(), refreshToken);
+            } 
+            catch (Exception ex)
+            {
+                _log.LogCritical(ex, "AuthenticationService ERROR: Exception occurred in (Logout) : App Token: {appToken}, Refresh Token: {refreshToken}", appToken, refreshToken);
+                return false;
+            }
+
+            _log.LogInformation("AuthenticationService: End (Logout) : App Token: {appToken}, Refresh Token: {refreshToken}", appToken, refreshToken);
+            return result;
+        }
+
+        public async Task<List<RefreshToken>> GetUserRefreshTokens(Guid userId)
+        {
+            return await _refreshTokenRepository.GetUserRefreshTokens(userId);
+        }
+
+        public async Task<EmailForReset> EmailForReset(string email)
+        {
+            var failedDTO = new EmailForReset() { IsUser = false, Message = "User not available for Reset", UserId = Guid.Empty};
+            var user = await _userRepository.GetUserByEmail(email);
+            
+            if (user == null)
+                return failedDTO;
+
+            var authCodeDTO = await CreateUserAuthCode(user.Id, Utils.GenerateRandomNo().ToString());
+
+            if (authCodeDTO == null)
+                return failedDTO;
+
+            // send email to user
+            if (!(await SendValidationCodeForReset(user.Email, authCodeDTO.Code)))
+                return failedDTO;
+
+            return new EmailForReset() { IsUser = true, Message = null, UserId = user.Id, Email = user.Email };
+        }
+
+        public async Task<AuthenticationDTO> RefreshToken(RefreshTokenDTO refreshTokenDTO, string uuid)
         {
             var authenticationDTO = new AuthenticationDTO();
             if (string.IsNullOrEmpty(refreshTokenDTO.Token))
             {
                 authenticationDTO.IsAuthenticated = false;
                 authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
                 authenticationDTO.Message = "Token invalid.";
                 return authenticationDTO;
             }
@@ -141,18 +350,20 @@ namespace CED.Services.Core
             {
                 authenticationDTO.IsAuthenticated = false;
                 authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
                 authenticationDTO.Message = "Token did not match any users.";
                 return authenticationDTO;
             }
 
             var refreshToken = await _refreshTokenRepository.GetRefreshToken(refreshTokenDTO.Token);
             var devices = await _deviceService.GetUserDevices(user.Id);
-            var userDevice = devices.Find(d => (d.UUID.Equals(refreshTokenDTO.DeviceUUID)));
+            var userDevice = devices.Find(d => (d.UUID.Equals(uuid)));
 
             if (userDevice == null)
             {
                 authenticationDTO.IsAuthenticated = false;
                 authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
                 authenticationDTO.Message = "Device not matching.";
 
                 return authenticationDTO;
@@ -163,6 +374,7 @@ namespace CED.Services.Core
             {
                 authenticationDTO.IsAuthenticated = false;
                 authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
                 authenticationDTO.Message = "Unable to process request";
 
                 return authenticationDTO;
@@ -207,7 +419,7 @@ namespace CED.Services.Core
                     expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtToken.TokenExpiry)),
                     notBefore: DateTime.Now.Subtract(TimeSpan.FromMinutes(30)),
                     signingCredentials: credentials);
-                
+
                 return new JwtSecurityTokenHandler().WriteToken(token);
             });
         }
@@ -237,6 +449,73 @@ namespace CED.Services.Core
                 return refreshToken;
             });
         }
+
+        public async Task<AuthCodeDTO> GetAuthCode(string email)
+        {
+            AuthCode code = await _userRepository.GetUserAuthCode(email);
+            return _mapper.Map<AuthCode, AuthCodeDTO>(code);
+        }
+
+        public async Task<AuthCodeDTO> CreateUserAuthCode(Guid userId, string code)
+        {
+            AuthCode authCode = await _userRepository.CreateUserAuthCode(userId, code);
+            return _mapper.Map<AuthCode, AuthCodeDTO>(authCode);
+        }
+
+        public async Task<AuthCodeDTO> DeleteUserAuthCode(string email)
+        {
+            AuthCode authCode = await _userRepository.DeleteUserAuthCode(email);
+            return _mapper.Map<AuthCode, AuthCodeDTO>(authCode);
+        }
+
+        public async Task<bool> ResendValidationCode(string email)
+        {
+            var user = await _userRepository.GetUserByEmail(email);
+            if (user == null)
+                return false;
+
+            var deletionCode = await DeleteUserAuthCode(user.Email);
+            if (deletionCode != null)
+                return false;
+
+            var authCodeDTO = await CreateUserAuthCode(user.Id, Utils.GenerateRandomNo().ToString());
+
+            if (!(await SendValidationCode(email, authCodeDTO.Code)))
+                return false;
+
+            return true;
+        }
+
+        public async Task<AuthenticationDTO> ResetPassword(Guid userId, string password)
+        {
+            var authenticationDTO = new AuthenticationDTO();
+            var user = await _userRepository.GetUserById(userId);
+            if (user == null) 
+            {
+                authenticationDTO.IsAuthenticated = false;
+                authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
+                authenticationDTO.Message = "Unable to reset password.";
+                return authenticationDTO;
+            }
+
+            var requestUser = await _userRepository.UpdateUserPassword(userId, password);
+            if (requestUser == null)
+            {
+                authenticationDTO.IsAuthenticated = false;
+                authenticationDTO.ShouldRedirectoToLogin = true;
+                authenticationDTO.Error = true;
+                authenticationDTO.Message = "Unable to reset password.";
+                return authenticationDTO;
+            }
+
+            authenticationDTO.IsAuthenticated = true;
+            authenticationDTO.Message = "Password Successfully Changed";
+            authenticationDTO.ShouldRedirectoToLogin = true;
+
+            return authenticationDTO;
+        }
+
         #endregion
 
         #region private util methods
@@ -247,26 +526,64 @@ namespace CED.Services.Core
             authenticationDTO.IsAuthenticated = false;
             authenticationDTO.Message = $"Device not Authorized";
             authenticationDTO.IsNewDevice = false;
+            authenticationDTO.Error = true;
             return authenticationDTO;
         }
 
-        private AuthenticationDTO AddNewDevice()
+        private AuthenticationDTO AddNewDevice(string email)
         {
             var authenticationDTO = new AuthenticationDTO();
             authenticationDTO.IsAuthenticated = false;
-            authenticationDTO.Message = $"New Device Detected";
+            authenticationDTO.Message = $"New Device Detected. Please confirm ownership of the account";
             authenticationDTO.IsNewDevice = true;
+            authenticationDTO.Email = email;
             return authenticationDTO;
         }
 
-        private AuthenticationDTO RegistrationError()
+        private AuthenticationDTO AuthenticationError()
         {
             var authenticationDTO = new AuthenticationDTO();
             authenticationDTO.IsAuthenticated = false;
             authenticationDTO.Message = $"Email or password incorrect";
             authenticationDTO.IsNewDevice = false;
+            authenticationDTO.Error = true;
             return authenticationDTO;
         }
-        #endregion
-    }
+
+        private RegistrationUserDTO RegistrationError()
+        {
+            var registrationDTO = new RegistrationUserDTO() 
+            {
+                IsUserCreated = false,
+                Message = "Unable to register the new user",
+                ShouldRedirectToLogin = true,
+                UserId = Guid.Empty
+            };
+
+            return registrationDTO;
+        }
+
+        private async Task<AuthenticationDTO> ResendCodeForUnconfirmedLoginAsync(User user, LoginRequestDTO loginRequestDTO, string deviceUUID)
+        {
+            // if user not confirmed, then reissue a new code to email account
+            var result = await ResendValidationCode(user.Email);
+            
+            if (result)
+            {
+                _log.LogInformation("AuthenticationService: Resent new validation code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDTO, deviceUUID);
+                var authenticationDTO = new AuthenticationDTO();
+                authenticationDTO.Confirmed = false;
+                authenticationDTO.Error = false;
+                authenticationDTO.IsAuthenticated = true;
+                authenticationDTO.Email = user.Email;
+                return authenticationDTO;
+            } 
+            else 
+            {
+                _log.LogError("AuthenticationService: Error - Failed to send new validation code (Login) : LoginRequestDTO {loginRequestDto}, Device: {deviceUUID}", loginRequestDTO, deviceUUID);
+                return AuthenticationError();
+            }
+        }
+    #endregion
+  }
 }

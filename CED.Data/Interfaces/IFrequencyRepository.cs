@@ -10,8 +10,11 @@ namespace CED.Data.Interfaces
     public interface IFrequencyRepository
     {
         Task<List<Frequency>> GetAllFrequencies();
-        Task<Frequency> GetFrequencyById(int id);
-        Task<List<Frequency>> GetHabitFrequencies(int habitId);
+        Task<Frequency> GetFrequencyById(Guid id);
+        Task<List<Frequency>> GetHabitFrequencies(Guid habitId);
 
+        Task<Frequency> SaveHabitFrequency(int frequencyId, Guid habitId);
+
+        Task<List<Frequency>> ClearHabitFrequencies(Guid habitId);
     }
 }

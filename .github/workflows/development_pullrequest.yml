@@ -1,0 +1,90 @@
+name: Development Pull Request
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    name: Build and Test CED Application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
+      - name: Test
+        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ThresholdType=Method
+      - name: Codecov
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+        run: | 
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          find . -iregex "codecov.*"
+          chmod +x codecov 
+          ./codecov -t ${CODECOV_TOKEN}
+  notification_failure:
+    name: Failure Notification Email
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    needs: build
+    steps:
+      - name: Send Email Failure Notification
+        uses: dawidd6/action-send-mail@v3
+        with: 
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          subject: ${{ github.repository }} develop build failure -- Pull Request
+          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+          from: CED Pipeline Failure
+          body: Github pipeline has failed to run -- Pull Request
+          priority: high
+  discord_failure:
+    name: Failure Notification Discord
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    needs: build
+    steps:
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'PULL REQUEST: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} build has failed.'
+  notification_success:
+    name: Success Notification Email
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    needs: build
+    steps:
+      - name: Send Email Success Notification
+        uses: dawidd6/action-send-mail@v3
+        with: 
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          subject: ${{ github.repository }} develop build succeeded -- Pull Request
+          to: dtatkison@gmail.com, izzybeth.harris@gmail.com
+          from: CED Pipeline Success
+          body: Github pipeline has succeeded -- Pull Request
+          priority: high
+  discord_success:
+    name: Success Notification Discord
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    needs: build
+    steps:
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'PULL REQUEST: DEVELOP - {{ EVENT_PAYLOAD.repository.full_name }} build has succeeded.'

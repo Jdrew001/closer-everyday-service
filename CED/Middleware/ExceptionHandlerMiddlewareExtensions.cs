@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using CED.Models.DTO;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -46,11 +47,12 @@ namespace CED.Middleware
         {
             context.Response.ContentType = "application/json";
             int statusCode = (int)HttpStatusCode.InternalServerError;
-            var result = JsonConvert.SerializeObject(new
+            var result = JsonConvert.SerializeObject(new GenericResponseDTO()
             {
-                code = statusCode,
                 message = exception.Message,
-                status = "FAILURE"
+                status = "FAILURE",
+                data = null,
+                Error = true
             });
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = statusCode;

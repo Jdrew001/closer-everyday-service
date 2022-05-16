@@ -1,4 +1,5 @@
-﻿using CED.Data.Interfaces;
+﻿using System;
+using CED.Data.Interfaces;
 using CED.Models;
 using CED.Models.Core;
 using Microsoft.Extensions.Options;
@@ -21,12 +22,12 @@ namespace CED.Data.Repositories
             throw new System.NotImplementedException();
         }
 
-        public Task<Frequency> GetFrequencyById(int id)
+        public Task<Frequency> GetFrequencyById(Guid id)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<Frequency>> GetHabitFrequencies(int habitId)
+        public async Task<List<Frequency>> GetHabitFrequencies(Guid habitId)
         {
             //GetHabitFrequencies
             List<Frequency> frequencies = new List<Frequency>();
@@ -34,7 +35,40 @@ namespace CED.Data.Repositories
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("HabitId", habitId);
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+            while (drh.Read())
+                frequencies.Add(ReadFrequency(drh));
+
+            return frequencies;
+        }
+
+        public async Task<Frequency> SaveHabitFrequency(int frequencyId, Guid habitId)
+        {
+            Frequency frequency = null;
+            string spName = "SaveHabitFrequency";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
+            command.Parameters.AddWithValue("FrequencyId", frequencyId);
+            using DataReaderHelper drh = await command.ExecuteReaderAsync();
+            while (drh.Read())
+                frequency = ReadFrequency(drh);
+
+            return frequency;
+        }
+
+        public async Task<List<Frequency>> ClearHabitFrequencies(Guid habitId)
+        {
+            List<Frequency> frequencies = new List<Frequency>();
+            string spName = "ClearFrequenciesForHabit";
+            using DataConnectionProvider dcp = CreateConnection();
+            await using var command = dcp.CreateCommand(spName);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("HabitId", habitId.ToString());
+
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())

@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using CED.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using CED.Services.Interfaces;
+using Newtonsoft.Json;
 
 namespace CED.Controllers
 {
@@ -21,36 +22,38 @@ namespace CED.Controllers
                 .Value.FirstOrDefault().Remove(0, 7);
         }
 
-        protected async Task<int> GetUserId()
+        protected async Task<Guid> GetUserId()
         {
             var reqToken = RetrieveToken();
             if (string.IsNullOrEmpty(reqToken))
-                return -1;
+                return Guid.Empty;
 
             var token = await _tokenService.ReadJwtToken(RetrieveToken());
             if (token == null)
-                return -1;
+                return Guid.Empty;
 
-            return Int32.Parse(token.Claims.First(x => x.Type == "uid").Value);
+            return Guid.Parse(token.Claims.First(x => x.Type == "uid").Value);
         }
 
-        protected GenericResponseDTO GenerateErrorResponse(string message, object data)
+        protected GenericResponseDTO GenerateErrorResponse(string message, object data = null)
         {
             return new GenericResponseDTO()
             {
                 message = message,
                 status = "FAILURE",
-                data = data
+                data = data,
+                Error = true
             };
         }
 
-        protected GenericResponseDTO GenerateSuccessResponse(string message, object data)
+        protected GenericResponseDTO GenerateSuccessResponse(string message, object data = null)
         {
             return new GenericResponseDTO()
             {
                 message = message,
                 status = "SUCCESS",
-                data = data
+                data = data,
+                Error = false
             };
         }
     }

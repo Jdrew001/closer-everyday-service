@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace CED.Models.DTO
 {
@@ -12,12 +12,10 @@ namespace CED.Models.DTO
     {
         [Required]
         [MaxLength(256)]
+        [JsonProperty("token")]
         public string Token { get; set; }
 
         [JsonIgnore]
         public string IpAddress { get; set; }
-
-        [JsonIgnore]
-        public string DeviceUUID { get; set; }
     }
 }
