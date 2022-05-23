@@ -53,7 +53,7 @@ namespace CED.Controllers
             }
 
             var response = await _authenticationService.Login(request, deviceUUID);
-            return !response.Error ? Ok(GenerateSuccessResponse("Successfully logged in", response)): Ok(GenerateErrorResponse("Email or password incorrect", response));
+            return !response.Error ? Ok(GenerateSuccessResponse("Successfully logged in", response)): Ok(GenerateErrorResponse("The email or password incorrect", response));
         }
 
         [HttpPost("validateCode")]
