@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CED.Models.Core;
 using CED.Services.Interfaces;
@@ -7,7 +8,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MimeKit;
-
+using moment.net;
+using Newtonsoft.Json;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -54,10 +56,22 @@ namespace CED.Controllers
             return Ok("");
         }
 
-        [HttpGet("environment")]
+        [HttpGet("test")]
         public IActionResult actionResult()
         {
-            return Ok(_hostingEnv.EnvironmentName);
+            var currentDate = DateTime.Parse("05/23/2022", System.Globalization.CultureInfo.InvariantCulture);
+            var firstDayOfCurrentWeek = currentDate.FirstDateInWeek();
+            
+            return Ok(JsonConvert.SerializeObject(new Week() 
+            {
+                firstDay = firstDayOfCurrentWeek.AddDays(-7.0 * 4).ToShortDateString(),
+                lastDay = firstDayOfCurrentWeek.AddDays((7.0 * 4) + 6).ToShortDateString()
+            }));
         }
+    }
+
+    public class Week {
+        public string firstDay;
+        public string lastDay;
     }
 }
