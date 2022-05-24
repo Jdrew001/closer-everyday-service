@@ -1,3 +1,9 @@
+Initial Request
+{
+	"currentDate": "05/23/2022",
+	"limit": 9
+}
+
 Request for swiping
 {
 	"limit": 9,
