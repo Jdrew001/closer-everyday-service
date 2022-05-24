@@ -41,7 +41,7 @@ namespace CED.Services.Core
             var habits = await _habitRepository.GetAllUserHabits(userId, date);
             habits.ForEach(async o =>
             {
-                o.Frequencies = await _frequencyService.GetHabitFrequencies(o.Id);
+                o.Frequency = await _frequencyService.GetHabitFrequency(o.Id);
                 o.friendHabits = await _friendService.GetFriendsForHabit(o.Id);
                 o.habitLog = await GetHabitLogByIdDate(o.Id, date);
             });

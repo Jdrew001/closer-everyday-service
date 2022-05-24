@@ -39,33 +39,6 @@ CREATE TABLE `ceddb`.`frequency_day` (
   `frequency_id` INT NOT NULL,
   PRIMARY KEY (`idfrequency_day`));
 
-ALTER TABLE `ceddb`.`frequency_day` 
-ADD INDEX `frequency_day_idx` (`frequency_id` ASC) VISIBLE,
-ADD INDEX `day_freq_idx` (`day_id` ASC) VISIBLE;
-;
-ALTER TABLE `ceddb`.`frequency_day` 
-ADD CONSTRAINT `frequency_day`
-  FOREIGN KEY (`frequency_id`)
-  REFERENCES `ceddb`.`frequency` (`idfrequency`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION,
-ADD CONSTRAINT `day_freq`
-  FOREIGN KEY (`day_id`)
-  REFERENCES `ceddb`.`day` (`idDay`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
-
-ALTER TABLE `ceddb`.`frequency` 
-ADD COLUMN `frequency_type` INT NOT NULL AFTER `frequency_val`,
-ADD INDEX `freq_type_idx` (`frequency_type` ASC) VISIBLE;
-;
-ALTER TABLE `ceddb`.`frequency` 
-ADD CONSTRAINT `freq_type`
-  FOREIGN KEY (`frequency_type`)
-  REFERENCES `ceddb`.`frequency_type` (`idfrequency_type`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
-
 
 ALTER TABLE `ceddb`.`day` 
 ADD COLUMN `detail` VARCHAR(45) NOT NULL AFTER `value`;
@@ -151,3 +124,28 @@ INSERT INTO `ceddb`.`schedule_type`
 (`idschedule_type`, `schedule_value`)
 VALUES
 (4, "Evening");
+
+
+ALTER TABLE `ceddb`.`frequency_type` 
+CHANGE COLUMN `freq_type` `value` VARCHAR(45) NOT NULL ;
+
+ALTER TABLE `ceddb`.`frequency_day` 
+DROP FOREIGN KEY `frequency_day`;
+ALTER TABLE `ceddb`.`frequency_day` 
+DROP INDEX `frequency_day_idx` ;
+;
+
+ALTER TABLE `ceddb`.`frequency` 
+CHANGE COLUMN `idfrequency` `idfrequency` VARCHAR(255) NOT NULL ;
+
+ALTER TABLE `ceddb`.`frequency_day` 
+CHANGE COLUMN `frequency_id` `frequency_id` VARCHAR(255) NOT NULL ,
+ADD INDEX `freq_day_idx` (`frequency_id` ASC) VISIBLE;
+;
+ALTER TABLE `ceddb`.`frequency_day` 
+ADD CONSTRAINT `freq_day`
+  FOREIGN KEY (`frequency_id`)
+  REFERENCES `ceddb`.`frequency` (`frequency_type`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
