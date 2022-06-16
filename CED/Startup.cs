@@ -21,6 +21,8 @@ using CED.Models.Utils;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using FluentMigrator.Runner;
+using System.Reflection;
 
 namespace CED
 {
@@ -42,6 +44,14 @@ namespace CED
             services.Configure<JwtToken>(options => Configuration.GetSection("JwtToken").Bind(options));
             services.Configure<MailServerConfig>(options => Configuration.GetSection("MailServerConfig").Bind(options));
             services.Configure<SendGridConfig>(options => Configuration.GetSection("SendGridConfig").Bind(options));
+            var connectionStrings = Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
+
+            services.AddFluentMigratorCore()
+                .ConfigureRunner(c => 
+                c.AddMySql5()
+                .WithGlobalConnectionString(connectionStrings.CEDDB)
+                .ScanIn(Assembly.Load("CED.Data")).For.Migrations())
+                .AddLogging(config => config.AddFluentMigratorConsole());
 
             services.AddSingleton<MailServerConfig>(
                 x => x.GetRequiredService<IOptions<MailServerConfig>>().Value);
@@ -49,7 +59,7 @@ namespace CED
             services.AddSingleton<SendGridConfig>(
                 x => x.GetRequiredService<IOptions<SendGridConfig>>().Value);
 
-            var connectionStrings = Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
+            
             var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -141,6 +151,10 @@ namespace CED
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
             });
+
+            using var scope = app.ApplicationServices.CreateScope();
+            var migrator = scope.ServiceProvider.GetService<IMigrationRunner>();
+            migrator.MigrateUp();
         }
     }
 }
