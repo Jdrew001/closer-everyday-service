@@ -1,15 +1,16 @@
-DROP PROCEDURE IF EXISTS GetHabitFrequencies;
+DROP PROCEDURE IF EXISTS GetHabitFrequency;
 
 DELIMITER //
 
-CREATE PROCEDURE GetHabitFrequencies(
+CREATE PROCEDURE GetHabitFrequency(
 	IN
     HabitId VARCHAR(255)
 )
 BEGIN
     SELECT
 		idfrequency,
-		frequency_val as "frequency"
+		frequency_val as "frequency",
+        frequency_type as "frequencyType"
 	FROM `ceddb`.`frequency` f
 	INNER JOIN habit_frequency hf ON hf.frequency_id = f.idfrequency
     WHERE hf.freq_habit_id=HabitId;
@@ -52,7 +53,6 @@ CREATE PROCEDURE ClearFrequenciesForHabit(
     HabitId VARCHAR(255)
 )
 BEGIN
-	DELETE from habit_frequency hf WHERE hf.freq_habit_id = HabitId;
     
      SELECT
 		f.idfrequency,

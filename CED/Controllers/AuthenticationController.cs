@@ -44,15 +44,15 @@ namespace CED.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDTO request, [FromHeader] DeviceDTO device)
         {
-            request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            string deviceUUID = device.UUID;
+            // request.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
+            // string deviceUUID = device.UUID;
 
-            if (deviceUUID == null || deviceUUID.Equals(""))
-            {
-                return BadRequest("DEVICE NOT FOUND");
-            }
+            // if (deviceUUID == null || deviceUUID.Equals(""))
+            // {
+            //     return BadRequest("DEVICE NOT FOUND");
+            // }
 
-            var response = await _authenticationService.Login(request, deviceUUID);
+            var response = await _authenticationService.Login(request, "0f3c26ed36fbd3ce");
             return !response.Error ? Ok(GenerateSuccessResponse("Successfully logged in", response)): Ok(GenerateErrorResponse("Email or password incorrect", response));
         }
 

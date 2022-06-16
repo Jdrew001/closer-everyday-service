@@ -162,6 +162,18 @@ namespace CED.Controllers
         }
         #endregion
 
+        [HttpPost("initialStatDashboardGraph")]
+        public async Task<IActionResult> FetchInitialStatsDashboard(InitDashboardGraphDTO dto) 
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpPost("swipeStatDashboardGraph")]
+        public async Task<IActionResult> FetchSwipeStatsDashboard(SwipeDashboardGraphDTO dto) 
+        {
+            throw new NotImplementedException();
+        }
+
         private UpdateHabitLogDTO MapHabitLogDto(HabitLog log)
         {
             return new UpdateHabitLogDTO()

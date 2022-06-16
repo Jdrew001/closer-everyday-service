@@ -10,5 +10,9 @@ namespace CED.Models.Core
     {
         public int Id { get; set; }
         public string Value { get; set; }
+
+        public FrequencyType FrequencyType { get; set; }
+
+        public List<Day> Days { get; set; }
     }
 }

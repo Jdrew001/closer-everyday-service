@@ -36,7 +36,7 @@ namespace CED.Data.Repositories
             while (drh.Read())
             {
                 var habit = ReadHabit(drh);
-                habit.Frequencies = await _frequencyRepository.GetHabitFrequencies(habit.Id);
+                habit.Frequency = await _frequencyRepository.GetHabitFrequency(habit.Id);
                 habits.Add(habit);
             }
 
@@ -76,7 +76,7 @@ namespace CED.Data.Repositories
             while (drh.Read())
             {
                 habit = ReadHabit(drh);
-                habit.Frequencies = await _frequencyRepository.GetHabitFrequencies(habit.Id);
+                habit.Frequency = await _frequencyRepository.GetHabitFrequency(habit.Id);
             }
 
             return habit;

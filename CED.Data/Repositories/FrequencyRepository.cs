@@ -27,11 +27,11 @@ namespace CED.Data.Repositories
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<Frequency>> GetHabitFrequencies(Guid habitId)
+        // TODO: COMPLETED
+        public async Task<Frequency> GetHabitFrequency(Guid habitId)
         {
-            //GetHabitFrequencies
-            List<Frequency> frequencies = new List<Frequency>();
-            string spName = "GetHabitFrequencies";
+            Frequency frequency = null;
+            string spName = "GetHabitFrequency";
             using DataConnectionProvider dcp = CreateConnection();
             await using var command = dcp.CreateCommand(spName);
             command.CommandType = CommandType.StoredProcedure;
@@ -39,11 +39,12 @@ namespace CED.Data.Repositories
             using DataReaderHelper drh = await command.ExecuteReaderAsync();
 
             while (drh.Read())
-                frequencies.Add(ReadFrequency(drh));
+                frequency = ReadFrequency(drh);
 
-            return frequencies;
+            return frequency;
         }
 
+        // TODO:
         public async Task<Frequency> SaveHabitFrequency(int frequencyId, Guid habitId)
         {
             Frequency frequency = null;
@@ -79,10 +80,17 @@ namespace CED.Data.Repositories
 
         private Frequency ReadFrequency(DataReaderHelper drh)
         {
+
             return new Frequency()
             {
                 Id = drh.Get<int>("idfrequency"),
-                Value = drh.Get<string>("frequency")
+                Value = drh.Get<string>("frequency"),
+                // get frequency type
+                FrequencyType = new FrequencyType()
+                {
+                    Id = drh.Get<int>("frequencyTypeId"),
+                    Value = drh.Get<string>("habitFrequency")
+                }
             };
         }
     }

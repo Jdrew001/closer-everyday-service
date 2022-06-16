@@ -27,9 +27,9 @@ namespace CED.Services.Core
             return await _frequencyRepository.GetFrequencyById(id);
         }
 
-        public async Task<List<Frequency>> GetHabitFrequencies(Guid habitId)
+        public async Task<Frequency> GetHabitFrequency(Guid habitId)
         {
-            return await _frequencyRepository.GetHabitFrequencies(habitId);
+            return await _frequencyRepository.GetHabitFrequency(habitId);
         }
 
         public async Task<List<Frequency>> SaveHabitFrequencies(List<Frequency> frequencies, Guid habitId)
