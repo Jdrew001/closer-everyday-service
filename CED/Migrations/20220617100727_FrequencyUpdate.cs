@@ -3,7 +3,8 @@ using FluentMigrator;
 
 namespace CED
 {
-  [Migration(202206171007271)]
+  [Migration(2022061710072710)]
+  [Profile("Development")]
   public class FrequencyUpdate : Migration
   {
     public override void Up()

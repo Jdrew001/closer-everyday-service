@@ -2,7 +2,8 @@ using FluentMigrator;
 
 namespace CED
 {
-  [Migration(20220617123547)]
+  [Migration(202206171235470)]
+  [Profile("Development")]
   public class ReferenceDataInsert : Migration
   {
     public override void Up()
