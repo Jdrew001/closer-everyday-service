@@ -7,7 +7,7 @@ namespace CED
   {
     public override void Up()
     {
-      Execute.Script(@"Scripts\20220617154418_test.sql");
+      Execute.Script(@"Scripts/20220617154418_test.sql");
     }
 
     public override void Down()
