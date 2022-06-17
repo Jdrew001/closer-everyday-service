@@ -3,7 +3,7 @@ using System;
 
 namespace CED
 {
-  [Migration(202206171250360)]
+  [Migration(20220617125036)]
   [Profile("Local")]
   public class SeedHabitData : Migration
   {
