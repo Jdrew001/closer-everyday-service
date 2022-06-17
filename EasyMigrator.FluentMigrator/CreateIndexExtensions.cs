@@ -30,7 +30,7 @@ namespace EasyMigrator
           FluentMigrator.Builders.Create.Index.ICreateIndexOptionsSyntax WithOptions();
         }
 
-    public interface ICreateIndexOnColumnSyntax
+        public interface ICreateIndexOnColumnSyntax
         {
             ICreateIndexOptionsSyntax OnColumns<TTable>(params Expression<Func<TTable, object>>[] columns);
             ICreateIndexOptionsSyntax OnColumns<TTable>(params IndexColumn<TTable>[] columns);

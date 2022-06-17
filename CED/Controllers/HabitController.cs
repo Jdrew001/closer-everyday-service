@@ -33,8 +33,8 @@ namespace CED.Controllers
         }
 
         #region GET Methods
-        [HttpGet("getAllUserHabits/{date}")]
-        public async Task<IActionResult> GetAllUserHabits(DateTime date)
+        [HttpGet("getAllUserHabits")]
+        public async Task<IActionResult> GetAllUserHabits()
         {
 
             var userId = await GetUserId();
@@ -43,7 +43,8 @@ namespace CED.Controllers
                 return Unauthorized(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
             }
 
-            var habits = await _habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
+            // var habits = await _habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
+            var habits = await _habitService.GetAllUserHabits(userId);
             var habitDtos = _mapper.Map<List<Habit>, List<HabitDTO>>(habits);
             return Ok(GenerateSuccessResponse("Success", habitDtos));
         }
@@ -70,7 +71,8 @@ namespace CED.Controllers
                 return Unauthorized(GenerateErrorResponse(AppConstants.GENERIC_ERROR, null));
             }
 
-            var habits = await _habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
+            //var habits = await _habitService.GetAllUserHabits(userId, date.ToString("yyyy-MM-dd H:mm:ss"));
+            var habits = await _habitService.GetAllUserHabits(userId);
             if (habits != null)
             {
                 // Get all ids for habits where habit log is null

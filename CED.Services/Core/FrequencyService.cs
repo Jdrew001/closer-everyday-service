@@ -17,36 +17,27 @@ namespace CED.Services.Core
         {
             _frequencyRepository = frequencyRepository;
         }
-        public async Task<List<Frequency>> GetAllFrequencies()
-        {
-            return await _frequencyRepository.GetAllFrequencies();
-        }
-
-        public async Task<Frequency> GetFrequencyById(Guid id)
-        {
-            return await _frequencyRepository.GetFrequencyById(id);
-        }
 
         public async Task<Frequency> GetHabitFrequency(Guid habitId)
         {
-            return await _frequencyRepository.GetHabitFrequency(habitId);
+            Frequency frequency =  await _frequencyRepository.GetHabitFrequency(habitId);
+            frequency.Days = await GetFrequencyDays(frequency.Id);
+            return frequency;
         }
 
-        public async Task<List<Frequency>> SaveHabitFrequencies(List<Frequency> frequencies, Guid habitId)
+        public async Task<Frequency> SaveHabitFrequency(Frequency frequency, Guid habitId)
         {
-            var savedFrequencies = new List<Frequency>();
-            for (int i = 0; i < frequencies.Count; i++)
-            {
-                var freq = await _frequencyRepository.SaveHabitFrequency(frequencies[i].Id, habitId);
-                savedFrequencies.Add(freq);
-            }
-
-            return savedFrequencies;
+            return await _frequencyRepository.SaveHabitFrequency(frequency.Id, habitId);
         }
 
-        public async Task<List<Frequency>> ClearHabitFrequencies(Guid habitId)
+        public async Task<Frequency> ClearHabitFrequency(Guid habitId)
         {
-            return await _frequencyRepository.ClearHabitFrequencies(habitId);
+            return await _frequencyRepository.ClearHabitFrequency(habitId);
+        }
+
+        public async Task<List<Day>> GetFrequencyDays(Guid frequencyId)
+        {
+            return await _frequencyRepository.GetFrequencyDays(frequencyId);
         }
     }
 }

@@ -9,10 +9,9 @@ namespace CED.Services.Interfaces
 {
     public interface IFrequencyService
     {
-        public Task<List<Frequency>> GetAllFrequencies();
-        public Task<Frequency> GetFrequencyById(Guid id);
         public Task<Frequency> GetHabitFrequency(Guid habitId);
-        public Task<List<Frequency>> SaveHabitFrequencies(List<Frequency> frequencies, Guid habitId);
-        public Task<List<Frequency>> ClearHabitFrequencies(Guid habitId);
+        public Task<Frequency> SaveHabitFrequency(Frequency frequency, Guid habitId);
+        public Task<Frequency> ClearHabitFrequency(Guid habitId);
+        public Task<List<Day>> GetFrequencyDays(Guid frequencyId);
     }
 }

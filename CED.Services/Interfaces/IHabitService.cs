@@ -11,7 +11,7 @@ namespace CED.Services.Interfaces
     public interface IHabitService
     {
         Task<List<Habit>> GetAllHabits();
-        Task<List<Habit>> GetAllUserHabits(Guid userId, string date);
+        Task<List<Habit>> GetAllUserHabits(Guid userId);
         Task<Habit> GetHabitById(Guid id);
         Task<HabitLog> GetHabitLogByIdDate(Guid id, string date);
         Task<HabitLog> GetHabitLog(Guid id);
