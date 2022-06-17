@@ -1,3 +1,4 @@
+using CED.Data;
 using FluentMigrator;
 
 namespace CED
