@@ -5,7 +5,6 @@ using System;
 namespace CED
 {
   [Migration(202206171607510)]
-  [Profile("Development")]
   public class SeedDataForDevelopment : Migration
   {
     public override void Up()
