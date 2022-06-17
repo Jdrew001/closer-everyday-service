@@ -9,16 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Scripts\20220617154418_test.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Scripts\20220617154418_test.sql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="migrations.json" />
   </ItemGroup>
   
@@ -80,6 +70,9 @@
     </None>
     <None Update="Scripts\06172022_InitDB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Scripts\20220617154418_test.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Templates\RegisterCode.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
