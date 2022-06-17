@@ -18,7 +18,6 @@ namespace CED
 
 
       Alter.Table("habit").AlterColumn("reminderAt").AsDateTime().Nullable();
-      Delete.Column("frequency_val").FromTable("frequency");
 
       Insert.IntoTable("habit")
         .Row(new
