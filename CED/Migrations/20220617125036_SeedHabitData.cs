@@ -1,7 +1,7 @@
 using FluentMigrator;
 using System;
 
-namespace CED.Data
+namespace CED
 {
   [Migration(202206171250360)]
   [Profile("Local")]

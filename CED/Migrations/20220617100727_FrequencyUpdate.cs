@@ -1,6 +1,6 @@
 using FluentMigrator;
 
-namespace CED.Data
+namespace CED
 {
   [Migration(202206171007271)]
   public class FrequencyUpdate : Migration

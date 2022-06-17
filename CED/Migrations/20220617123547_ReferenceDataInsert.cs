@@ -1,6 +1,6 @@
 using FluentMigrator;
 
-namespace CED.Data
+namespace CED
 {
   [Migration(20220617123547)]
   public class ReferenceDataInsert : Migration
