@@ -71,9 +71,6 @@
     <None Update="Scripts\06172022_InitDB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\20220617154418_test.sql">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Templates\RegisterCode.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

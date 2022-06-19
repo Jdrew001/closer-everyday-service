@@ -339,11 +339,11 @@ namespace CED.Data.Repositories
     {
       return new HabitLog()
       {
-        Id = new Guid(drh.Get<string>("id")),
-        Value = drh.Get<char>("value"),
-        UserId = new Guid(drh.Get<string>("userId")),
-        HabitId = new Guid(drh.Get<string>("habitId")),
-        CreatedAt = drh.Get<DateTime>("createdAt")
+        Id = new Guid(drh.Get<string>("idhabit_log")),
+        Value = drh.Get<char>("log_value"),
+        UserId = new Guid(drh.Get<string>("user_id")),
+        HabitId = new Guid(drh.Get<string>("habit_id")),
+        CreatedAt = drh.Get<DateTime>("created_at")
       };
     }
     #endregion
