@@ -1,8 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="migrations.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="migrations.json" />
+  </ItemGroup>
   
 
   <ItemGroup>
@@ -57,6 +65,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Scripts\20220617151728_InitDevelopmentStoredProcs.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Scripts\06172022_InitDB.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\RegisterCode.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

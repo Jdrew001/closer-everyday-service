@@ -97,26 +97,11 @@ jobs:
           password: ${{ secrets.PASSWORD }} 
           script: |
             sudo systemctl restart ced.service
-  db_deploy:
-    name: Deploy DB Scripts
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Update Database
-        uses: gtadam/mysql-deploy-action@v1
-        with:
-          DATABASE_HOST: ${{ secrets.REMOTE_HOST }}
-          DATABASE_PORT: '3306'
-          DATABASE_NAME: 'ced_dev'
-          DATABASE_USERNAME: ${{ secrets.MYSQL_USER }}
-          DATABASE_PASSWORD: ${{ secrets.MYSQL_PASS }}
-          DATABASE_SCRIPT: 'script.sql'
   discord_failure:
     name: Failure Notification Discord
     runs-on: ubuntu-latest
     if: ${{ failure() }}
-    needs: [build,publish_upload,deploy,db_deploy]
+    needs: [build,publish_upload,deploy]
     steps:
       - name: Discord notification
         env:
@@ -128,7 +113,7 @@ jobs:
     name: Success Notification Discord
     runs-on: ubuntu-latest
     if: ${{ success() }}
-    needs: [build,publish_upload,deploy,db_deploy]
+    needs: [build,publish_upload,deploy]
     steps:
       - name: Discord notification
         env:

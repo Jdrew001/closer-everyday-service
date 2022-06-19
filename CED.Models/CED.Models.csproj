@@ -43,12 +43,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="EasyMigrator.Core">
-      <HintPath>..\..\EasyMigrator2\EasyMigrator\EasyMigrator.FluentMigrator\bin\Debug\net5.0\EasyMigrator.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="EasyMigrator.FluentMigrator">
-      <HintPath>..\..\EasyMigrator2\EasyMigrator\EasyMigrator.FluentMigrator\bin\Debug\net5.0\EasyMigrator.FluentMigrator.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\EasyMigrator.Core\EasyMigrator.Core.csproj" />
+    <ProjectReference Include="..\EasyMigrator.FluentMigrator\EasyMigrator.FluentMigrator.csproj" />
   </ItemGroup>
 
 </Project>

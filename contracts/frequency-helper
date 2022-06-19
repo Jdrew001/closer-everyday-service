@@ -1,0 +1,17 @@
+When frequency = 2
+habit frequency = day
+
+THis reads, "every 2 days"
+
+----------
+if habit freq = week
+
+"Every 2 weeks", need to specify on what day so a day needs to be added
+---------
+
+Every month??
+Same day each month
+
+-------------------
+every 2 years on the current date
+

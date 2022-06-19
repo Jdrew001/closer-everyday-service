@@ -18,9 +18,9 @@ namespace CED.Models.DTO
         public string Description { get; set; }
         public string Status { get; set; }
         public HabitType HabitType { get; set; }
-        public Schedule Schedule { get; set; }
+        public Schedule Schedule { get; set; } // TODO: DTOs!!
         public Guid UserId { get; set; }
-        public List<Frequency> Frequencies { get; set; }
+        public Frequency Frequency { get; set; }
         public List<FriendHabit> friendHabits { get; set; }
         public HabitLog habitLog { get; set; }
     }

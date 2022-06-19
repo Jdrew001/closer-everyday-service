@@ -8,7 +8,7 @@ namespace CED.Data.Interfaces
     public interface IHabitRepository
     {
         Task<List<Habit>> GetAllHabits();
-        Task<List<Habit>> GetAllUserHabits(Guid userId, string date);
+        Task<List<Habit>> GetAllUserHabits(Guid userId);
         Task<Habit> GetHabitById(Guid id);
         Task<List<FriendHabit>> GetFriendHabits(Guid habitId);
         Task<HabitLog> GetHabitLogById(Guid id);

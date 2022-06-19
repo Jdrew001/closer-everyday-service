@@ -1,0 +1,1118 @@
+--  Init script for all store procs
+
+
+DROP PROCEDURE IF EXISTS `ActivateDevice`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `ActivateDevice`(
+	IN
+    UUID VARCHAR(100)
+)
+BEGIN
+	SET @id = (SELECT de.iddevice FROM `ced_dev`.`device` de
+				WHERE de.uuid = UUID);
+                
+	UPDATE `ced_dev`.`device` SET `active` = true WHERE @id = `ced_dev`.`device`.`iddevice`;  
+    
+    SELECT * FROM `ced_dev`.`device` de
+    WHERE de.uuid = UUID;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `AddHabitLog`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `AddHabitLog`(
+	IN
+    HabitId VARCHAR(255),
+    UserId VARCHAR(255),
+    `Value` CHAR(1)
+)
+BEGIN
+	SET @id = UUID();
+    
+    INSERT INTO `ced_dev`.`habit_log`
+		(`idhabit_log`,
+        `log_value`,
+		`user_id`,
+		`habit_id`)
+	VALUES
+		(@id,
+        `Value`,
+		UserId,
+		HabitId);
+        
+	SELECT 
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+    FROM `ced_dev`.`habit_log` hl WHERE hl.`idhabit_log`=@id;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `CheckForTokenInBlacklist`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `CheckForTokenInBlacklist`(
+	IN 
+		appToken LONGTEXT
+)
+BEGIN
+
+	select * from `blacklisted_token` bt
+    where bt.token = appToken;
+
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `ClearFrequenciesForHabit`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `ClearFrequenciesForHabit`(
+	IN
+    HabitId VARCHAR(255)
+)
+BEGIN
+	DELETE from habit_frequency hf WHERE hf.freq_habit_id = HabitId;
+    
+     SELECT
+		f.idfrequency,
+        f.frequency_val AS "frequency"
+	FROM `ceddb`.`frequency` f
+    JOIN habit_frequency h ON f.idfrequency = h.frequency_id
+    WHERE h.freq_habit_id=HabitId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `ClearFriendHabit`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `ClearFriendHabit`(
+	IN
+    FriendId VARCHAR(255),
+    HabitId VARCHAR(255),
+    OwnerId VARCHAR(255)
+)
+BEGIN
+	DELETE from friend_habit fh WHERE
+    fh.friendId = FriendId AND 
+    fh.habitId = HabitId AND 
+    fh.ownerId = OwnerId;
+    
+    SELECT * FROM `ceddb`.`friend_habit` fh WHERE
+    fh.friendId = FriendId AND 
+    fh.habitId = HabitId AND 
+    fh.ownerId = OwnerId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `ConfirmNewUser`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `ConfirmNewUser`(
+	IN Email VARCHAR(255)
+)
+BEGIN
+	SET @id = (SELECT u.iduser FROM `ced_dev`.`user` u
+		WHERE u.email=Email);
+        
+	UPDATE `ced_dev`.`user` u SET
+		u.`confirmed`= true
+	WHERE u.iduser = @id;
+
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ced_dev`.`user` u
+    WHERE u.iduser = @id;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `CreateAuthCode`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `CreateAuthCode`(
+	IN
+    AuthCode VARCHAR(45),
+    UserId VARCHAR(255)
+)
+BEGIN
+SET @id = UUID();
+
+
+DELETE from `ced_dev`.`auth_code` WHERE `user_id` = UserId;
+
+INSERT INTO `ced_dev`.`auth_code`
+(`idauth_code`, `code`,`user_id`)
+	VALUES(@id, AuthCode, UserId);
+    
+SELECT * from `ced_dev`.`auth_code` ac
+WHERE ac.`idauth_code` = @id;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `CreateHabit`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `CreateHabit`(
+	IN
+    `Name` VARCHAR(145),
+    Icon BLOB,
+    Reminder TINYINT,
+    ReminderAt DateTime,
+    VisibleToFriends TINYINT,
+    Description VARCHAR(100),
+    UserId VARCHAR(255),
+    ScheduleId VARCHAR(255),
+    HabitTypeId INT,
+    CreatedAt DateTime,
+    ActiveInd char(1)
+)
+BEGIN
+	SET @id = UUID();
+
+	INSERT INTO `ceddb`.`habit` (`idhabit`, `name`, `icon`, `reminder`, `reminderAt`, `visibleToFriends`, `description`, `status`, `userId`, `scheduleId`, `habitTypeId`, `createdAt`, `active_ind`)
+	VALUES(@id, Name, Icon, Reminder, ReminderAt, VisibleToFriends, Description, 'P', UserId, ScheduleId, HabitTypeId, CreatedAt, ActiveInd);
+    
+    SELECT
+		h.idhabit,
+		h.name,
+		h.icon,
+		h.reminder,
+		h.reminderAt,
+		h.visibleToFriends,
+		h.description,
+		h.status,
+		h.userId,
+		h.createdAt,
+		h.active_ind,
+		s.idSchedule,
+		s.schedule_time,
+		st.idschedule_type,
+		st.schedule_value as "scheduleType",
+		ht.habitTypeId,
+		ht.habitTypeValue as "habitType",
+		ht.description as "habitTypeDescription"
+    FROM `ceddb`.`habit` h
+    JOIN Schedule s ON h.scheduleId=s.idschedule
+	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
+	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId
+    WHERE h.idhabit = @id;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `CreateNewDevice`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `CreateNewDevice`(
+	IN
+    DeviceGUID VARCHAR(100),
+    DeviceModel VARCHAR(100),
+    DevicePlatform VARCHAR(100),
+    Manufacturer VARCHAR(100),
+    UserId INT
+)
+BEGIN
+	INSERT INTO `ced_dev`.`device`
+	(`model`,`platform`,`uuid`,`manufacturer`, `user_id`)
+		VALUES(DeviceModel, DevicePlatform, DeviceGUID, Manufacturer, UserId);
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `CreateUserDevice`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `CreateUserDevice`(
+	IN
+    UUID VARCHAR(100),
+    Model VARCHAR(100),
+    Platform VARCHAR(100),
+    Manufacturer VARCHAR(100),
+    UserId VARCHAR(255)
+)
+BEGIN
+	SET @id = UUID();
+	INSERT INTO `ced_dev`.`device`
+	(`iddevice`, `model`,`platform`,`uuid`,`manufacturer`, `user_id`, `active`)
+		VALUES(@id, Model, Platform, UUID, Manufacturer, UserId, true);
+        
+	SELECT * FROM `ced_dev`.`device` d WHERE d.`iddevice`=@id;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `DeactiveateDevice`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `DeactiveateDevice`(
+	IN
+    UUID VARCHAR(100)
+)
+BEGIN
+	SET @id = (SELECT de.iddevice FROM `ced_dev`.`device` de
+				WHERE de.uuid = UUID);
+                
+	UPDATE `ced_dev`.`device` SET `active` = false WHERE @id = `ced_dev`.`device`.`iddevice`;  
+    
+    SELECT * FROM `ced_dev`.`device` de
+    WHERE de.uuid = DeviceUUID;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `DeleteAuthCode`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `DeleteAuthCode`(
+	IN
+    Email VARCHAR(255)
+)
+BEGIN
+
+set @id = (select u.iduser from user u where u.email=Email);
+
+DELETE FROM `ced_dev`.`auth_code` ac
+WHERE ac.`user_id` = @id;
+
+SELECT * from `ced_dev`.`auth_code` authcode
+WHERE authcode.`user_id` = @id;
+
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `DeleteRefreshToken`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `DeleteRefreshToken`(
+	IN Token VARCHAR(255)
+)
+BEGIN
+  
+  DELETE FROM `ced_dev`.`refresh_token` re
+  WHERE re.`token` = Token;
+  
+  SELECT * FROM `ced_dev`.`refresh_token` re
+  WHERE re.`token` = Token;
+  
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetAllHabits`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetAllHabits`()
+BEGIN
+    SELECT 
+		h.idhabit,
+		h.name,
+		h.icon,
+		h.reminder,
+		h.reminderAt,
+		h.visibleToFriends,
+		h.description,
+		h.status,
+		h.userId,
+		h.createdAt,
+		h.active_ind,
+		s.idSchedule,
+		s.schedule_time,
+		st.idschedule_type,
+		st.schedule_value as "scheduleType",
+		ht.habitTypeId,
+		ht.habitTypeValue as "habitType",
+		ht.description as "habitTypeDescription"
+    FROM habit h 
+	JOIN Schedule s ON h.scheduleId=s.idschedule
+	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
+	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetAllHabitTypes`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetAllHabitTypes`()
+BEGIN
+    SELECT 
+		habitTypeId,
+        habitTypeValue as "value",
+        description
+	FROM `ced_dev`.`habit_type`;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetAllLogsForHabit`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetAllLogsForHabit`(
+	IN
+    HabitId VARCHAR(255)
+)
+BEGIN
+    SELECT hl.`idhabit_log` as `id`,
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+	FROM `ced_dev`.`habit_log` hl
+    WHERE hl.`habit_id` = HabitId
+    ORDER BY hl.created_at ASC;
+
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetAllScheduleTypes`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetAllScheduleTypes`()
+BEGIN
+    SELECT 
+		idschedule_type,
+        schedule_value as "value"
+	FROM `ced_dev`.`schedule_type`;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetAllUserHabits`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetAllUserHabits`(
+	IN
+    UserId VARCHAR(255)
+)
+BEGIN
+    SELECT 
+		h.idhabit,
+		h.name,
+		h.icon,
+		h.reminder,
+		h.reminderAt,
+		h.visibleToFriends,
+		h.description,
+		h.status,
+		h.userId,
+		h.createdAt,
+		h.active_ind,
+		s.idSchedule,
+		s.schedule_time,
+		st.idschedule_type,
+		st.schedule_value as "scheduleType",
+		ht.habitTypeId,
+		ht.habitTypeValue as "habitType",
+		ht.description as "habitTypeDescription"
+    FROM habit h 
+	JOIN Schedule s ON h.scheduleId=s.idschedule
+	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
+	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId
+    WHERE h.userId = UserId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetAuthCodeByEmail`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetAuthCodeByEmail`(
+	IN Email VARCHAR(255)
+)
+BEGIN
+	set @id = (select u.iduser from user u where u.email=Email);
+
+	SELECT * FROM `ced_dev`.`auth_code` ac
+	WHERE ac.`user_id`=@id;
+    
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetAvgSuccessLogsForUser`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetAvgSuccessLogsForUser`(
+	IN
+    UserId VARCHAR(255)
+)
+BEGIN
+	SELECT (
+		(SELECT COUNT(*) FROM HABIT_LOG WHERE user_id = UserId and log_value = 'C') /
+		(SELECT COUNT(*) FROM HABIT_LOG WHERE user_id = UserId) * 100) 
+	AS 'COMPLETED_PERCENTAGE';
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetCompletedLogsForHabit`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetCompletedLogsForHabit`(
+	IN
+    HabitId VARCHAR(255)
+)
+BEGIN
+	select * 
+    from habit_log hl 
+    where hl.habit_id = HabitId AND hl.log_value = "C"
+    ORDER BY hl.created_at ASC, hl.habit_id ASC; 
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetCompletedLogsForUser`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetCompletedLogsForUser`(
+	IN
+    UserId VARCHAR(255)
+)
+BEGIN
+	select * 
+    from habit_log hl 
+    where hl.user_id= UserId AND hl.log_value = "C"
+    ORDER BY hl.created_at ASC, hl.habit_id ASC; 
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetDeviceByUUID`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetDeviceByUUID`(
+	IN
+    UUID VARCHAR(100)
+)
+BEGIN
+	SELECT * FROM `ced_dev`.`device` d
+    WHERE d.uuid = UUID;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetDeviceIdByUUID`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetDeviceIdByUUID`(
+	IN
+    UUID VARCHAR(100)
+)
+BEGIN
+    SELECT de.iddevice FROM `ced_dev`.`device` de
+    WHERE de.uuid = UUID;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetFriendHabits`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetFriendHabits`(
+	IN
+    UserId INT
+)
+BEGIN
+	SELECT * FROM `ced_dev`.`friend_habit` fh
+    WHERE fh.friendId = UserId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetHabitById`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetHabitById`(
+	IN
+    HabitId VARCHAR(255)
+)
+BEGIN
+    SELECT 
+		h.idhabit,
+		h.name,
+		h.icon,
+		h.reminder,
+		h.reminderAt,
+		h.visibleToFriends,
+		h.description,
+		h.status,
+		h.userId,
+		h.createdAt,
+		h.active_ind,
+		s.idSchedule,
+		s.schedule_time,
+		st.idschedule_type,
+		st.schedule_value as "scheduleType",
+		ht.habitTypeId,
+		ht.habitTypeValue as "habitType",
+		ht.description as "habitTypeDescription"
+    FROM habit h 
+	JOIN Schedule s ON h.scheduleId=s.idschedule
+	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
+	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId
+	WHERE h.idhabit = HabitId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetHabitFrequencies`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetHabitFrequencies`(
+	IN
+    HabitId VARCHAR(255)
+)
+BEGIN
+    SELECT
+		idfrequency,
+		frequency_val as "frequency"
+	FROM `ced_dev`.`frequency` f
+	INNER JOIN habit_frequency hf ON hf.frequency_id = f.idfrequency
+    WHERE hf.freq_habit_id=HabitId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetHabitFriends`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetHabitFriends`(
+	IN
+    HabitId VARCHAR(255)
+)
+BEGIN
+    SELECT 
+		fh.idfriend_habit as "id",
+        u.iduser as "friendId",
+        u.firstname as "FirstName",
+        u.lastname as "LastName",
+        u.email as "Email",
+        fh.ownerId
+    FROM `ced_dev`.`friend_habit` fh
+	JOIN User u ON fh.friendId=u.iduser
+	WHERE fh.habitId = HabitId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetHabitLogById`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetHabitLogById`(
+	IN
+    HabitId VARCHAR(255)
+)
+BEGIN
+	SET @id = (SELECT hl.idhabit_log FROM `ced_dev`.`habit_log` hl
+		WHERE hl.habit_id = HabitId);
+
+    SELECT hl.`idhabit_log` as `id`,
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+	FROM `ced_dev`.`habit_log` hl
+    WHERE hl.`idhabit_log` = @id;
+
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetHabitLogByIdAndDate`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetHabitLogByIdAndDate`(
+	IN
+    HabitId VARCHAR(255),
+    DateValue DATETIME
+)
+BEGIN
+	
+    SELECT hl.`idhabit_log` as `id`,
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+	FROM `ced_dev`.`habit_log` hl
+    WHERE Date(hl.`created_at`)=Date(DateValue) AND hl.`habit_id` = HabitId;
+
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetLogsForUser`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetLogsForUser`(
+	IN
+    UserId VARCHAR(255)
+)
+BEGIN
+	SELECT * FROM `ced_dev`.`habit_log` hl
+    WHERE hl.user_id = UserId ORDER BY hl.created_at ASC;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetRefreshToken`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetRefreshToken`(
+	IN Token VARCHAR(256)
+)
+BEGIN
+
+  SELECT * FROM `ced_dev`.`refresh_token` rt
+	WHERE rt.token = Token;
+    
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetScheduleByHabitId`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetScheduleByHabitId`(
+	IN
+    HabitId VARCHAR(255)
+)
+BEGIN
+    SELECT 
+		s.idschedule AS "scheduleId",
+        s.user_id as "userId",
+        s.schedule_time AS "scheduleTime",
+        st.idschedule_type AS "idScheduleType",
+        st.schedule_value AS "scheduleTypeValue"
+    FROM `ced_dev`.`habit` h
+	JOIN `ced_dev`.`Schedule` s ON h.scheduleId=s.idschedule
+    JOIN `ced_dev`.`Schedule_type` st ON s.schedule_type_id=st.idschedule_type
+	WHERE h.idhabit = HabitId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetTemplateByKey`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetTemplateByKey`(
+	IN
+    `Key` VARCHAR(255)
+)
+BEGIN
+	SELECT t.templateId FROM `ced_dev`.`email_template` t
+    WHERE t.`key` = `Key`;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetUserByEmail`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetUserByEmail`(
+	IN Email VARCHAR(256)
+)
+BEGIN
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ced_dev`.`user` u 
+    WHERE u.email = Email;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetUserById`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetUserById`(
+	IN 
+		UserId VARCHAR(255)
+)
+BEGIN
+
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ced_dev`.`user` u
+    WHERE u.iduser = userId;
+
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetUserByRefreshToken`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetUserByRefreshToken`(
+	IN Token VARCHAR(256)
+)
+BEGIN
+
+  SELECT * FROM `ced_dev`.`user` u 
+  WHERE u.iduser = (SELECT userId FROM `ced_dev`.`refresh_token` rt
+	WHERE rt.token = Token);
+    
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `getUserDevices`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `getUserDevices`(
+	IN
+    UserId INT
+)
+BEGIN
+	SELECT * FROM `ced_dev`.`device` d
+    WHERE d.user_id = UserId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetUserFriendHabitStats`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetUserFriendHabitStats`(
+	IN
+    UserId VARCHAR(255)
+)
+BEGIN
+	SELECT (
+		(SELECT COUNT(*) FROM `ced_dev`.friend_habit WHERE user_id = UserId))
+	AS 'FRIEND_STAT';
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetUserRefreshTokenById`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetUserRefreshTokenById`(
+	IN UserId VARCHAR(255)
+)
+BEGIN
+	SELECT re.token, re.expires, re.created, re.isExpired, re.revoked, re.deviceId
+	FROM `ced_dev`.`refresh_token` re 
+    WHERE re.userId = UserId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GetUsersDevices`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `GetUsersDevices`(
+	IN
+    UserId VARCHAR(255)
+)
+BEGIN
+	SELECT * FROM `ced_dev`.`device` d
+    WHERE d.user_id = UserId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `RegisterAccount`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `RegisterAccount`(
+	IN
+    Firstname VARCHAR(100),
+    Lastname VARCHAR(100),
+    Email VARCHAR(265),
+    UserHash BLOB,
+    Salt BLOB,
+    DeviceGUID VARCHAR(100),
+    DeviceModel VARCHAR(100),
+    DevicePlatform VARCHAR(100),
+    Manufacturer VARCHAR(100)
+)
+BEGIN
+SET @id = UUID();
+
+INSERT INTO `ced_dev`.`user`
+(`iduser`, `firstname`,`lastname`,`email`,`passwordSalt`, `locked`, `password`)
+	VALUES(@id, Firstname, Lastname, Email, Salt, false, UserHash);
+    
+call CreateUserDevice(
+	DeviceGUID,
+    DeviceModel,
+    DevicePlatform,
+    Manufacturer,
+    (SELECT `ced_dev`.`user`.`iduser` FROM `ced_dev`.`user` WHERE `ced_dev`.`user`.`iduser`=@id));
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `RevokeToken`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `RevokeToken`(
+	IN 
+		appToken longtext,
+        appTokenExpiry datetime,
+        refreshToken VARCHAR(255)
+)
+BEGIN
+	SET @id = UUID();
+    
+	DELETE FROM `ced_dev`.`refresh_token` re
+	WHERE re.`token` = refreshToken;
+    
+    INSERT INTO `ced_dev`.`blacklisted_token`
+	(`id`, `token`, `expiry`) 
+	VALUES (UUID(), appToken, appTokenExpiry);
+
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `SaveFriendHabit`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `SaveFriendHabit`(
+	IN
+    FriendId VARCHAR(255),
+    HabitId VARCHAR(255),
+    OwnerId VARCHAR(255)
+)
+BEGIN
+	set @id = UUID();
+    INSERT INTO `ced_dev`.`friend_habit` (`idfriend_habit`, `friendId`, `habitId`, `ownerId`)
+	VALUES(@id, FriendId, HabitId, OwnerId);
+    
+    SELECT
+		fh.idfriend_habit AS "id",
+        fh.friendId AS "friendId",
+        u.firstname AS "FirstName",
+        u.lastname AS "LastName",
+        u.email AS "Email",
+        fh.ownerId AS "ownerId"
+	FROM `ced_dev`.`friend_habit` fh
+    JOIN `ced_dev`.`user` u ON fh.friendId = u.iduser
+    WHERE f.idfrequency = FrequencyId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `SaveHabitFrequency`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `SaveHabitFrequency`(
+	IN
+    HabitId VARCHAR(255),
+    FrequencyId INT
+)
+BEGIN
+	set @id = UUID();
+    INSERT INTO `ced_dev`.`habit_frequency` (`idhabit_frequency`, `freq_habit_id`, `frequency_id`)
+	VALUES(@id, HabitId, FrequencyId);
+    
+    SELECT
+		f.idfrequency,
+        f.frequency_val AS "frequency"
+	FROM `ced_dev`.`frequency` f
+    WHERE f.idfrequency = FrequencyId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `SaveRefreshToken`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `SaveRefreshToken`(
+	IN UserId VARCHAR(255), Token VARCHAR(255), IsExpired Boolean, Expires DATETIME, Created DATETIME, Revoked DATETIME, IsRevoked Boolean, DeviceId VARCHAR(255)
+)
+BEGIN
+  INSERT INTO refresh_token(`token`, `expires`, `isExpired`, `created`, `revoked`, `is_revoked`, `userId`, `deviceId`)
+  VALUES(
+	Token, Expires, IsExpired, Created, Revoked, IsRevoked, UserId, DeviceId
+  );
+  
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `SaveSchedule`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `SaveSchedule`(
+	IN
+    ScheduleTypeId INT,
+    UserId VARCHAR(255),
+    ScheduleTime DATETIME
+)
+BEGIN
+	SET @id = UUID();
+    INSERT INTO `ced_dev`.`schedule` (`idschedule`, `schedule_type_id`, `user_id`, `schedule_time`)
+	VALUES(@id, ScheduleTypeId, UserId, ScheduleTime);
+
+    SELECT
+    s.idschedule as "Id",
+    s.schedule_time as "ScheduleTime",
+    st.idschedule_type as "idschedule_type",
+    st.schedule_value as "scheduleType",
+    s.user_id as "UserId"
+    FROM `ced_dev`.`schedule` s
+    INNER JOIN schedule_type st ON st.idschedule_type = schedule_type_id
+    WHERE s.`idschedule`=@id;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `SearchForUser`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `SearchForUser`(
+	IN Param VARCHAR(256)
+)
+BEGIN
+
+  SELECT
+	u.iduser,
+    u.firstname,
+    u.lastname,
+    u.email
+  FROM user u 
+  WHERE u.firstname LIKE CONCAT('%', Param, '%') OR u.lastname LIKE CONCAT('%', Param, '%') OR u.email LIKE CONCAT('%', Param, '%');
+    
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `UpdateHabit`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `UpdateHabit`(
+	IN
+    `Name` VARCHAR(145),
+    Icon BLOB,
+    Reminder TINYINT,
+    ReminderAt DateTime,
+    VisibleToFriends TINYINT,
+    Description VARCHAR(100),
+    UserId VARCHAR(255),
+    ScheduleId VARCHAR(255),
+    HabitTypeId INT,
+    CreatedAt DateTime,
+    ActiveInd char(1),
+    HabitId VARCHAR(255)
+)
+BEGIN
+    UPDATE `ceddb`.`habit` h SET
+		`name`= Name,
+        icon = Icon,
+        reminder = Reminder,
+        reminderAt = ReminderAt,
+        visibleToFriends = VisibleToFriends,
+        description = Description,
+        userid = UserId,
+        scheduleId = ScheduleId,
+        habitTypeId = HabitTypeId,
+        createdAt = CreatedAt,
+        active_ind = ActiveInd
+	WHERE h.idhabit = HabitId;
+    
+    SELECT
+		h.idhabit,
+		h.name,
+		h.icon,
+		h.reminder,
+		h.reminderAt,
+		h.visibleToFriends,
+		h.description,
+		h.status,
+		h.userId,
+		h.createdAt,
+		h.active_ind,
+		s.idSchedule,
+		s.schedule_time,
+		st.idschedule_type,
+		st.schedule_value as "scheduleType",
+		ht.habitTypeId,
+		ht.habitTypeValue as "habitType",
+		ht.description as "habitTypeDescription"
+    FROM `ceddb`.`habit` h
+    JOIN Schedule s ON h.scheduleId=s.idschedule
+	JOIN schedule_type st ON s.schedule_type_id = st.idschedule_type
+	JOIN habit_type ht ON h.habitTypeId = ht.habitTypeId
+    WHERE h.idhabit = HabitId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `UpdateHabitLog`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `UpdateHabitLog`(
+	IN
+    `Value` CHAR(1),
+    HabitId VARCHAR(255),
+    DateValue DATETIME
+)
+BEGIN
+	SET @id = (SELECT hl.idhabit_log FROM `ced_dev`.`habit_log` hl
+		WHERE Date(hl.`created_at`)=Date(DateValue) AND hl.habit_id=HabitId);
+
+	UPDATE `ced_dev`.`habit_log` SET
+		`log_value` = `Value`
+		WHERE `idhabit_log` = @id;
+        
+	select 
+		hl.`log_value` as `value`,
+		hl.`user_id` as `userId`,
+		hl.`habit_id` as `habitId`,
+		hl.`created_at` as `createdAt`
+    from `ced_dev`.`habit_log` hl WHERE Date(hl.`created_at`)=Date(DateValue) AND hl.habit_id=HabitId;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `UpdateSchedule`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `UpdateSchedule`(
+	IN
+    Id VARCHAR(255),
+    ScheduleTypeId INT,
+    UserId VARCHAR(255),
+    ScheduleTime DATETIME
+)
+BEGIN
+    UPDATE `ceddb`.`schedule` s SET
+		`schedule_type_id`= ScheduleTypeId,
+        user_id = UserId,
+        schedule_time = ScheduleTime
+	WHERE s.idschedule = Id;
+    
+    SELECT
+		s.idschedule as "Id",
+		s.schedule_time as "ScheduleTime",
+		st.idschedule_type as "idschedule_type",
+		st.schedule_value as "scheduleType",
+		s.user_id as "UserId"
+    FROM `ceddb`.`schedule` s 
+    INNER JOIN schedule_type st ON st.idschedule_type = schedule_type_id
+    WHERE s.`idschedule`=Id;
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `UpdateUserPassword`;
+
+DELIMITER ;;
+CREATE DEFINER=`dtatkison`@`%` PROCEDURE `UpdateUserPassword`(
+	IN 
+		UserId VARCHAR(255), 
+		UserHash BLOB,
+		Salt BLOB
+)
+BEGIN
+        
+	UPDATE `ced_dev`.`user` u SET
+		u.`passwordSalt`= Salt,
+		u.`password`= UserHash
+	WHERE u.iduser = UserId;
+
+	SELECT u.`iduser`,
+		u.`firstname`,
+		u.`lastname`,
+		u.`email`,
+		u.`passwordSalt`,
+		u.`lastLogin`,
+		u.`locked`,
+		u.`dateLocked`,
+		u.`token`,
+		u.`password`,
+        u.`confirmed`
+	FROM `ced_dev`.`user` u
+    WHERE u.iduser = userId;
+
+END ;;
+DELIMITER ;

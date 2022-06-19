@@ -1,5 +1,5 @@
 {
-  "ConnectionProjectName": "CED.Data",
+  "ConnectionProjectName": "CED",
   "ConnectionName": "CEDDB",
   "FluentMigrationToolPath": "%USERPROFILE%\\.nuget\\packages\\fluentmigrator.console\\3.3.2\\net461\\any\\Migrate.exe",
   "DbProvider": "MySql",

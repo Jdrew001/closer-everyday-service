@@ -1,0 +1,636 @@
+-- MySQL dump 10.13  Distrib 8.0.29, for Win64 (x86_64)
+--
+-- Host: 104.237.137.197    Database: ced_qa
+-- ------------------------------------------------------
+-- Server version	8.0.24
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `auth_code`
+--
+
+DROP TABLE IF EXISTS `auth_code`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `auth_code` (
+  `idauth_code` varchar(255) NOT NULL,
+  `code` varchar(45) NOT NULL,
+  `user_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`idauth_code`),
+  UNIQUE KEY `idauth_code_UNIQUE` (`idauth_code`),
+  KEY `user_id_idx` (`user_id`),
+  CONSTRAINT `user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `blacklisted_token`
+--
+
+DROP TABLE IF EXISTS `blacklisted_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `blacklisted_token` (
+  `id` varchar(255) NOT NULL,
+  `token` longtext NOT NULL,
+  `expiry` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `comment`
+--
+
+DROP TABLE IF EXISTS `comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `comment` (
+  `idcomment` varchar(255) NOT NULL,
+  `comment_value` varchar(360) NOT NULL,
+  `milestone_id` varchar(255) NOT NULL,
+  `user_id` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`idcomment`),
+  UNIQUE KEY `idcomment_UNIQUE` (`idcomment`),
+  UNIQUE KEY `idcomment` (`idcomment`),
+  UNIQUE KEY `idcomment_2` (`idcomment`),
+  UNIQUE KEY `idcomment_3` (`idcomment`),
+  UNIQUE KEY `idcomment_4` (`idcomment`),
+  UNIQUE KEY `idcomment_5` (`idcomment`),
+  UNIQUE KEY `idcomment_6` (`idcomment`),
+  UNIQUE KEY `idcomment_7` (`idcomment`),
+  KEY `milestone_comment_id_idx` (`milestone_id`),
+  KEY `user_comment_id_idx` (`user_id`),
+  CONSTRAINT `milestone_comment_id` FOREIGN KEY (`milestone_id`) REFERENCES `milestone` (`idmilestone`) ON DELETE CASCADE,
+  CONSTRAINT `user_comment_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `device`
+--
+
+DROP TABLE IF EXISTS `device`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `device` (
+  `iddevice` varchar(255) NOT NULL,
+  `model` varchar(45) NOT NULL,
+  `platform` varchar(45) NOT NULL,
+  `uuid` varchar(45) NOT NULL,
+  `manufacturer` varchar(45) NOT NULL,
+  `user_id` varchar(255) NOT NULL,
+  `active` tinyint NOT NULL,
+  PRIMARY KEY (`iddevice`),
+  UNIQUE KEY `iddevice_UNIQUE` (`iddevice`),
+  UNIQUE KEY `iddevice` (`iddevice`),
+  UNIQUE KEY `iddevice_2` (`iddevice`),
+  UNIQUE KEY `iddevice_3` (`iddevice`),
+  UNIQUE KEY `iddevice_4` (`iddevice`),
+  UNIQUE KEY `iddevice_5` (`iddevice`),
+  UNIQUE KEY `iddevice_6` (`iddevice`),
+  UNIQUE KEY `iddevice_7` (`iddevice`),
+  KEY `user_device_id_idx` (`user_id`),
+  CONSTRAINT `user_device_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `email_template`
+--
+
+DROP TABLE IF EXISTS `email_template`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `email_template` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `key` varchar(45) NOT NULL,
+  `templateId` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `frequency`
+--
+
+DROP TABLE IF EXISTS `frequency`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `frequency` (
+  `idfrequency` varchar(255) NOT NULL,
+  `frequency_val` varchar(45) NOT NULL,
+  PRIMARY KEY (`idfrequency`),
+  UNIQUE KEY `idfrequency_UNIQUE` (`idfrequency`),
+  UNIQUE KEY `idfrequency` (`idfrequency`),
+  UNIQUE KEY `idfrequency_2` (`idfrequency`),
+  UNIQUE KEY `idfrequency_3` (`idfrequency`),
+  UNIQUE KEY `idfrequency_4` (`idfrequency`),
+  UNIQUE KEY `idfrequency_5` (`idfrequency`),
+  UNIQUE KEY `idfrequency_6` (`idfrequency`),
+  UNIQUE KEY `idfrequency_7` (`idfrequency`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `friend_habit`
+--
+
+DROP TABLE IF EXISTS `friend_habit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `friend_habit` (
+  `idfriend_habit` varchar(255) NOT NULL,
+  `friendId` varchar(255) NOT NULL,
+  `habitId` varchar(255) NOT NULL,
+  `ownerId` varchar(255) NOT NULL,
+  PRIMARY KEY (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_UNIQUE` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_2` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_3` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_4` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_5` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_6` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_7` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_8` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_9` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_10` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_11` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_12` (`idfriend_habit`),
+  UNIQUE KEY `idfriend_habit_13` (`idfriend_habit`),
+  KEY `friendId_idx` (`friendId`),
+  KEY `owner_id_idx` (`ownerId`),
+  KEY `friend_habit_id_idx` (`habitId`),
+  CONSTRAINT `friend_habit_id` FOREIGN KEY (`habitId`) REFERENCES `habit` (`idhabit`),
+  CONSTRAINT `friend_id` FOREIGN KEY (`friendId`) REFERENCES `user` (`iduser`),
+  CONSTRAINT `owner_id` FOREIGN KEY (`ownerId`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `habit`
+--
+
+DROP TABLE IF EXISTS `habit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `habit` (
+  `idhabit` varchar(255) NOT NULL,
+  `name` varchar(45) NOT NULL,
+  `icon` blob,
+  `reminder` tinyint NOT NULL,
+  `reminderAt` datetime NOT NULL,
+  `visibleToFriends` tinyint NOT NULL,
+  `description` varchar(4000) DEFAULT NULL,
+  `status` char(1) NOT NULL,
+  `userId` varchar(255) NOT NULL,
+  `scheduleId` varchar(255) NOT NULL,
+  `habitTypeId` int NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `active_ind` char(1) NOT NULL,
+  PRIMARY KEY (`idhabit`),
+  UNIQUE KEY `idhabit_UNIQUE` (`idhabit`),
+  UNIQUE KEY `idhabit` (`idhabit`),
+  UNIQUE KEY `idhabit_2` (`idhabit`),
+  UNIQUE KEY `idhabit_3` (`idhabit`),
+  UNIQUE KEY `idhabit_4` (`idhabit`),
+  UNIQUE KEY `idhabit_5` (`idhabit`),
+  UNIQUE KEY `idhabit_6` (`idhabit`),
+  UNIQUE KEY `idhabit_7` (`idhabit`),
+  UNIQUE KEY `idhabit_8` (`idhabit`),
+  UNIQUE KEY `idhabit_9` (`idhabit`),
+  UNIQUE KEY `idhabit_10` (`idhabit`),
+  KEY `habitTypeId_idx` (`habitTypeId`),
+  KEY `habit_schedule_idx` (`scheduleId`),
+  KEY `userId_idx` (`userId`),
+  CONSTRAINT `habitUserId` FOREIGN KEY (`userId`) REFERENCES `user` (`iduser`),
+  CONSTRAINT `schedule_habit_id` FOREIGN KEY (`scheduleId`) REFERENCES `schedule` (`idschedule`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `habit_frequency`
+--
+
+DROP TABLE IF EXISTS `habit_frequency`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `habit_frequency` (
+  `idhabit_frequency` varchar(255) NOT NULL,
+  `freq_habit_id` varchar(255) NOT NULL,
+  `frequency_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_UNIQUE` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_2` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_3` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_4` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_5` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_6` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_7` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_8` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_9` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_10` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_11` (`idhabit_frequency`),
+  UNIQUE KEY `idhabit_frequency_12` (`idhabit_frequency`),
+  KEY `freq_habit_id_idx` (`freq_habit_id`),
+  CONSTRAINT `freq_habit_id` FOREIGN KEY (`freq_habit_id`) REFERENCES `habit` (`idhabit`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `habit_log`
+--
+
+DROP TABLE IF EXISTS `habit_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `habit_log` (
+  `idhabit_log` varchar(255) NOT NULL,
+  `log_value` char(1) NOT NULL,
+  `user_id` varchar(255) NOT NULL,
+  `habit_id` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idhabit_log`),
+  UNIQUE KEY `idhabit_history_UNIQUE` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_2` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_3` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_4` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_5` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_6` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_7` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_8` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_9` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_10` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_11` (`idhabit_log`),
+  UNIQUE KEY `idhabit_log_12` (`idhabit_log`),
+  KEY `history_user_id_idx` (`user_id`),
+  KEY `history_habit_id_idx` (`habit_id`),
+  CONSTRAINT `history_habit_id` FOREIGN KEY (`habit_id`) REFERENCES `habit` (`idhabit`),
+  CONSTRAINT `history_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `habit_type`
+--
+
+DROP TABLE IF EXISTS `habit_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `habit_type` (
+  `habitTypeId` int NOT NULL AUTO_INCREMENT,
+  `habitTypeValue` varchar(45) NOT NULL,
+  `description` varchar(2000) NOT NULL,
+  PRIMARY KEY (`habitTypeId`),
+  UNIQUE KEY `idnew_table_UNIQUE` (`habitTypeId`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `historyhabit`
+--
+
+DROP TABLE IF EXISTS `historyhabit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `historyhabit` (
+  `idhabit` varchar(255) NOT NULL,
+  `name` varchar(45) NOT NULL,
+  `icon` blob,
+  `reminder` tinyint DEFAULT NULL,
+  `reminderAt` datetime DEFAULT NULL,
+  `visibleToFriends` tinyint DEFAULT NULL,
+  `description` varchar(4000) DEFAULT NULL,
+  `status` char(1) NOT NULL,
+  `userId` varchar(255) NOT NULL,
+  `scheduleId` varchar(255) NOT NULL,
+  `habitTypeid` varchar(255) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `active_ind` char(1) NOT NULL,
+  PRIMARY KEY (`idhabit`),
+  UNIQUE KEY `idhabit_UNIQUE` (`idhabit`),
+  UNIQUE KEY `idhabit` (`idhabit`),
+  UNIQUE KEY `userId` (`userId`),
+  UNIQUE KEY `scheduleId` (`scheduleId`),
+  UNIQUE KEY `habitTypeid` (`habitTypeid`),
+  UNIQUE KEY `idhabit_2` (`idhabit`),
+  UNIQUE KEY `idhabit_3` (`idhabit`),
+  UNIQUE KEY `idhabit_4` (`idhabit`),
+  UNIQUE KEY `idhabit_5` (`idhabit`),
+  UNIQUE KEY `idhabit_6` (`idhabit`),
+  UNIQUE KEY `idhabit_7` (`idhabit`),
+  UNIQUE KEY `idhabit_8` (`idhabit`),
+  UNIQUE KEY `idhabit_9` (`idhabit`),
+  UNIQUE KEY `idhabit_10` (`idhabit`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `like`
+--
+
+DROP TABLE IF EXISTS `like`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `like` (
+  `idlike` varchar(255) NOT NULL,
+  `user_id` varchar(255) NOT NULL,
+  `comment_id` varchar(255) NOT NULL,
+  `milestone_id` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`idlike`),
+  UNIQUE KEY `idlike_UNIQUE` (`idlike`),
+  UNIQUE KEY `idlike` (`idlike`),
+  UNIQUE KEY `idlike_2` (`idlike`),
+  UNIQUE KEY `idlike_3` (`idlike`),
+  UNIQUE KEY `idlike_4` (`idlike`),
+  UNIQUE KEY `idlike_5` (`idlike`),
+  UNIQUE KEY `idlike_6` (`idlike`),
+  UNIQUE KEY `idlike_7` (`idlike`),
+  KEY `like_comment_id_idx` (`comment_id`),
+  KEY `like_milestone_id_idx` (`milestone_id`),
+  KEY `like_user_id_idx` (`user_id`),
+  CONSTRAINT `like_comment_id` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`idcomment`),
+  CONSTRAINT `like_milestone_id` FOREIGN KEY (`milestone_id`) REFERENCES `milestone` (`idmilestone`) ON DELETE CASCADE,
+  CONSTRAINT `like_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `milestone`
+--
+
+DROP TABLE IF EXISTS `milestone`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `milestone` (
+  `idmilestone` varchar(255) NOT NULL,
+  `milestone_type_id` int NOT NULL,
+  `user_id` varchar(255) NOT NULL,
+  `habit_id` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`idmilestone`),
+  UNIQUE KEY `idmilestone_UNIQUE` (`idmilestone`),
+  UNIQUE KEY `idmilestone` (`idmilestone`),
+  UNIQUE KEY `idmilestone_2` (`idmilestone`),
+  UNIQUE KEY `idmilestone_3` (`idmilestone`),
+  UNIQUE KEY `idmilestone_4` (`idmilestone`),
+  UNIQUE KEY `idmilestone_5` (`idmilestone`),
+  UNIQUE KEY `idmilestone_6` (`idmilestone`),
+  UNIQUE KEY `idmilestone_7` (`idmilestone`),
+  UNIQUE KEY `idmilestone_8` (`idmilestone`),
+  UNIQUE KEY `idmilestone_9` (`idmilestone`),
+  UNIQUE KEY `idmilestone_10` (`idmilestone`),
+  UNIQUE KEY `idmilestone_11` (`idmilestone`),
+  UNIQUE KEY `idmilestone_12` (`idmilestone`),
+  UNIQUE KEY `idmilestone_13` (`idmilestone`),
+  UNIQUE KEY `idmilestone_14` (`idmilestone`),
+  UNIQUE KEY `idmilestone_15` (`idmilestone`),
+  KEY `milestone_type_id_idx` (`milestone_type_id`),
+  KEY `milestone_user_id_idx` (`user_id`),
+  KEY `milestone_habit_id_idx` (`habit_id`),
+  CONSTRAINT `milestone_habit_id` FOREIGN KEY (`habit_id`) REFERENCES `habit` (`idhabit`),
+  CONSTRAINT `milestone_type_id` FOREIGN KEY (`milestone_type_id`) REFERENCES `milestone_type` (`idmilestone_type`),
+  CONSTRAINT `milestone_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `milestone_type`
+--
+
+DROP TABLE IF EXISTS `milestone_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `milestone_type` (
+  `idmilestone_type` int NOT NULL,
+  `name` varchar(45) NOT NULL,
+  `description` varchar(2000) DEFAULT NULL,
+  PRIMARY KEY (`idmilestone_type`),
+  UNIQUE KEY `idmilestone_type_UNIQUE` (`idmilestone_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `refresh_token`
+--
+
+DROP TABLE IF EXISTS `refresh_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `refresh_token` (
+  `token` varchar(255) NOT NULL,
+  `expires` datetime NOT NULL,
+  `isExpired` tinyint NOT NULL,
+  `created` datetime NOT NULL,
+  `revoked` datetime DEFAULT NULL,
+  `userId` varchar(255) NOT NULL,
+  `is_revoked` tinyint NOT NULL,
+  `deviceId` varchar(255) NOT NULL,
+  PRIMARY KEY (`token`),
+  KEY `user_device_id_idx` (`deviceId`),
+  KEY `userId_idx` (`userId`),
+  CONSTRAINT `token_device_id` FOREIGN KEY (`deviceId`) REFERENCES `device` (`iddevice`),
+  CONSTRAINT `userId` FOREIGN KEY (`userId`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `schedule`
+--
+
+DROP TABLE IF EXISTS `schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `schedule` (
+  `idschedule` varchar(255) NOT NULL,
+  `schedule_type_id` int NOT NULL,
+  `user_id` varchar(255) NOT NULL,
+  `schedule_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`idschedule`),
+  UNIQUE KEY `idschedule_UNIQUE` (`idschedule`),
+  KEY `schedule_type_id_idx` (`schedule_type_id`),
+  KEY `schedule_user_id_idx` (`user_id`),
+  CONSTRAINT `schedule_type_id` FOREIGN KEY (`schedule_type_id`) REFERENCES `schedule_type` (`idschedule_type`),
+  CONSTRAINT `schedule_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `schedule_type`
+--
+
+DROP TABLE IF EXISTS `schedule_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `schedule_type` (
+  `idschedule_type` int NOT NULL AUTO_INCREMENT,
+  `schedule_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`idschedule_type`),
+  UNIQUE KEY `idschedule_type_UNIQUE` (`idschedule_type`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `subscription`
+--
+
+DROP TABLE IF EXISTS `subscription`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `subscription` (
+  `idsubscription` varchar(255) NOT NULL,
+  `subscription_type_id` int NOT NULL,
+  `user_id` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`idsubscription`),
+  UNIQUE KEY `idsubscription_history_UNIQUE` (`idsubscription`),
+  KEY `sub_type_id_idx` (`subscription_type_id`),
+  KEY `sub_user_id_idx` (`user_id`),
+  CONSTRAINT `sub_type_id` FOREIGN KEY (`subscription_type_id`) REFERENCES `subscription_type` (`idsubscription_type`),
+  CONSTRAINT `sub_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `subscription_type`
+--
+
+DROP TABLE IF EXISTS `subscription_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `subscription_type` (
+  `idsubscription_type` int NOT NULL,
+  `subscription_type` varchar(45) NOT NULL,
+  PRIMARY KEY (`idsubscription_type`),
+  UNIQUE KEY `idsubscription_type_UNIQUE` (`idsubscription_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user`
+--
+
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user` (
+  `iduser` varchar(255) NOT NULL,
+  `firstname` varchar(100) DEFAULT NULL,
+  `lastname` varchar(100) DEFAULT NULL,
+  `email` varchar(256) NOT NULL,
+  `passwordSalt` longtext NOT NULL,
+  `lastLogin` datetime DEFAULT NULL,
+  `locked` tinyint DEFAULT NULL,
+  `dateLocked` datetime DEFAULT NULL,
+  `token` longtext,
+  `password` longtext NOT NULL,
+  `confirmed` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`iduser`),
+  UNIQUE KEY `iduser_UNIQUE` (`iduser`),
+  UNIQUE KEY `iduser` (`iduser`),
+  UNIQUE KEY `iduser_2` (`iduser`),
+  UNIQUE KEY `iduser_3` (`iduser`),
+  UNIQUE KEY `iduser_4` (`iduser`),
+  UNIQUE KEY `iduser_5` (`iduser`),
+  UNIQUE KEY `iduser_6` (`iduser`),
+  UNIQUE KEY `iduser_7` (`iduser`),
+  UNIQUE KEY `iduser_8` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user_friends`
+--
+
+DROP TABLE IF EXISTS `user_friends`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_friends` (
+  `iduser_friends` binary(16) NOT NULL,
+  `user_id` varchar(255) NOT NULL,
+  `friend_id` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_UNIQUE` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_2` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_3` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_4` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_5` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_6` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_7` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_8` (`iduser_friends`),
+  UNIQUE KEY `iduser_friends_9` (`iduser_friends`),
+  KEY `friend_user_id_idx` (`user_id`),
+  KEY `user_friend_id_idx` (`friend_id`),
+  CONSTRAINT `friend_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`iduser`),
+  CONSTRAINT `user_friend_id` FOREIGN KEY (`friend_id`) REFERENCES `user` (`iduser`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2022-06-17 15:23:58
+
+
+-- MySQL dump 10.13  Distrib 8.0.29, for Win64 (x86_64)
+--
+-- Host: 104.237.137.197    Database: ced_qa
+-- ------------------------------------------------------
+-- Server version	8.0.24
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES ('770c5bee-d9e1-11ec-9672-f23c92435ec3','Drew','Drew','dtatkison@gmail.com','ZtUpm5t3DUl6pgrPyx3K',NULL,0,NULL,NULL,'0jdiLw0UWyjbF11lMFwqAf3vJZifNTSFN6NYhn+lD7hY+UiC0aS0MRDWW93pPeR8pe9S+a5wfSlN4MoBWvpFkg==',1),('c7d2cb32-d559-11ec-9672-f23c92435ec3','Luke','Luke','nelson.luke16@gmail.com','DgBQaBCzUAHEDeCIIzsX',NULL,0,NULL,NULL,'qbBGazY08SpewXNlzskdBrwedNyzwuKdF4vMtFFzmUrOHDE0ZKbGSzpbCvNUDJijOD24iGoopOkDUxaEHTsV/g==',1),('cb17e5f4-d9df-11ec-9672-f23c92435ec3','Quinn','Quinn','qwink95@gmail.com','iOu7CtXdklOjVQOq+Zcm',NULL,0,NULL,NULL,'LJPWcmjyAqVWX0B6Eu2FxaA81rWCjqebEnYf5FASyTUlZ+sLNJxOnzf2USllgjANICYX4L5j+dOC+cdXBKDKjQ==',1),('e2292cc1-d558-11ec-9672-f23c92435ec3','William','Withers','williamawithers@gmail.com','07plBbHRbxEoFgzJT/tG',NULL,0,NULL,NULL,'c0liVpuaPriL78QXr15PvHFcMb5DQTpR2i7Hwv2CWeGmQwK1obwLPx2OaairHUxR8HoMGFIzYEFvBjszIQxGuQ==',1);
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2022-06-17 15:54:47
+
