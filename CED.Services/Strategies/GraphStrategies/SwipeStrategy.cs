@@ -13,5 +13,17 @@ namespace CED.Services.Strategies.GraphStrategies
 
       return null;
     }
+
+    public override int CalculateWeekMultiple(int index, int startingIndex, int middleIndex, int endingIndex)
+    {
+
+      /*
+        For a give date
+       
+       */
+
+
+      throw new System.NotImplementedException();
+    }
   }
 }

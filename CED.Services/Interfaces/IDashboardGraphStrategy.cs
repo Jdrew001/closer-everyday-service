@@ -10,7 +10,7 @@ namespace CED.Services.Interfaces
 {
   public abstract class IDashboardGraphStrategy
   {
-    private int weekDifference = 7;
+    protected int weekDifference = 7;
     protected string dateSelected;
     protected List<HabitLog> logs;
 
@@ -22,6 +22,8 @@ namespace CED.Services.Interfaces
     /// <param name="logs">Logs for a given user -- should be all habit's logs</param>
     /// <returns>A list of dictionary key values - start and end dates</returns>
     public abstract List<GraphDataResponseDTO> createGraphData<T>(T data, List<HabitLog> logs);
+
+    public abstract int CalculateWeekMultiple(int index, int startingIndex, int middleIndex, int endingIndex);
 
     public List<Dictionary<WeekBoundary, string>> GetWeekBoundaries(string date, int limit)
     {
@@ -43,8 +45,7 @@ namespace CED.Services.Interfaces
 
       for (int i = startingIndex; i < endingIndex; i++)
       {
-        int weekMultiple = weekDifference * (i - middleIndex);
-
+        int weekMultiple = CalculateWeekMultiple(i, startingIndex, middleIndex, endingIndex);
 
         var firstDay = firstDayOfWeek.AddDays(weekMultiple).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
         var lastDay = firstDayOfWeek.AddDays(weekMultiple + 6).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);

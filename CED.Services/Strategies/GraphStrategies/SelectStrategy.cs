@@ -20,5 +20,10 @@ namespace CED.Services.Strategies.GraphStrategies
       var dto = result.ConvertAll(new Converter<Dictionary<WeekBoundary, string>, GraphDataResponseDTO>(ConvertToGraphDataDTO));
       return dto;
     }
+
+    public override int CalculateWeekMultiple(int index, int startingIndex, int middleIndex, int endingIndex)
+    {
+      return weekDifference * (index - middleIndex);
+    }
   }
 }
