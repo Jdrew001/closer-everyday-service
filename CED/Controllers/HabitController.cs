@@ -163,7 +163,7 @@ namespace CED.Controllers
           Ok(GenerateSuccessResponse(null, MapHabitLogDto(result)));
     }
 
-    [HttpPost("getGraphDataForDashboard")]
+    [HttpPost("getSelectedGraphData")]
     public async Task<IActionResult> GetGraphDataForDashboard(DashboardGraphSelectRequest request)
     {
       var userId = Guid.Parse("770c5bee-d9e1-11ec-9672-f23c92435ec3");
@@ -176,13 +176,14 @@ namespace CED.Controllers
 
       return Ok(GenerateSuccessResponse(null, new DashboardGraphDTO()
       {
+        Title = "Weekly Overview",
         Data = data,
         Animation = true,
         Total = data.Count
       }));
     }
 
-    [HttpPost("swipeStatDashboardGraph")]
+    [HttpPost("getSwipedGraphData")]
     public async Task<IActionResult> FetchSwipeStatsDashboard(SwipeDashboardGraphDTO dto)
     {
       var userId = Guid.Parse("770c5bee-d9e1-11ec-9672-f23c92435ec3");
@@ -194,6 +195,7 @@ namespace CED.Controllers
       var data = await _habitService.GetGraphData<SwipeDashboardGraphDTO, SwipeStrategy>(userId, dto);
       return Ok(GenerateSuccessResponse(null, new DashboardGraphDTO()
       {
+        Title = "Weekly Overview",
         Data = data,
         Animation = true,
         Total = data.Count

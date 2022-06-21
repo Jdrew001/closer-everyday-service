@@ -15,5 +15,6 @@ namespace CED.Models.DTO
     public bool Selected { get; set; }
 
     public string DefaultSelected { get; set; }
+    public List<string> Keys => new List<string>() { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
   }
 }

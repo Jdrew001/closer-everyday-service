@@ -43,7 +43,7 @@ namespace CED.Services.Interfaces
       // set the middle point -- ((9 - 1) / 2) = 4
       var middleIndex = ((limit - 1) / 2);
 
-      for (int i = startingIndex; i < endingIndex; i++)
+      for (int i = startingIndex; i <= endingIndex; i++)
       {
         int weekMultiple = CalculateWeekMultiple(i, startingIndex, middleIndex, endingIndex);
 
@@ -78,7 +78,9 @@ namespace CED.Services.Interfaces
       graphDataResponseDTO.EndDate = lastDate;
       graphDataResponseDTO.Selected = selectedDate(startDateObject, endDateObject);
       graphDataResponseDTO.DefaultSelected = graphDataResponseDTO.Selected ? DateTime.Parse(dateSelected, CultureInfo.InvariantCulture).ToString("ddd") : null;
-      graphDataResponseDTO.GraphData = GenerateGraphDTO(filteredLogs, dates);
+
+      // this will created empty data for UI to render. This case is true when there is no logs for user on this date range
+      graphDataResponseDTO.GraphData = filteredLogs.Count == 0 && dates.Count == 0 ? GenerateEmptyData(startDateObject) : GenerateGraphDTO(filteredLogs, dates);
 
       return graphDataResponseDTO;
     }
@@ -105,6 +107,24 @@ namespace CED.Services.Interfaces
           Date = date.ToString("MM/dd/yyyy")
         });
       });
+
+      return graphDataDTOs;
+    }
+
+    private List<GraphDataDTO> GenerateEmptyData(DateTime startDate)
+    {
+      List<GraphDataDTO> graphDataDTOs = new List<GraphDataDTO>();
+
+      for (int i = 0; i < 7; i++)
+      {
+        var date = startDate.AddDays((double)i);
+        graphDataDTOs.Add(new GraphDataDTO()
+        {
+          Key = date.ToString("ddd"),
+          Value = 0,
+          Date = date.ToString("MM/dd/yyyy")
+        });
+      }
 
       return graphDataDTOs;
     }
