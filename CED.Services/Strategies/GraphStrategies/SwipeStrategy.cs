@@ -3,15 +3,30 @@ using CED.Models.DTO;
 using CED.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace CED.Services.Strategies.GraphStrategies
 {
   public class SwipeStrategy : IDashboardGraphStrategy
   {
+    private string boundary = "";
+
     public override List<GraphDataResponseDTO> createGraphData<T>(T data, List<HabitLog> logs)
     {
       var swipeDTO = data as SwipeDashboardGraphDTO;
-      dateSelected = swipeDTO.DateSelected;
+      var date = DateTime.Parse(swipeDTO.DateSelected, CultureInfo.InvariantCulture);
+
+      if (swipeDTO.Boundary.ToUpper() == "START")
+      {
+        dateSelected = date.AddDays(-7).ToString();
+      }
+      else
+      {
+        dateSelected = date.AddDays(7).ToString();
+      }
+
+      boundary = swipeDTO.Boundary;
+      //dateSelected = swipeDTO.DateSelected;
       this.logs = logs;
 
       var result = GetWeekBoundaries(dateSelected, swipeDTO.Limit);
@@ -36,7 +51,7 @@ namespace CED.Services.Strategies.GraphStrategies
 
     public override int CalculateWeekMultiple(int index, int startingIndex, int middleIndex, int endingIndex)
     {
-      return (index * -1) * weekDifference;
+      return (index * (boundary.ToUpper() == "START" ? -1 : 1)) * weekDifference;
     }
   }
 }
