@@ -4,7 +4,6 @@ using CED.Models.DTO;
 using CED.Services.Interfaces;
 using CED.Services.Strategies.GraphStrategies;
 using CED.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace CED.Controllers
 {
-  [Authorize]
+  //[Authorize]
   [Route("api/habit")]
   [ApiController]
   public class HabitController : CEDBaseController
@@ -164,10 +163,10 @@ namespace CED.Controllers
           Ok(GenerateSuccessResponse(null, MapHabitLogDto(result)));
     }
 
-    [HttpPost("getGraphDataForDashboard")]
+    [HttpPost("getSelectedGraphData")]
     public async Task<IActionResult> GetGraphDataForDashboard(DashboardGraphSelectRequest request)
     {
-      var userId = await GetUserId();
+      var userId = Guid.Parse("770c5bee-d9e1-11ec-9672-f23c92435ec3");
       if (userId == Guid.Empty)
       {
         return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
@@ -177,24 +176,32 @@ namespace CED.Controllers
 
       return Ok(GenerateSuccessResponse(null, new DashboardGraphDTO()
       {
+        Title = "Weekly Overview",
+        Data = data,
+        Animation = true,
+        Total = data.Count
+      }));
+    }
+
+    [HttpPost("getSwipedGraphData")]
+    public async Task<IActionResult> FetchSwipeStatsDashboard(SwipeDashboardGraphDTO dto)
+    {
+      var userId = Guid.Parse("770c5bee-d9e1-11ec-9672-f23c92435ec3");
+      if (userId == Guid.Empty)
+      {
+        return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+      }
+
+      var data = await _habitService.GetGraphData<SwipeDashboardGraphDTO, SwipeStrategy>(userId, dto);
+      return Ok(GenerateSuccessResponse(null, new DashboardGraphDTO()
+      {
+        Title = "Weekly Overview",
         Data = data,
         Animation = true,
         Total = data.Count
       }));
     }
     #endregion
-
-    [HttpPost("initialStatDashboardGraph")]
-    public async Task<IActionResult> FetchInitialStatsDashboard(InitDashboardGraphDTO dto)
-    {
-      throw new NotImplementedException();
-    }
-
-    [HttpPost("swipeStatDashboardGraph")]
-    public async Task<IActionResult> FetchSwipeStatsDashboard(SwipeDashboardGraphDTO dto)
-    {
-      throw new NotImplementedException();
-    }
 
     private UpdateHabitLogDTO MapHabitLogDto(HabitLog log)
     {

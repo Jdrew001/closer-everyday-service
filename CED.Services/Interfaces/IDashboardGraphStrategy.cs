@@ -10,7 +10,7 @@ namespace CED.Services.Interfaces
 {
   public abstract class IDashboardGraphStrategy
   {
-    private int weekDifference = 7;
+    protected int weekDifference = 7;
     protected string dateSelected;
     protected List<HabitLog> logs;
 
@@ -22,6 +22,8 @@ namespace CED.Services.Interfaces
     /// <param name="logs">Logs for a given user -- should be all habit's logs</param>
     /// <returns>A list of dictionary key values - start and end dates</returns>
     public abstract List<GraphDataResponseDTO> createGraphData<T>(T data, List<HabitLog> logs);
+
+    public abstract int CalculateWeekMultiple(int index, int startingIndex, int middleIndex, int endingIndex);
 
     public List<Dictionary<WeekBoundary, string>> GetWeekBoundaries(string date, int limit)
     {
@@ -41,10 +43,9 @@ namespace CED.Services.Interfaces
       // set the middle point -- ((9 - 1) / 2) = 4
       var middleIndex = ((limit - 1) / 2);
 
-      for (int i = startingIndex; i < endingIndex; i++)
+      for (int i = startingIndex; i <= endingIndex; i++)
       {
-        int weekMultiple = weekDifference * (i - middleIndex);
-
+        int weekMultiple = CalculateWeekMultiple(i, startingIndex, middleIndex, endingIndex);
 
         var firstDay = firstDayOfWeek.AddDays(weekMultiple).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
         var lastDay = firstDayOfWeek.AddDays(weekMultiple + 6).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
@@ -77,7 +78,9 @@ namespace CED.Services.Interfaces
       graphDataResponseDTO.EndDate = lastDate;
       graphDataResponseDTO.Selected = selectedDate(startDateObject, endDateObject);
       graphDataResponseDTO.DefaultSelected = graphDataResponseDTO.Selected ? DateTime.Parse(dateSelected, CultureInfo.InvariantCulture).ToString("ddd") : null;
-      graphDataResponseDTO.GraphData = GenerateGraphDTO(filteredLogs, dates);
+
+      // this will created empty data for UI to render. This case is true when there is no logs for user on this date range
+      graphDataResponseDTO.GraphData = filteredLogs.Count == 0 && dates.Count == 0 ? GenerateEmptyData(startDateObject) : GenerateGraphDTO(filteredLogs, dates);
 
       return graphDataResponseDTO;
     }
@@ -104,6 +107,24 @@ namespace CED.Services.Interfaces
           Date = date.ToString("MM/dd/yyyy")
         });
       });
+
+      return graphDataDTOs;
+    }
+
+    private List<GraphDataDTO> GenerateEmptyData(DateTime startDate)
+    {
+      List<GraphDataDTO> graphDataDTOs = new List<GraphDataDTO>();
+
+      for (int i = 0; i < 7; i++)
+      {
+        var date = startDate.AddDays((double)i);
+        graphDataDTOs.Add(new GraphDataDTO()
+        {
+          Key = date.ToString("ddd"),
+          Value = 0,
+          Date = date.ToString("MM/dd/yyyy")
+        });
+      }
 
       return graphDataDTOs;
     }
