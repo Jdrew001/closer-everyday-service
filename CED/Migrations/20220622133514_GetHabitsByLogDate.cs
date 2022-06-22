@@ -7,7 +7,7 @@ namespace CED
   {
     public override void Up()
     {
-      Execute.Script(@"Scripts\20220622133514_GetHabitsByLogDate.sql");
+      Execute.Script(@"Scripts/20220622133514_GetHabitsByLogDate.sql");
     }
 
     public override void Down()
