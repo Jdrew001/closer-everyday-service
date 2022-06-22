@@ -4,6 +4,7 @@ using CED.Models.DTO;
 using CED.Services.Interfaces;
 using CED.Services.Strategies.GraphStrategies;
 using CED.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace CED.Controllers
 {
-  //[Authorize]
+  [Authorize]
   [Route("api/habit")]
   [ApiController]
   public class HabitController : CEDBaseController
@@ -167,7 +168,7 @@ namespace CED.Controllers
     [HttpPost("getSelectedGraphData")]
     public async Task<IActionResult> GetGraphDataForDashboard(DashboardGraphSelectRequest request)
     {
-      var userId = Guid.Parse("770c5bee-d9e1-11ec-9672-f23c92435ec3");
+      var userId = await GetUserId();
       if (userId == Guid.Empty)
       {
         return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
@@ -187,7 +188,7 @@ namespace CED.Controllers
     [HttpPost("getSwipedGraphData")]
     public async Task<IActionResult> FetchSwipeStatsDashboard(SwipeDashboardGraphDTO dto)
     {
-      var userId = Guid.Parse("770c5bee-d9e1-11ec-9672-f23c92435ec3");
+      var userId = await GetUserId();
       if (userId == Guid.Empty)
       {
         return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
