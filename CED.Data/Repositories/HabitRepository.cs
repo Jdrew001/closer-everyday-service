@@ -282,6 +282,24 @@ namespace CED.Data.Repositories
 
       return logs;
     }
+
+    public async Task<List<Habit>> GetHabitsByLogDate(DateTime date, string userId, string scheduleType)
+    {
+      List<Habit> habits = new List<Habit>();
+      string spName = "GetHabitByLogDate";
+      using DataConnectionProvider dcp = CreateConnection();
+      await using var command = dcp.CreateCommand(spName);
+      command.CommandType = CommandType.StoredProcedure;
+      command.Parameters.AddWithValue("Date", date.ToString("yyyy-MM-dd HH:mm:ss"));
+      command.Parameters.AddWithValue("UserId", userId);
+      command.Parameters.AddWithValue("Schedule", scheduleType);
+      using DataReaderHelper drh = await command.ExecuteReaderAsync();
+
+      while (drh.Read())
+        habits.Add(ReadHabitWithLog(drh));
+
+      return habits;
+    }
     #endregion
 
     #region Private Methods
@@ -297,16 +315,6 @@ namespace CED.Data.Repositories
         VisibleToFriends = drh.Get<bool>("visibleToFriends"),
         Description = drh.Get<string>("description"),
         Status = drh.Get<string>("status"),
-        Frequency = new Frequency()
-        {
-          Id = new Guid(drh.Get<string>("frequencyId")),
-          Value = drh.Get<int>("frequencyVal").ToString(),
-          FrequencyType = new FrequencyType()
-          {
-            Id = drh.Get<int>("frequencyTypeId"),
-            Value = drh.Get<string>("freqTypeValue")
-          }
-        },
         HabitType = new HabitType()
         {
           Id = drh.Get<int>("habitTypeId"),
@@ -326,6 +334,44 @@ namespace CED.Data.Repositories
         UserId = new Guid(drh.Get<string>("userId"))
       };
     }
+
+    private Habit ReadHabitWithLog(DataReaderHelper drh)
+    {
+      return new Habit()
+      {
+        Id = new Guid(drh.Get<string>("idhabit")),
+        Name = drh.Get<string>("name"),
+        Icon = drh.Get<byte[]>("icon"),
+        Reminder = drh.Get<bool>("reminder"),
+        ReminderAt = drh.Get<DateTime>("reminderAt"),
+        VisibleToFriends = drh.Get<bool>("visibleToFriends"),
+        Description = drh.Get<string>("description"),
+        Status = drh.Get<string>("status"),
+        HabitType = new HabitType()
+        {
+          Id = drh.Get<int>("habitTypeId"),
+          Value = drh.Get<string>("habitType"),
+          Description = drh.Get<string>("habitTypeDescription")
+        },
+        Schedule = new Schedule()
+        {
+          Id = new Guid(drh.Get<string>("idSchedule")),
+          ScheduleTime = drh.Get<DateTime>("schedule_time"),
+          ScheduleType = new ScheduleType()
+          {
+            Id = drh.Get<int>("idschedule_type"),
+            Value = drh.Get<string>("scheduleType")
+          }
+        },
+        UserId = new Guid(drh.Get<string>("userId")),
+        habitLog = new HabitLog()
+        {
+          Value = drh.Get<char>("habitLogValue"),
+          CreatedAt = drh.Get<DateTime>("habitLogCreatedAt")
+        }
+      };
+    }
+
     private FriendHabit ReadFriendHabit(DataReaderHelper drh)
     {
       return new FriendHabit()

@@ -71,6 +71,12 @@
     <None Update="Scripts\06172022_InitDB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Scripts\20220622133514_GetHabitsByLogDate.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Scripts\20220622133514_GetHabitsByLogDate_Down.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\RegisterCode.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
