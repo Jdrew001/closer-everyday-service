@@ -215,6 +215,11 @@ namespace CED.Services.Core
         return await _habitRepository.UpdateHabitLog(status, habitId, date); //save by created date
     }
 
+    public async Task<List<Habit>> GetHabitsByLogDate(DateTime date, Guid userId, string schedule)
+    {
+      return await _habitRepository.GetHabitsByLogDate(date, userId.ToString(), schedule); ;
+    }
+
     /// <summary>
     /// Check for different status updates and send notification to user if habit is visible to friends
     /// </summary>

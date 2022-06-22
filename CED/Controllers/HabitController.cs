@@ -7,6 +7,7 @@ using CED.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -200,6 +201,23 @@ namespace CED.Controllers
         Animation = true,
         Total = data.Count
       }));
+    }
+
+    [HttpPost("getHabitsByLogDate")]
+    public async Task<IActionResult> GetHabitsByLogDate(HabitByLogDateRequest dto)
+    {
+      var date = DateTime.Parse(dto.Date, CultureInfo.InvariantCulture);
+      var schedule = dto.Schedule;
+
+      var userId = Guid.Parse("770c5bee-d9e1-11ec-9672-f23c92435ec3");
+      if (userId == Guid.Empty)
+      {
+        return Unauthorized(GenerateErrorResponse("Unable to Process Request. Please notify support.", null));
+      }
+
+      var data = await _habitService.GetHabitsByLogDate(date, userId, schedule);
+      var mappedData = _mapper.Map<List<Habit>, List<HabitByLogDateResponse>>(data).GroupBy(o => o.ScheduleType);
+      return Ok(GenerateSuccessResponse(null, mappedData));
     }
     #endregion
 
